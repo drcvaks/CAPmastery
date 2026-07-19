@@ -1,0 +1,28 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and Expo output
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Tests and tools
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+
+# Native generated projects (managed workflow unless intentionally adopted)
+android/
+ios/
+
+# Local Supabase state
+supabase/.branches/
+supabase/.temp/
+
+# Editor files
+.vscode/
+.idea/

@@ -1,0 +1,29 @@
+# Question Content Standard
+
+## Approval standard
+
+Every approved question must use an authorized source, test one learning objective, have one unambiguously best answer, use plausible distractors, avoid tricks, match reading level, include a teaching explanation and precise source reference, pass human review, and avoid implying it is an actual CAP exam item unless officially designated.
+
+Recalled or protected examination questions are prohibited. AI-generated content is prohibited in the non-AI pilot workflow.
+
+## Explanation standard
+
+State why the correct choice is correct, teach the underlying concept, address a likely misconception when useful, and stay concise. “This is stated in the chapter” alone is insufficient. Approved edits create a historical question version so existing attempts remain interpretable.
+
+## CSV contract
+
+The planned template columns are:
+
+```text
+external_id,exam_code,course_code,volume_code,chapter_code,section_code,topic_code,learning_objective_code,difficulty,cognitive_level,question_type,question_text,choice_a,choice_b,choice_c,choice_d,correct_letter,explanation,choice_a_explanation,choice_b_explanation,choice_c_explanation,choice_d_explanation,common_mistake,remediation_text,source_document,source_pages,source_reference_text,is_exam_style,review_status
+```
+
+Multiple choice requires at least three choices. True/false uses only TRUE and FALSE. The correct letter must identify a populated choice. Approved content requires explanation and source. Unknown hierarchy codes are errors unless an administrator deliberately uses a controlled creation workflow. Duplicate detection uses normalized text plus exam and objective and produces warnings rather than silent merges.
+
+## Workflow
+
+Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.
+
+## Initial content decision
+
+Technical testing may use a small clearly labeled sample, but adaptivity evaluation requires broad objective coverage and approximately 150–250 reviewed questions per exam, including difficulty and cognitive-level variety.
