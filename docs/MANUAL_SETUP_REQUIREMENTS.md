@@ -2,17 +2,19 @@
 
 This is the complete known input register as of Checkpoint 0. Do not paste passwords, recovery codes, access tokens, service-role keys, database passwords, or SMTP credentials into chat or tracked files. When a later checkpoint needs a secret, enter it through the local ignored environment, Supabase secrets, EAS credentials, or an approved CI secret store.
 
-## Needed before Checkpoint 1
+## Checkpoint 1 decisions — completed
 
-Only decisions are needed; no account credential is required to generate and validate the local shell.
+The owner approved these defaults on 2026-07-19. No account credential was required.
 
-- Confirm working name “CAP Mastery” or replacement.
-- Confirm npm as package manager (recommended because mySCP uses npm and the local npm version is known), or choose pnpm/yarn.
-- Approve application identifiers: proposed Expo slug `cap-mastery`, URL scheme `capmastery`, and Android package `com.chaimvaks.capmastery` (the final reverse-domain owner may differ).
-- Choose basic visual direction, logo/app icon availability, and accessibility preferences. A neutral CAP-inspired but non-official visual system is recommended unless authorized marks are supplied.
+- Working name: CAP Mastery.
+- Package manager: npm.
+- Expo slug: `cap-mastery`.
+- URL scheme: `capmastery`.
+- Android package: `com.chaimvaks.capmastery`.
+- Visual direction: clean, encouraging navy/red study interface without official CAP marks unless authorized.
+- Device approach: responsive Android phone support now; record the actual pilot phone models and Android versions before physical-device pilot testing.
 - Confirm Git hosting provider, remote repository name, owner/organization, and private/public visibility. No remote is required for local Checkpoint 1.
-- Confirm whether `main` plus checkpoint branches/tags is acceptable.
-- Identify Android pilot devices/OS versions and supported web browsers.
+- Git hosting, branching, commits, and tags remain owner-managed.
 
 ## Accounts eventually required
 
@@ -73,6 +75,6 @@ Codex can perform CLI/configuration steps when the account is authenticated and 
 - Pilot success thresholds, feedback collection method, support contact, backup/restore expectations, data retention, incident contact, and go/no-go approval.
 - Web admin hosting and Android distribution choice for pilot; later error-monitoring provider and privacy configuration.
 
-## Checkpoint 0 manual action
+## Checkpoint 1 manual action
 
-No secret, account creation, Supabase action, or production database action is required now. Review this register, the proposed architecture, and the reuse report. Provide the Checkpoint 1 decisions above when authorizing that checkpoint.
+No secret, account creation, Supabase action, or production database action is required to review the shell. Before Checkpoint 2, choose/create the separate CAP Mastery development Supabase project and decide the pilot email-confirmation/account-creation approach. Do not create a production database yet.

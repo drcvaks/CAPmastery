@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository is currently at **Checkpoint 0: repository and architecture planning**. It intentionally contains no application implementation, dependency manifest, database migrations, or live backend connection yet.
+The repository has completed **Checkpoint 1: Expo application skeleton**. It contains a dependency-free-from-Supabase shell with auth, student, and admin route groups, shared responsive components, an error boundary, and automated quality checks. Product behavior and backend integration remain intentionally deferred.
 
 ## Repository boundaries
 
@@ -14,7 +14,7 @@ The repository is currently at **Checkpoint 0: repository and architecture plann
 ## Planned structure
 
 ```text
-app/                    Expo Router routes (from Checkpoint 1)
+app/                    Thin Expo Router routes and layouts
 components/             Reusable presentational components
 features/               Domain modules and feature-specific UI/hooks
 hooks/                  Cross-feature hooks
@@ -28,7 +28,28 @@ types/                  Shared application types
 docs/                   Product, architecture, security, and runbooks
 ```
 
-Empty planned directories contain `.gitkeep` placeholders only. They are not implemented features.
+Unimplemented planned directories contain `.gitkeep` placeholders only.
+
+## Local development
+
+Requirements: Node `>=22.13.0` and npm. This checkpoint was validated with Node `v24.15.0`, npm `11.12.1`, and Expo SDK 57.
+
+```powershell
+npm install
+npm start
+```
+
+Useful commands:
+
+```powershell
+npm run check
+npm run validate:expo
+npx expo-doctor
+npm run export:web
+npm run export:android
+```
+
+The landing page links to placeholder auth, student, and admin shells. No account or environment value is required yet.
 
 ## Documentation
 
@@ -36,7 +57,7 @@ Begin with [AGENTS.md](AGENTS.md), then read [the architecture](docs/ARCHITECTUR
 
 ## Local status
 
-Checkpoint 0 confirmed Node `v24.15.0`, npm `11.12.1`, Git `2.46.2.windows.1`, and the installed mySCP Expo CLI `54.0.25`. The CAP Mastery Expo SDK and supported Node version will be pinned during Checkpoint 1; Node 24 should not be assumed compatible until Expo validation passes.
+Expo SDK 57, React Native 0.86, React 19.2, TypeScript 6, Expo Router, Jest, React Native Testing Library, ESLint, and Prettier are pinned through `package-lock.json`. Supabase, React Hook Form, Zod, and TanStack Query are intentionally not installed until the checkpoint that uses them.
 
 ## Secrets
 

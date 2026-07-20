@@ -4,12 +4,12 @@
 
 From Checkpoint 1 onward, every checkpoint runs the configured TypeScript check, lint, unit/component/integration tests, and an Expo startup/config validation. Database checkpoints also replay migrations and run SQL/RLS tests. Report the exact command, exit code, counts, and any skipped/non-applicable check.
 
-## Planned tools
+## Configured tools
 
-- TypeScript compiler in strict mode.
-- ESLint with Expo/TypeScript support and a formatter decision at Checkpoint 1.
-- Jest is the proposed runner because Expo/RN tooling uses it naturally; confirm current Expo guidance at Checkpoint 1.
-- React Native Testing Library for components.
+- TypeScript 6 compiler in strict mode with unchecked indexed access.
+- Expo ESLint flat configuration plus Prettier enforcement.
+- Jest 29 with the official `jest-expo` preset.
+- React Native Testing Library 14 and Expo Router testing utilities.
 - Pure unit tests for algorithms and validators.
 - Supabase CLI/local PostgreSQL tests for migrations, functions, and RLS when introduced.
 
@@ -26,3 +26,13 @@ Manual: Android sizes, responsive web admin, slow/offline transitions, backgroun
 ## Checkpoint 0 validation
 
 No `package.json`, TypeScript source, Expo application, tests, migrations, or backend exists, so TypeScript, lint, unit tests, Expo startup, and RLS tests are not applicable. Checkpoint 0 instead validates documentation completeness, placeholder structure, secret scanning, Git separation, local tool versions, and mySCP unchanged state.
+
+## Current commands
+
+- `npm run check`: typecheck, lint, tests, and formatting check.
+- `npm run validate:expo`: resolve and print public Expo configuration.
+- `npx expo-doctor`: dependency/configuration compatibility checks.
+- `npm run export:web`: production web bundle to ignored `dist/web`.
+- `npm run export:android`: production Android/Hermes bundle to ignored `dist/android`.
+
+Checkpoint 1 includes a component contract test and a Router navigation test. Browser smoke testing verifies landing, student, and admin routes. A production bundle validates Metro/Hermes compilation but does not replace a later physical-device test.

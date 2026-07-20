@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+dist/
+coverage/
+package-lock.json
+*.md
+*.txt
+*.pdf
+*.bak
