@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository has completed **Checkpoint 1: Expo application skeleton**. It contains a dependency-free-from-Supabase shell with auth, student, and admin route groups, shared responsive components, an error boundary, and automated quality checks. Product behavior and backend integration remain intentionally deferred.
+The repository has completed Checkpoint 1 and is implementing **Checkpoint 2: Supabase foundation and authentication**. It now contains a typed Supabase boundary, persisted email/password sessions, recovery screens, database-backed route guards, versioned identity/access migrations, explicit grants, RLS policies, and database tests. Hosted migration and account verification remain pending until the development project is linked.
 
 ## Repository boundaries
 
@@ -32,10 +32,11 @@ Unimplemented planned directories contain `.gitkeep` placeholders only.
 
 ## Local development
 
-Requirements: Node `>=22.13.0` and npm. This checkpoint was validated with Node `v24.15.0`, npm `11.12.1`, and Expo SDK 57.
+Requirements: Node `>=22.13.0` and npm. The Expo application was validated with Node `v24.15.0`, npm `11.12.1`, and Expo SDK 57. Database replay additionally requires Docker Desktop or a linked nonproduction Supabase project.
 
 ```powershell
 npm install
+npx supabase login --name cap-mastery-codex
 npm start
 ```
 
@@ -47,9 +48,12 @@ npm run validate:expo
 npx expo-doctor
 npm run export:web
 npm run export:android
+npm run db:reset
+npm run db:test
+npm run db:lint
 ```
 
-The landing page links to placeholder auth, student, and admin shells. No account or environment value is required yet.
+Add the separate CAP Mastery development project URL and publishable key to ignored `.env.local`. With no valid client configuration, the app shows a safe setup screen rather than attempting a connection. Authenticated users are routed by database roles; client routing is not the authorization boundary.
 
 ## Documentation
 
@@ -57,8 +61,8 @@ Begin with [AGENTS.md](AGENTS.md), then read [the architecture](docs/ARCHITECTUR
 
 ## Local status
 
-Expo SDK 57, React Native 0.86, React 19.2, TypeScript 6, Expo Router, Jest, React Native Testing Library, ESLint, and Prettier are pinned through `package-lock.json`. Supabase, React Hook Form, Zod, and TanStack Query are intentionally not installed until the checkpoint that uses them.
+Expo SDK 57, React Native 0.86, React 19.2, TypeScript 6, Expo Router, Supabase JS, AsyncStorage, React Hook Form, Zod, TanStack Query, Jest, React Native Testing Library, ESLint, Prettier, and the repository-local Supabase CLI are pinned through `package-lock.json`.
 
 ## Secrets
 
-Copy `.env.example` to an ignored `.env.local` only after a separate CAP Mastery Supabase project exists. Never commit credentials or place a service-role key in a client-visible variable.
+The ignored `.env.local` contains only client-safe placeholders until the owner enters the development project URL and publishable key. Never commit credentials or place a service-role key in a client-visible variable.

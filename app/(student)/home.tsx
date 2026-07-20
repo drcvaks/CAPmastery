@@ -1,4 +1,5 @@
 import { AppLinkButton } from "../../components/common/AppLinkButton";
+import { SignOutButton } from "../../features/auth/components/SignOutButton";
 import { PlaceholderScreen } from "../../features/shell/components/PlaceholderScreen";
 
 export default function StudentHomeScreen() {
@@ -10,6 +11,7 @@ export default function StudentHomeScreen() {
       checkpoint="Checkpoint 6"
     >
       <AppLinkButton href="/" label="Return to shell home" variant="secondary" />
+      <SignOutButton />
     </PlaceholderScreen>
   );
 }

@@ -25,6 +25,16 @@ Server-side secrets, if later required, belong in Supabase Function secrets or a
 - Revoke default public execution and grant only the specific callable functions required.
 - Test cross-user, cross-family, content-state, role-escalation, and answer-key attacks using separate identities.
 
+## Checkpoint 2 enforcement
+
+- The dashboard Data API stays enabled, automatic table exposure stays disabled, and automatic RLS stays enabled as defense in depth.
+- Migrations explicitly enable RLS and revoke `anon`/`authenticated` privileges before granting required reads and the four user-editable profile columns.
+- Ordinary clients have no insert, update, or delete privilege on roles, relationships, organizations, memberships, or audit rows.
+- A user reads their own profile/roles. An active guardian with `can_view_progress` reads the linked student's profile. An administrator reads identity/access and audit rows.
+- Global administrator role changes and guardian-link changes use named functions that re-check `auth.uid()`, call a private role helper, validate input, use an empty `search_path`, and append safe audit summaries.
+- The first administrator is bootstrapped once through the hosted SQL editor after account creation; subsequent changes use the audited function.
+- The application requires a database role before entering a workspace. Student and admin route guards improve UX, while database policies remain authoritative against direct API calls.
+
 ## Answer protection
 
 Question delivery uses a safe view/function or explicit field selection that cannot expose `question_choices.is_correct`. Grading is atomic and server-side. The client cannot submit `is_correct`, modify counters, or retrieve explanations/correct text early. Duplicate taps and replayed calls require idempotent or conflict-safe handling.

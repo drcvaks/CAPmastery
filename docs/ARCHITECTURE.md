@@ -6,7 +6,7 @@ Use Expo SDK 57 and Expo Router for Android and responsive web, with React Nativ
 
 ## Layers
 
-1. `app/`: route groups and layouts only. `(auth)`, `(student)`, and `(admin)` shells exist; authentication/authorization arrives later.
+1. `app/`: thin route groups and layouts. `(auth)` owns sign-in and recovery screens; `(student)` and `(admin)` use role-aware guards.
 2. `components/`: accessible shared primitives and domain-neutral compositions.
 3. `features/`: auth, content, study, adaptive, progress, challenges, and admin modules. Each feature owns UI, hooks, schemas, and pure logic that are specific to it.
 4. `services/`: typed use-case-oriented calls such as question delivery, session creation, secure submission, mastery reads, and challenges.
@@ -15,7 +15,7 @@ Use Expo SDK 57 and Expo Router for Android and responsive web, with React Nativ
 
 ## State strategy
 
-- Supabase Auth session: a small auth provider with native session persistence and lifecycle refresh.
+- Supabase Auth session: `AuthProvider` restores the session, loads the RLS-filtered profile/roles, handles recovery deep links, and manages native foreground refresh. AsyncStorage persists native sessions; web uses the browser storage adapter.
 - Server state: TanStack Query is approved for caching, invalidation, loading, and retry when Supabase integration begins. It is not installed before it is used.
 - Form state: React Hook Form plus Zod.
 - Local transient UI: component state or narrowly scoped context.
@@ -25,17 +25,17 @@ Do not recreate mySCP's single global provider that loads unrelated tables at st
 
 ## Backend boundary
 
-The public client uses only the Supabase URL and publishable key. RLS protects every exposed relation. Sensitive workflows use carefully scoped PostgreSQL functions or Edge Functions with explicit authorization, safe `search_path`, minimal grants, validation, idempotency where needed, and audit entries.
+The lazily created typed client uses only the Supabase URL and publishable key. Invalid or absent configuration produces a setup state rather than an import-time crash. Queries live in services, and RLS protects every exposed relation. Sensitive workflows use carefully scoped PostgreSQL functions with explicit authorization, empty `search_path`, minimal grants, validation, and audit entries.
 
 Question delivery must return safe question/choice fields without `is_correct`. `submit_answer` validates ownership and membership in the session, grades internally, writes the attempt and derived state atomically, and only then returns feedback.
 
 ## Navigation
 
-- `(auth)`: sign-in placeholder now; recovery/reset later.
-- `(student)`: tabbed home, study, and progress placeholders now; session/result, practice test, achievements, challenges, and settings later.
-- `(admin)`: responsive administration placeholder now; parent/coach and authorized reviewer/admin screens later.
+- `(auth)`: email/password sign-in, reset request, and recovery password update.
+- `(student)`: authenticated users with the global `student` role; tabbed product screens remain placeholders for later checkpoints.
+- `(admin)`: authenticated users with the global `admin` role; administration features remain scheduled for later checkpoints.
 
-The landing page exposes preview links only while no backend exists. Checkpoint 2 replaces preview access with session restoration and role-aware routing. Client routing remains a usability boundary; RLS and protected functions remain authoritative.
+The root restores the session and routes to `/admin`, `/home`, or `/unauthorized`. Direct URLs are checked by route-group guards. Client routing remains a usability boundary; RLS, revoked write grants, and protected functions remain authoritative.
 
 ## UI foundation
 
@@ -50,6 +50,6 @@ The shell uses a clean, encouraging navy/red visual direction without official C
 - Migrations are forward-only in shared environments; corrective migrations replace edited history after application.
 - No remote, commit, tag, or external deployment is created without the owner's normal repository workflow/authorization.
 
-## Checkpoint 1 boundary
+## Checkpoint 2 boundary
 
-The Expo shell, navigation, quality tooling, and placeholder tests exist. There is no Supabase dependency, client, project, schema, authentication implementation, product feature, AI integration, or production database.
+Identity, scoped roles, guardian links, future-ready organizations, audit logging, authentication, recovery, and route guards are in scope. Content, questions, study behavior, server-side grading, mastery, AI, and production infrastructure remain out of scope.

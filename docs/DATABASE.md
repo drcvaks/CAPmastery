@@ -9,7 +9,19 @@
 - Soft deletion/status for durable content and version snapshots for approved-question edits.
 - Generated TypeScript database types checked into the repository after migrations are established.
 
-## Domains
+## Checkpoint 2 identity/access schema
+
+- `profiles`: one trigger-created profile per Auth user; users may update only their own display fields.
+- `user_roles`: normalized global or organization-scoped roles; no direct client writes.
+- `student_guardian_links`: explicit capability flags and active/inactive state; no direct client writes.
+- `organizations` and `organization_memberships`: future-ready access scope; read only by members or administrators.
+- `audit_log`: append-only safe summaries; readable only by administrators.
+- `private.has_role` and `private.can_view_profile`: non-exposed security-definer policy helpers with empty `search_path`.
+- `admin_set_user_role` and `admin_set_guardian_link`: authenticated but internally admin-authorized, audited mutation entrypoints.
+
+All primary keys are UUIDs except the identity audit sequence. Enums and checks constrain status, role, scope, organization type, and relationship state. Foreign keys use deliberate cascade, restrict, or null behavior.
+
+## Later domains
 
 - Identity/access: profiles, user roles with scope, guardian links, organizations, memberships.
 - Curriculum/content: programs, exams, courses, volumes, chapters, sections, topics, objectives, source documents/passages.
@@ -18,7 +30,7 @@
 - Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
 - Operations: CSV import jobs, audit log, and feature flags.
 
-Exact columns begin from the build plan but will be normalized and constrained during their scheduled checkpoint. Hierarchy links may be nullable where future exams omit a level.
+Content and later-domain columns begin from the build plan but will be normalized and constrained during their scheduled checkpoint. Hierarchy links may be nullable where future exams omit a level.
 
 ## Secure grading transaction
 
@@ -34,4 +46,4 @@ Clients cannot select answer-key columns or write `question_attempts.is_correct`
 4. Generate types from the resulting schema.
 5. Apply to shared environments only after review and record the result in `CHECKPOINT_LOG.md`.
 
-No migration and no database action occurred in Checkpoint 0.
+Checkpoint 2 introduces three forward migrations: identity/access schema and triggers, RLS/grants, and audited admin functions. `supabase/seed.sql` intentionally contains no real accounts or credentials. SQL tests under `supabase/tests/` verify trigger behavior, RLS enablement, cross-user profile visibility, role visibility, and privilege escalation denial.

@@ -1,0 +1,2 @@
+-- Intentionally empty. Never commit real pilot emails, passwords, or Auth users.
+-- See docs/MANUAL_SETUP_REQUIREMENTS.md for the safe development-user procedure.

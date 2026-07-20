@@ -34,5 +34,11 @@ No `package.json`, TypeScript source, Expo application, tests, migrations, or ba
 - `npx expo-doctor`: dependency/configuration compatibility checks.
 - `npm run export:web`: production web bundle to ignored `dist/web`.
 - `npm run export:android`: production Android/Hermes bundle to ignored `dist/android`.
+- `npm run db:reset`: replay migrations and the intentionally empty development seed against the local stack.
+- `npm run db:test`: execute pgTAP migration/RLS tests against the local stack.
+- `npm run db:lint`: run PostgreSQL function/schema linting against the local stack.
+- `npm run types:database`: regenerate database types from a successfully replayed local schema.
 
 Checkpoint 1 includes a component contract test and a Router navigation test. Browser smoke testing verifies landing, student, and admin routes. A production bundle validates Metro/Hermes compilation but does not replace a later physical-device test.
+
+Checkpoint 2 adds environment-validation, password-validation, and role-routing tests. `supabase/tests/identity_access_rls.test.sql` contains pgTAP coverage for all six API tables, profile creation, self/linked/admin reads, and direct/function-based role escalation denial. These SQL tests are not considered passed until run against a local or linked database.

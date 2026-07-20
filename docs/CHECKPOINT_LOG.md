@@ -92,3 +92,26 @@ Known limitations:
 Manual action required: none for Checkpoint 1 review. The owner manages Git. Checkpoint 2 will require a separate CAP Mastery development Supabase project and client-safe URL/publishable key through ignored environment storage; do not create production infrastructure yet.
 
 Recommended next checkpoint after owner approval: Checkpoint 2, Supabase Foundation and Authentication.
+
+## Checkpoint 2 — Supabase foundation and authentication
+
+Status: in progress. Started 2026-07-20. Hosted migration/RLS/account verification is pending CLI authorization and project linking.
+
+Completed locally:
+
+- Added Supabase JS, native AsyncStorage session persistence, URL polyfill, React Hook Form, Zod, TanStack Query, and repository-local Supabase CLI dependencies.
+- Added lazy validated environment handling; only the project URL and publishable key are client-readable, and missing values render a configuration state.
+- Added email/password sign-in, sign-out, reset request, recovery deep-link exchange, password update, session restoration, and native foreground token refresh.
+- Replaced preview navigation with database-role-aware root routing and student/admin route-group guards.
+- Added migrations for profiles, scoped roles, guardian links, organizations, memberships, audit log, profile/update triggers, explicit grants, RLS policies, private authorization helpers, and audited admin functions.
+- Added an intentionally empty seed file and pgTAP identity/RLS/privilege-escalation tests.
+- No production project, Storage, content schema, grading function, AI integration, or service-role client key was created.
+
+Current validation:
+
+- `npm run check`: exit 0; typecheck and lint passed; 5 Jest suites passed, 11 tests passed, 0 failed; formatting passed.
+- `npm run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- Clean web export with empty ignored client configuration: exit 0; 1,545 modules bundled to ignored `dist/web-checkpoint2`.
+- Repository-local Supabase CLI: `2.109.1` installed and `supabase init` completed.
+- Hosted CLI project listing: exit 1 because the noninteractive Codex terminal has no Supabase access token. Owner browser login is required.
+- Database replay, pgTAP RLS tests, database lint, generated remote/local types, student/admin sign-in, and recovery-link tests remain pending and must pass before this checkpoint can be marked complete.

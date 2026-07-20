@@ -78,3 +78,20 @@ Codex can perform CLI/configuration steps when the account is authenticated and 
 ## Checkpoint 1 manual action
 
 No secret, account creation, Supabase action, or production database action is required to review the shell. Before Checkpoint 2, choose/create the separate CAP Mastery development Supabase project and decide the pilot email-confirmation/account-creation approach. Do not create a production database yet.
+
+## Checkpoint 2 setup status and remaining owner actions
+
+Completed by the owner on 2026-07-20: created the separate nonproduction CAP Mastery Supabase project. Dashboard security choices are Data API enabled, automatic new-table exposure disabled, and automatic RLS enabled.
+
+Approved development authentication defaults: invitation/admin-created accounts only, public email sign-up disabled, email confirmation enabled, password recovery enabled, and passwords at least 10 characters with letters and numbers. Local redirect targets are `http://localhost:8081/reset-password` and `capmastery://reset-password`; equivalent hosted dashboard redirect allowlists must be configured before recovery testing.
+
+Remaining actions that require the owner:
+
+1. In a personal PowerShell at the repository root, run `npx supabase login --name cap-mastery-codex` and approve the browser authorization. The Codex terminal is noninteractive and cannot complete this login.
+2. Enter the new project's URL and publishable key in ignored `.env.local`. Do not add a service-role key, database password, or access token.
+3. After Codex identifies the project reference, link the repository if the CLI requests the database password. Enter it only into the interactive CLI prompt, never chat or a tracked file.
+4. In Supabase Auth dashboard settings, disable public sign-up, require email confirmation, set the password policy, and allow the development recovery redirects listed above.
+5. After migrations pass, create/invite one development administrator and one development student using owner-controlled inboxes. Do not send their passwords in chat.
+6. Bootstrap the first administrator once through a reviewed SQL-editor statement supplied in the checkpoint handoff. Subsequent role/link changes use audited database functions.
+
+No production project, Storage bucket, service-role client configuration, AI provider, or real content is required or authorized in Checkpoint 2.
