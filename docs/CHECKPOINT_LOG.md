@@ -144,7 +144,7 @@ Recommended next checkpoint after owner approval: Checkpoint 3, Content Hierarch
 
 ## Checkpoint 3 — Content hierarchy and question bank
 
-Status: implementation complete; awaiting linked pgTAP result and owner-authorized sample content. Date: 2026-07-20.
+Status: complete pending owner approval. Date: 2026-07-20.
 
 Completed:
 
@@ -174,13 +174,13 @@ Validation results so far:
 - `supabase db push --linked`: migrations through `202607200010` applied. The CLI emitted a non-fatal Docker catalog-cache warning because Docker Desktop is unavailable.
 - `supabase db lint --linked --level warning`: exit 0; no schema errors found.
 - `supabase migration list --linked`: exit 0; local and remote versions match through `202607200010`.
-- Linked pgTAP: pending owner execution with the database password supplied only to the invoking process. Expected plans are 15 identity/access tests plus 32 content tests.
-- Initial owner run during implementation: the then-current content suite passed 24/24; identity passed 13/15 because two assertions counted all hosted profiles rather than only transaction fixtures. Those assertions were corrected to filter fixture UUIDs, and the runner now prints failing TAP lines. A final run of the current 32+15 plans is pending.
+- `npm run db:test:linked`: owner-executed exit 0; `content_permissions.test.sql` passed 32/32, `identity_access_rls.test.sql` passed 15/15, and the aggregate result was 47/47. Both suites rolled back their synthetic fixtures.
+- An earlier run during implementation exposed two identity assertions that counted all hosted profiles. They were corrected to filter fixture UUIDs, and the runner now prints failing TAP lines.
 
 Known limitations and required owner input:
 
 - Physical Expo Go on the owner's Android device does not currently support this SDK 57 project. The owner chose to retain SDK 57; production web/Android bundles pass.
-- Checkpoint 3 cannot be marked complete until linked pgTAP passes and the owner provides authorized source metadata plus a small human-written/reviewed question bank. File presence is not authorization.
+- The original build plan's sample-bank deliverable is deliberately deferred to the separately supplied `CAP_Mastery_Content_Development_Plan.md`, which requires structure/objective work before question generation. The app shows an honest empty state meanwhile. File presence remains insufficient source authorization.
 - Docker is unavailable, so linked development-project migration/lint/pgTAP validation is used instead of local reset.
 - Study sessions, submission, server-side grading, mastery, imports/admin editor UI, AI, Storage, and production infrastructure remain out of scope.
 

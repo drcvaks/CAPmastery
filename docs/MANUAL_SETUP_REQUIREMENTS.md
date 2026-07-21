@@ -99,7 +99,7 @@ No production project, Storage bucket, service-role client configuration, AI pro
 
 ## Checkpoint 3 content inputs
 
-The development database now has the Leadership/Aerospace catalog and protected question workflow, but no real source or question rows. To finish the required manually reviewed sample bank, the owner must provide:
+The development database now has the Leadership/Aerospace catalog and protected question workflow, but no real source or question rows. Before the separate content-development workflow imports its first manually reviewed sample bank, the owner must provide:
 
 1. A written authorization decision for each source: exact title/edition/publication date, whether CAP Mastery may use it, whether full passages may be stored or only citations, and whether the two untracked workspace PDFs are authorized inputs. Codex will not infer authorization from file presence.
 2. A small human-written and human-reviewed sample bank in the documented CSV shape (recommended minimum: three questions per track for a meaningful permission/browser smoke test). Do not provide recalled or protected exam items.
