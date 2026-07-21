@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository has completed Checkpoint 1 and is implementing **Checkpoint 2: Supabase foundation and authentication**. It now contains a typed Supabase boundary, persisted email/password sessions, recovery screens, database-backed route guards, versioned identity/access migrations, explicit grants, RLS policies, and database tests. Hosted migration and account verification remain pending until the development project is linked.
+The repository has completed **Checkpoint 2: Supabase foundation and authentication**, pending owner review. It contains a typed Supabase boundary, persisted email/password sessions, recovery screens, database-backed route guards, versioned identity/access migrations, explicit grants, RLS policies, generated database types, and linked database tests. The migrations are applied only to the separate CAP Mastery development project; no production database exists.
 
 ## Repository boundaries
 

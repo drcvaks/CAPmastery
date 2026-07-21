@@ -95,9 +95,9 @@ Recommended next checkpoint after owner approval: Checkpoint 2, Supabase Foundat
 
 ## Checkpoint 2 — Supabase foundation and authentication
 
-Status: in progress. Started 2026-07-20. Hosted migration/RLS/account verification is pending CLI authorization and project linking.
+Status: complete pending owner review. Date: 2026-07-20.
 
-Completed locally:
+Completed:
 
 - Added Supabase JS, native AsyncStorage session persistence, URL polyfill, React Hook Form, Zod, TanStack Query, and repository-local Supabase CLI dependencies.
 - Added lazy validated environment handling; only the project URL and publishable key are client-readable, and missing values render a configuration state.
@@ -105,13 +105,39 @@ Completed locally:
 - Replaced preview navigation with database-role-aware root routing and student/admin route-group guards.
 - Added migrations for profiles, scoped roles, guardian links, organizations, memberships, audit log, profile/update triggers, explicit grants, RLS policies, private authorization helpers, and audited admin functions.
 - Added an intentionally empty seed file and pgTAP identity/RLS/privilege-escalation tests.
+- Linked the repository only to the new CAP Mastery development project in `us-east-1`, applied the three migrations in order, and generated authoritative TypeScript definitions from the hosted public schema.
+- Bootstrapped confirmed development administrator and student roles through the documented one-time audited procedure.
 - No production project, Storage, content schema, grading function, AI integration, or service-role client key was created.
 
-Current validation:
+Validation results:
 
 - `npm run check`: exit 0; typecheck and lint passed; 5 Jest suites passed, 11 tests passed, 0 failed; formatting passed.
 - `npm run validate:expo`: exit 0; SDK 57 public configuration resolved.
-- Clean web export with empty ignored client configuration: exit 0; 1,545 modules bundled to ignored `dist/web-checkpoint2`.
+- `npm run export:web`: exit 0; 1,545 modules bundled to ignored `dist/web` with the client-safe development environment.
+- `npm run export:android`: exit 0; 1,975 modules bundled and a 5.9 MB Hermes bytecode bundle written to ignored `dist/android`.
+- `npx expo-doctor`: exit 0; 20/20 checks passed.
 - Repository-local Supabase CLI: `2.109.1` installed and `supabase init` completed.
-- Hosted CLI project listing: exit 1 because the noninteractive Codex terminal has no Supabase access token. Owner browser login is required.
-- Database replay, pgTAP RLS tests, database lint, generated remote/local types, student/admin sign-in, and recovery-link tests remain pending and must pass before this checkpoint can be marked complete.
+- `supabase migration list --linked`: exit 0; local and remote versions match for `202607200001`, `202607200002`, and `202607200003`.
+- `supabase db lint --linked --level error`: exit 0; no schema errors found in `extensions`, `private`, or `public`.
+- `npm run db:test:linked`: owner-executed exit 0; pgTAP 15/15 passed. The transaction rolled back all synthetic users and rows.
+- Hosted manual auth: owner confirmed student and administrator sign-in, student redirect away from `/admin`, administrator access to `/admin`, and sign-out.
+- Tracked-scope secret scan: 0 JWT-shaped hits and 0 privileged-secret assignment hits; `.env.local` and `supabase/.temp/` are ignored.
+- `npm audit --json`: exit 1; 10 moderate, 0 high, 0 critical advisories. The existing Expo CLI/config chain through `xcode`/`uuid` remains without an acceptable SDK 57 fix; npm proposes an invalid downgrade to Expo 46.
+
+Database changes:
+
+- Development project only: six API tables, seven enums, indexes, four triggers, six functions (including two private RLS helpers and two public audited admin entrypoints), explicit grants, seven RLS policies, and three recorded migrations.
+- Seed changes: none; `supabase/seed.sql` intentionally contains comments only.
+- Production database changes: none; no production project was initialized.
+
+Known limitations:
+
+- Product screens remain placeholders; content, questions, study sessions, grading, progress, and administrative UI are later checkpoints.
+- Password-recovery request, deep-link exchange, and update flows are implemented and compile/bundle, but real email delivery and recovery deep links still require target-device/browser testing.
+- Docker is unavailable, so local `supabase db reset`, local pgTAP, and local database lint were not run. Migrations were dry-run/applied to the dedicated development project; linked lint and linked pgTAP passed.
+- No physical Android device or emulator interaction was performed by Codex. The owner performed the hosted account/route checks, and the Android Hermes production export passed.
+- The 10 moderate npm advisories remain in Expo tooling with no acceptable nonbreaking automated fix.
+
+Manual action required for review: none. Keep `.env.local`, `supabase/.temp/`, account emails/passwords, and database credentials out of Git. The owner manages Git.
+
+Recommended next checkpoint after owner approval: Checkpoint 3, Content Hierarchy and Question Bank.

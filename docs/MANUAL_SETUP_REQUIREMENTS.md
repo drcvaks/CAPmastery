@@ -79,19 +79,20 @@ Codex can perform CLI/configuration steps when the account is authenticated and 
 
 No secret, account creation, Supabase action, or production database action is required to review the shell. Before Checkpoint 2, choose/create the separate CAP Mastery development Supabase project and decide the pilot email-confirmation/account-creation approach. Do not create a production database yet.
 
-## Checkpoint 2 setup status and remaining owner actions
+## Checkpoint 2 setup status
 
 Completed by the owner on 2026-07-20: created the separate nonproduction CAP Mastery Supabase project. Dashboard security choices are Data API enabled, automatic new-table exposure disabled, and automatic RLS enabled.
 
 Approved development authentication defaults: invitation/admin-created accounts only, public email sign-up disabled, email confirmation enabled, password recovery enabled, and passwords at least 10 characters with letters and numbers. Local redirect targets are `http://localhost:8081/reset-password` and `capmastery://reset-password`; equivalent hosted dashboard redirect allowlists must be configured before recovery testing.
 
-Remaining actions that require the owner:
+Completed by the owner and Codex:
 
-1. In a personal PowerShell at the repository root, run `npx supabase login --name cap-mastery-codex` and approve the browser authorization. The Codex terminal is noninteractive and cannot complete this login.
-2. Enter the new project's URL and publishable key in ignored `.env.local`. Do not add a service-role key, database password, or access token.
-3. After Codex identifies the project reference, link the repository if the CLI requests the database password. Enter it only into the interactive CLI prompt, never chat or a tracked file.
-4. In Supabase Auth dashboard settings, disable public sign-up, require email confirmation, set the password policy, and allow the development recovery redirects listed above.
-5. After migrations pass, create/invite one development administrator and one development student using owner-controlled inboxes. Do not send their passwords in chat.
-6. Bootstrap the first administrator and development student once using `docs/AUTH_BOOTSTRAP.md`. Subsequent role/link changes use audited database functions.
+1. Authorized the repository-local CLI and linked only the CAP Mastery development project.
+2. Entered the project URL and publishable key in ignored `.env.local`; no privileged key was added to the client.
+3. Applied all three Checkpoint 2 migrations and generated types from the hosted development schema.
+4. Created confirmed development administrator and student Auth users and assigned their initial roles using `docs/AUTH_BOOTSTRAP.md`.
+5. Verified administrator and student sign-in, student rejection from the admin route, administrator access to the admin route, and sign-out.
+
+Remaining later-pilot configuration: exercise a real password-recovery email/deep link on the chosen Android and web targets, configure production-ready SMTP if Supabase development delivery is insufficient, and record retention/consent decisions before collecting pilot data.
 
 No production project, Storage bucket, service-role client configuration, AI provider, or real content is required or authorized in Checkpoint 2.
