@@ -2,6 +2,7 @@ node_modules/
 .expo/
 dist/
 coverage/
+Content/
 package-lock.json
 *.md
 *.txt

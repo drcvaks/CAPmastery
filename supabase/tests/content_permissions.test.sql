@@ -258,7 +258,18 @@ select lives_ok(
 select is((select count(*)::integer from public.question_reports), 1, 'Student reads own report');
 
 select set_config('request.jwt.claim.sub', '55555555-5555-4555-8555-555555555555', true);
-select is((select count(*)::integer from public.questions), 2, 'Reviewer sees approved and draft questions');
+select is(
+  (
+    select count(*)::integer
+    from public.questions
+    where id in (
+      '88888888-8888-4888-8888-888888888801',
+      '88888888-8888-4888-8888-888888888802'
+    )
+  ),
+  2,
+  'Reviewer sees approved and draft fixture questions'
+);
 
 select * from finish();
 rollback;

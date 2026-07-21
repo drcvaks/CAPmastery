@@ -47,6 +47,8 @@ Authenticated clients receive select-only grants on their own sessions, session 
 
 Correct choices and teaching feedback are joined from private tables only after an owned attempt exists. A lost-response retry with the same choice returns the existing result without another attempt or count increment; a retry with a different choice is rejected.
 
+Draft pilot delivery is package-scoped. Students cannot directly insert assignments and normal question RLS still returns no draft prompts. An audited administrator function assigns a package; the security-definer session function checks that assignment internally. It returns choices but withholds the private answer key and all teaching feedback until submission, exactly as it does for approved content.
+
 ## Audit/privacy
 
 Audit role changes, link changes, publishing, imports, question deactivation/version changes, and other sensitive administrative operations. Store safe summaries, not secrets or unnecessary private content. Minimize child data and define retention/export/deletion expectations before pilot data collection.

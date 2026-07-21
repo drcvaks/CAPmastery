@@ -54,8 +54,13 @@ Clients cannot select answer-key columns or write `question_attempts.is_correct`
 - Clients have owner-filtered select access only. Session creation and answer submission occur through protected functions with explicit authentication and student ownership checks.
 - `get_study_session_questions` returns prompts and choices for the owner, but answer/explanation fields remain null until that specific session question has an attempt.
 - `submit_answer` locks the session, rejects choice/question substitution, is idempotent for a repeated identical choice, rejects changed duplicates, and completes/scorers the session atomically.
+- Imported questions use nullable-but-unique `external_id` values so existing test fixtures remain compatible while every real import is required to provide a stable key. Pilot batch, import package, source status, supplied family code, objective/concept codes, page range, difficulty, cognitive level, and estimated time are retained in normalized storage.
+- `pilot_package_assignments` grants a student access to a named draft import package without publishing its questions. `create_study_session` may select draft content only when the current student has that exact package assignment.
+- The Chapter 1 importer writes choices, correctness, main explanation, per-choice explanations, misconception, and remediation to the existing protected normalized tables. Re-import updates draft rows by `external_id`, skips approved rows, and creates reinforcement links only when both external IDs exist.
 
 ## Migration workflow
+
+Checkpoint 4 migration `202607200013` adds import identity/provenance fields and private pilot package assignments. The import itself is deliberately an idempotent operator action, not a migration, so replaying migrations never inserts licensed or reviewable question content automatically.
 
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.

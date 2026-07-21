@@ -328,7 +328,7 @@ select throws_ok(
     11,
     '40000000-0000-4000-8000-000000000001'
   )$$,
-  '22023', 'Not enough approved questions for a 11 question session', 'Sparse bank cannot create an oversized session'
+  '22023', 'Not enough available questions for a 11 question session', 'Sparse bank cannot create an oversized session'
 );
 
 select * from finish();

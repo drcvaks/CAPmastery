@@ -18,6 +18,7 @@
     "test:watch": "jest --watch",
     "db:test": "supabase test db --local",
     "db:test:linked": "node scripts/run-linked-database-tests.cjs",
+    "content:import:pilot10": "node scripts/import-pilot-questions.cjs",
     "db:lint": "supabase db lint --local --level error",
     "db:reset": "supabase db reset --local",
     "types:database": "supabase gen types typescript --linked --schema public > types/database.ts",

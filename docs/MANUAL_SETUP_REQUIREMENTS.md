@@ -110,4 +110,16 @@ No service-role key, production database, Storage bucket, AI API, or new account
 
 ## Checkpoint 4 manual validation boundary
 
-No new account or credential is required. The owner runs linked pgTAP with the database password available only to that PowerShell process. The hosted development project contains no approved question bank, so Heshy or Avigail cannot yet complete a real 10-question session; the full lifecycle is validated with 10 synthetic questions in a rolled-back SQL transaction. Once the separate content workflow publishes at least 10 approved questions for a track, the web Study tab can exercise the same flow without another schema change.
+The owner authorized the supplied ten-question Chapter 1 sample for draft import on 2026-07-20. No PDF was opened or imported. The objective and concept files provide codes but not titles, so the importer uses the stable codes as temporary draft titles; a later reviewed metadata package may enrich them without changing the schema.
+
+The linked development migration is applied. Import and SQL tests require the database password, which Codex cannot read and which must remain outside Git and chat. In a PowerShell process where `CAP_MASTERY_DB_PASSWORD` is set temporarily, run:
+
+```powershell
+npm run content:import:pilot10
+npm run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD
+```
+
+After a successful import, an authenticated administrator must assign `LTL1_C1_PILOT_10` to each intended student through `admin_set_pilot_package_assignment`. The student and administrator UUIDs/emails remain untracked owner data. Do not assign the package broadly; draft questions remain hidden from all unassigned students.
+
+The owner confirmed the initial import (10 inserted) and idempotency run (10 updated, 0 inserted), followed by 101/101 passing linked pgTAP assertions. Remaining manual acceptance is to assign the package to the chosen pilot student accounts and complete a ten-question session in the web application.

@@ -537,6 +537,42 @@ export type Database = {
           },
         ];
       };
+      pilot_package_assignments: {
+        Row: {
+          assigned_by: string;
+          created_at: string;
+          import_package: string;
+          student_id: string;
+        };
+        Insert: {
+          assigned_by: string;
+          created_at?: string;
+          import_package: string;
+          student_id: string;
+        };
+        Update: {
+          assigned_by?: string;
+          created_at?: string;
+          import_package?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pilot_package_assignments_assigned_by_fkey";
+            columns: ["assigned_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pilot_package_assignments_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -759,6 +795,7 @@ export type Database = {
           description: string | null;
           exam_id: string;
           id: string;
+          source_code: string | null;
           status: Database["public"]["Enums"]["content_status"];
           title: string;
           updated_at: string;
@@ -769,6 +806,7 @@ export type Database = {
           description?: string | null;
           exam_id: string;
           id?: string;
+          source_code?: string | null;
           status?: Database["public"]["Enums"]["content_status"];
           title: string;
           updated_at?: string;
@@ -779,6 +817,7 @@ export type Database = {
           description?: string | null;
           exam_id?: string;
           id?: string;
+          source_code?: string | null;
           status?: Database["public"]["Enums"]["content_status"];
           title?: string;
           updated_at?: string;
@@ -996,9 +1035,12 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["question_difficulty"];
           estimated_time_seconds: number | null;
           exam_id: string;
+          external_id: string | null;
           id: string;
+          import_package: string | null;
           is_exam_style: boolean;
           learning_objective_id: string | null;
+          pilot_batch: string | null;
           purpose: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id: string | null;
           question_text: string;
@@ -1008,6 +1050,7 @@ export type Database = {
           source_page_end: number | null;
           source_page_start: number | null;
           source_reference: string | null;
+          source_status: string | null;
           status: Database["public"]["Enums"]["content_status"];
           topic_id: string;
           updated_at: string;
@@ -1022,9 +1065,12 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["question_difficulty"];
           estimated_time_seconds?: number | null;
           exam_id: string;
+          external_id?: string | null;
           id?: string;
+          import_package?: string | null;
           is_exam_style?: boolean;
           learning_objective_id?: string | null;
+          pilot_batch?: string | null;
           purpose?: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id?: string | null;
           question_text: string;
@@ -1034,6 +1080,7 @@ export type Database = {
           source_page_end?: number | null;
           source_page_start?: number | null;
           source_reference?: string | null;
+          source_status?: string | null;
           status?: Database["public"]["Enums"]["content_status"];
           topic_id: string;
           updated_at?: string;
@@ -1048,9 +1095,12 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["question_difficulty"];
           estimated_time_seconds?: number | null;
           exam_id?: string;
+          external_id?: string | null;
           id?: string;
+          import_package?: string | null;
           is_exam_style?: boolean;
           learning_objective_id?: string | null;
+          pilot_batch?: string | null;
           purpose?: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id?: string | null;
           question_text?: string;
@@ -1060,6 +1110,7 @@ export type Database = {
           source_page_end?: number | null;
           source_page_start?: number | null;
           source_reference?: string | null;
+          source_status?: string | null;
           status?: Database["public"]["Enums"]["content_status"];
           topic_id?: string;
           updated_at?: string;
@@ -1605,6 +1656,14 @@ export type Database = {
           p_student_id: string;
         };
         Returns: string;
+      };
+      admin_set_pilot_package_assignment: {
+        Args: {
+          p_enabled: boolean;
+          p_import_package: string;
+          p_student_id: string;
+        };
+        Returns: undefined;
       };
       admin_set_user_role: {
         Args: {
