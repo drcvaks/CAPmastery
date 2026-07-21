@@ -53,3 +53,5 @@ Checkpoint 4 adds pure parsing/error-message tests and `study_sessions.test.sql`
 The Chapter 1 sample adds actual-file parser/validator tests and `pilot_package_access.test.sql`. Tests cover the ten stable unique IDs, all four choices and explanations, Windows-1252-to-Unicode punctuation conversion, page ranges, draft enforcement, 14 out-of-sample reinforcement warnings, RLS on assignments, admin-only assignment, unassigned-student denial, draft hiding through normal RLS, assigned session creation, and pre-submission answer protection.
 
 `npm run content:import:pilot10` imports only `Content/LTL_V1_Chapter_1_Pilot_10_Questions_Import.csv` by default. It requires the database password in process-only `CAP_MASTERY_DB_PASSWORD`, validates all rows before opening a transaction, and prints inserted/updated/skipped/failed/warning counts.
+
+The post-Checkpoint 4 feedback refinement adds pure tests for correct/incorrect selection, overlap suppression, and the 35-word default budget, plus a component test proving remediation remains hidden until the accessible “Need more help?” control is activated.

@@ -7,6 +7,7 @@ import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
 import { getSafeStudyMessage } from "../errors";
 import { useStudySession, useSubmitStudyAnswer } from "../hooks/useStudySession";
+import { AnswerResultCard } from "./AnswerResultCard";
 
 export function StudySessionView({ sessionId }: { sessionId: string }) {
   const router = useRouter();
@@ -141,22 +142,18 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       </AppCard>
 
       {answered ? (
-        <AppCard
-          title={currentQuestion.is_correct ? "Correct" : "Review this one"}
-          description={currentQuestion.explanation ?? "Feedback is unavailable."}
-        >
-          {currentQuestion.selected_choice_feedback ? (
-            <Text style={styles.muted}>{currentQuestion.selected_choice_feedback}</Text>
-          ) : null}
-          {currentQuestion.remediation ? (
-            <Text style={styles.remediation}>{currentQuestion.remediation}</Text>
-          ) : null}
-          <Text style={styles.source}>Source: {currentQuestion.source_reference}</Text>
-          <AppButton
-            label={currentIndex + 1 === session.questions.length ? "View results" : "Next question"}
-            onPress={advance}
-          />
-        </AppCard>
+        <AnswerResultCard
+          explanation={currentQuestion.explanation}
+          isCorrect={Boolean(currentQuestion.is_correct)}
+          key={currentQuestion.session_question_id}
+          nextLabel={
+            currentIndex + 1 === session.questions.length ? "View results" : "Next question"
+          }
+          onNext={advance}
+          remediation={currentQuestion.remediation}
+          selectedChoiceFeedback={currentQuestion.selected_choice_feedback}
+          sourceReference={currentQuestion.source_reference}
+        />
       ) : null}
     </View>
   );
@@ -183,8 +180,6 @@ const styles = StyleSheet.create({
   muted: { color: theme.colors.muted, fontSize: 15, lineHeight: 22 },
   progress: { color: theme.colors.muted, fontSize: 14, fontWeight: "700" },
   progressRow: { flexDirection: "row", justifyContent: "space-between" },
-  remediation: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
-  source: { color: theme.colors.muted, fontSize: 13 },
   stack: { gap: theme.spacing.lg },
   supportive: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
 });

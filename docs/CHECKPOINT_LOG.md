@@ -243,3 +243,12 @@ Known limitations:
 - Docker is unavailable, so linked development-project validation replaces local reset/pgTAP.
 
 Checkpoint 4 is complete. Stop here. Recommended next checkpoint after explicit owner authorization: Checkpoint 5, Mastery and Adaptive Selection.
+
+### Post-completion feedback refinement — 2026-07-21
+
+- Replaced the inline result block with a shared `AnswerResultCard` used by every study question.
+- Correct answers show “Correct.” and only a concise main explanation. Incorrect answers show “Not quite.”, selected-choice feedback first, and a short correct-concept reminder only when the texts do not substantially overlap.
+- Default feedback is deterministically limited to roughly 35 words and two sentences; remediation is hidden behind an accessible “Need more help?” control; source text remains visible but secondary.
+- No database, grading, RLS, import, mastery, adaptive-selection, or AI behavior changed. Checkpoint 5 remains unstarted.
+- `npm run check`: exit 0; typecheck, lint, and formatting passed; 10 Jest suites passed with 30/30 tests.
+- `npm run validate:expo`: exit 0; SDK 57 public configuration resolved. `npm run export:web`: exit 0 with 1,557 modules. `npm run export:android`: initial sandboxed Hermes execution was denied, then the approved rerun passed with 1,987 modules and a 6 MB bytecode bundle.

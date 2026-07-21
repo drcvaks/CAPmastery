@@ -62,4 +62,6 @@ The content hierarchy, concepts/relationships, private tutor notes, question fam
 
 Basic owned study sessions use a protected creation function that snapshots an ordered set of approved question IDs and versions. A typed service and TanStack Query hooks deliver session prompts, retain selections across retry errors, and render post-answer feedback and final results. `submit_answer` accepts only the session-question ID, selected choice, response time, and optional confidence; PostgreSQL validates ownership and membership, computes correctness from the private answer key, records one attempt, and updates session counts atomically. Same-choice retries are idempotent, while changed duplicate answers are rejected.
 
+Post-answer presentation is centralized in `AnswerResultCard`. A pure formatter removes substantially overlapping feedback and limits the default display to about 35 words. Correct answers show only the main explanation. Incorrect answers lead with selected-choice feedback and add a short correct-concept reminder only when needed. Remediation is collapsed behind an accessible help control, and the source remains visible in secondary text.
+
 No mastery update, adaptive selection, spaced review, practice-test timing, or delayed practice-test feedback is implemented; those remain later checkpoints.
