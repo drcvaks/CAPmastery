@@ -17,9 +17,10 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "db:test": "supabase test db --local",
+    "db:test:linked": "node scripts/run-linked-database-tests.cjs",
     "db:lint": "supabase db lint --local --level error",
     "db:reset": "supabase db reset --local",
-    "types:database": "supabase gen types typescript --local > types/database.generated.ts",
+    "types:database": "supabase gen types typescript --linked --schema public > types/database.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run format:check",
     "validate:expo": "expo config --type public",
     "export:web": "expo export --platform web --output-dir dist/web",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "29.5.14",
+    "@types/pg": "^8.20.0",
     "@types/react": "~19.2.4",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.0",
@@ -58,6 +60,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "jest": "~29.7.0",
     "jest-expo": "~57.0.2",
+    "pg": "^8.22.0",
     "prettier": "^3.9.5",
     "supabase": "^2.109.1",
     "typescript": "~6.0.3"

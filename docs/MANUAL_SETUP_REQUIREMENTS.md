@@ -92,6 +92,6 @@ Remaining actions that require the owner:
 3. After Codex identifies the project reference, link the repository if the CLI requests the database password. Enter it only into the interactive CLI prompt, never chat or a tracked file.
 4. In Supabase Auth dashboard settings, disable public sign-up, require email confirmation, set the password policy, and allow the development recovery redirects listed above.
 5. After migrations pass, create/invite one development administrator and one development student using owner-controlled inboxes. Do not send their passwords in chat.
-6. Bootstrap the first administrator once through a reviewed SQL-editor statement supplied in the checkpoint handoff. Subsequent role/link changes use audited database functions.
+6. Bootstrap the first administrator and development student once using `docs/AUTH_BOOTSTRAP.md`. Subsequent role/link changes use audited database functions.
 
 No production project, Storage bucket, service-role client configuration, AI provider, or real content is required or authorized in Checkpoint 2.
