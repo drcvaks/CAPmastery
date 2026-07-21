@@ -107,3 +107,7 @@ The development database now has the Leadership/Aerospace catalog and protected 
 4. Confirmation of the exact volume/chapter/section/topic/objective mapping and source page/reference for each sample question.
 
 No service-role key, production database, Storage bucket, AI API, or new account is needed. The database password is used only as a process-scoped value when the owner runs linked pgTAP and must not be pasted into chat or saved in the repository.
+
+## Checkpoint 4 manual validation boundary
+
+No new account or credential is required. The owner runs linked pgTAP with the database password available only to that PowerShell process. The hosted development project contains no approved question bank, so Heshy or Avigail cannot yet complete a real 10-question session; the full lifecycle is validated with 10 synthetic questions in a rolled-back SQL transaction. Once the separate content workflow publishes at least 10 approved questions for a track, the web Study tab can exercise the same flow without another schema change.

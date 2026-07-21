@@ -144,7 +144,7 @@ Recommended next checkpoint after owner approval: Checkpoint 3, Content Hierarch
 
 ## Checkpoint 3 — Content hierarchy and question bank
 
-Status: complete pending owner approval. Date: 2026-07-20.
+Status: complete and owner-approved. Date: 2026-07-20.
 
 Completed:
 
@@ -185,3 +185,50 @@ Known limitations and required owner input:
 - Study sessions, submission, server-side grading, mastery, imports/admin editor UI, AI, Storage, and production infrastructure remain out of scope.
 
 Recommended next checkpoint after completion and owner approval: Checkpoint 4, Study Sessions and Secure Answer Submission.
+
+## Checkpoint 4 — Basic study session and secure answer submission
+
+Status: implementation complete; awaiting owner review and an approved question bank for manual student acceptance. Date: 2026-07-20.
+
+Completed:
+
+- Added owned study sessions, ordered/versioned session questions, and one immutable server-created attempt per session question.
+- Added RLS and select-only client grants for sessions, session questions, and attempts; another student receives no rows and cannot call owner-only delivery/submission successfully.
+- Added protected 10-question session creation using approved active questions only.
+- Added idempotent server-side `submit_answer`: validates session ownership and choice membership, reads the private key, computes correctness, records the attempt, and updates/completes session counters atomically.
+- Added safe session delivery that returns answer/explanation/remediation fields only after that session question has an attempt.
+- Added typed study services, Zod response validation, TanStack Query hooks, dynamic session route, question/choice UI, answer feedback, retry/offline error states, and final score results.
+- Added a sparse-bank error state rather than persisting invented educational questions.
+
+Database changes:
+
+- Applied development-only migrations `202607200011` and `202607200012`; local and remote migration history match through `202607200012`.
+- Added two enums, three public study tables, one private ownership helper, three public study functions, indexes, constraints, triggers, explicit grants, and three RLS policies.
+- No production project, mastery/adaptive tables, AI integration, or real/synthetic persistent question bank was created.
+
+Validation results so far:
+
+- `npm run check`: exit 0; typecheck and lint passed; 7 Jest suites passed, 18 tests passed, 0 failed; formatting passed.
+- `npm run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- `npx expo-doctor`: exit 0; 20/20 checks passed.
+- `npm run export:web`: exit 0; 1,555 modules bundled to ignored `dist/web`.
+- `npm run export:android`: exit 0; 1,985 modules bundled and a 6.0 MB Hermes bytecode bundle written to ignored `dist/android`.
+- `supabase db push --linked --dry-run`: exit 0; only migrations `202607200011` and `202607200012` were listed.
+- Initial function push: schema migration `202607200011` applied; PostgreSQL rejected reserved output name `position` in `202607200012`. The unapplied migration was corrected to `question_position` and then applied successfully.
+- `supabase db lint --linked --level warning`: exit 0; no schema errors found.
+- `supabase migration list --linked`: exit 0; local and remote versions match through `202607200012`.
+- In-app browser smoke check: the running local web app reached the CAP Mastery sign-in screen. Authenticated session UI could not be exercised without using owner credentials.
+- `npm run db:test:linked`: owner-executed exit 0; content passed 32/32, identity/access passed 15/15, study sessions passed 35/35, and the aggregate result was 82/82. All synthetic users, questions, sessions, and attempts rolled back.
+- Initial owner run passed the existing 47 tests, then stopped because the `authenticated` test role lacked access to transaction-local helper tables. The temporary fixtures now receive narrow test-only grants; no application table policy or grant changed.
+- The next run reached study submission and exposed PostgreSQL's lack of an implicit `integer`-to-`smallint` function-argument cast. Test confidence literals now use explicit `smallint` casts; the Supabase named RPC contract and hosted function were unchanged.
+- A subsequent run proved the grading membership check by rejecting a fixture choice whose loop number did not match UUID-based session ordering. The test now maps actual session-question IDs/positions to their fixture choices and scopes session creation to the transaction-only topic; application behavior was unchanged.
+
+Known limitations:
+
+- The development project has no persistent approved question bank. The required 10-question lifecycle is covered with rolled-back synthetic SQL fixtures; Heshy/Avigail manual completion remains blocked until the separate content workflow publishes at least 10 approved questions.
+- Owner web testing found that Supabase's plain RPC error object bypassed the initial `Error`-only sparse-bank message mapping. The parser now safely reads string `message` fields from plain objects, with a regression test, so the expected actionable empty-bank message is shown.
+- Basic selection is ordered, not adaptive. Mastery, spaced review, practice-test behavior, progress calculations, and delayed feedback remain later checkpoints.
+- Physical Expo Go remains incompatible with SDK 57 on the owner's current Android installation; production web/Android bundles pass.
+- Docker is unavailable, so linked development-project validation replaces local reset/pgTAP.
+
+Recommended next checkpoint after completion and owner approval: Checkpoint 5, Mastery and Adaptive Selection.

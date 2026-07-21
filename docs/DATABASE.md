@@ -34,7 +34,7 @@ All primary keys are UUIDs except the identity audit sequence. Enums and checks 
 
 ## Later domains
 
-- Study: sessions, session questions, attempts, per-question state, topic mastery, and readiness.
+- Study later work: per-question mastery state, topic mastery, and readiness.
 - Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
 - Operations: CSV import jobs, audit log, and feature flags.
 
@@ -45,6 +45,15 @@ Hierarchy links are nullable where an exam omits a level. Study, coaching, and o
 The proposed `submit_answer` function accepts session, question, selected choice, response time, and optional confidence. It must authenticate the caller; verify student/session/question ownership; prevent duplicate or invalid submission; find the protected correct choice; insert the attempt with server-computed correctness; update session counters and mastery atomically; audit exceptional administrative actions; and return only post-submission feedback.
 
 Clients cannot select answer-key columns or write `question_attempts.is_correct`. Practice tests defer returned explanations until session completion.
+
+## Checkpoint 4 study schema
+
+- `study_sessions` owns status, requested/question/answered/correct counts, timestamps, exam/topic scope, and completion invariants.
+- `study_session_questions` snapshots question membership, order, selection reason, and approved question version.
+- `question_attempts` stores one server-created answer per session question, including server-computed correctness, response time, optional confidence, and submission time.
+- Clients have owner-filtered select access only. Session creation and answer submission occur through protected functions with explicit authentication and student ownership checks.
+- `get_study_session_questions` returns prompts and choices for the owner, but answer/explanation fields remain null until that specific session question has an attempt.
+- `submit_answer` locks the session, rejects choice/question substitution, is idempotent for a repeated identical choice, rejects changed duplicates, and completes/scorers the session atomically.
 
 ## Migration workflow
 

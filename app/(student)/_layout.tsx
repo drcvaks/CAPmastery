@@ -43,6 +43,10 @@ export default function StudentLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="study-session/[sessionId]"
+          options={{ href: null, title: "Study session" }}
+        />
       </Tabs>
     </RequireRole>
   );

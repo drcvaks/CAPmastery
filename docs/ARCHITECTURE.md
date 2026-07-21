@@ -57,3 +57,9 @@ Identity, scoped roles, guardian links, future-ready organizations, audit loggin
 ## Checkpoint 3 boundary
 
 The content hierarchy, concepts/relationships, private tutor notes, question families/reinforcement metadata, protected question bank, catalog seed, approval gate, student-safe retrieval service, query hooks, and read-only Study catalog are implemented. Real CAP source ingestion and sample questions require owner authorization. Sessions, answer submission, grading, mastery, administrative editing/import UI, AI, Storage, and production infrastructure remain out of scope.
+
+## Checkpoint 4 boundary
+
+Basic owned study sessions use a protected creation function that snapshots an ordered set of approved question IDs and versions. A typed service and TanStack Query hooks deliver session prompts, retain selections across retry errors, and render post-answer feedback and final results. `submit_answer` accepts only the session-question ID, selected choice, response time, and optional confidence; PostgreSQL validates ownership and membership, computes correctness from the private answer key, records one attempt, and updates session counts atomically. Same-choice retries are idempotent, while changed duplicate answers are rejected.
+
+No mastery update, adaptive selection, spaced review, practice-test timing, or delayed practice-test feedback is implemented; those remain later checkpoints.

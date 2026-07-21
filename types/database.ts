@@ -603,6 +603,81 @@ export type Database = {
         };
         Relationships: [];
       };
+      question_attempts: {
+        Row: {
+          confidence: number | null;
+          id: string;
+          is_correct: boolean;
+          question_id: string;
+          response_time_ms: number;
+          selected_choice_id: string;
+          session_id: string;
+          session_question_id: string;
+          student_id: string;
+          submitted_at: string;
+        };
+        Insert: {
+          confidence?: number | null;
+          id?: string;
+          is_correct: boolean;
+          question_id: string;
+          response_time_ms: number;
+          selected_choice_id: string;
+          session_id: string;
+          session_question_id: string;
+          student_id: string;
+          submitted_at?: string;
+        };
+        Update: {
+          confidence?: number | null;
+          id?: string;
+          is_correct?: boolean;
+          question_id?: string;
+          response_time_ms?: number;
+          selected_choice_id?: string;
+          session_id?: string;
+          session_question_id?: string;
+          student_id?: string;
+          submitted_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "question_attempts_question_id_fkey";
+            columns: ["question_id"];
+            isOneToOne: false;
+            referencedRelation: "questions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_attempts_selected_choice_id_fkey";
+            columns: ["selected_choice_id"];
+            isOneToOne: false;
+            referencedRelation: "question_choices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_attempts_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "study_sessions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_attempts_session_question_id_fkey";
+            columns: ["session_question_id"];
+            isOneToOne: true;
+            referencedRelation: "study_session_questions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_attempts_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       question_choices: {
         Row: {
           choice_key: string;
@@ -1213,6 +1288,124 @@ export type Database = {
           },
         ];
       };
+      study_session_questions: {
+        Row: {
+          created_at: string;
+          id: string;
+          position: number;
+          question_id: string;
+          question_version: number;
+          selection_reason: string;
+          session_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          position: number;
+          question_id: string;
+          question_version: number;
+          selection_reason?: string;
+          session_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          position?: number;
+          question_id?: string;
+          question_version?: number;
+          selection_reason?: string;
+          session_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "study_session_questions_question_id_fkey";
+            columns: ["question_id"];
+            isOneToOne: false;
+            referencedRelation: "questions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "study_session_questions_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "study_sessions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      study_sessions: {
+        Row: {
+          answered_count: number;
+          completed_at: string | null;
+          correct_count: number;
+          created_at: string;
+          exam_id: string;
+          id: string;
+          mode: Database["public"]["Enums"]["study_session_mode"];
+          question_count: number;
+          requested_count: number;
+          started_at: string;
+          status: Database["public"]["Enums"]["study_session_status"];
+          student_id: string;
+          topic_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          answered_count?: number;
+          completed_at?: string | null;
+          correct_count?: number;
+          created_at?: string;
+          exam_id: string;
+          id?: string;
+          mode?: Database["public"]["Enums"]["study_session_mode"];
+          question_count: number;
+          requested_count: number;
+          started_at?: string;
+          status?: Database["public"]["Enums"]["study_session_status"];
+          student_id: string;
+          topic_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          answered_count?: number;
+          completed_at?: string | null;
+          correct_count?: number;
+          created_at?: string;
+          exam_id?: string;
+          id?: string;
+          mode?: Database["public"]["Enums"]["study_session_mode"];
+          question_count?: number;
+          requested_count?: number;
+          started_at?: string;
+          status?: Database["public"]["Enums"]["study_session_status"];
+          student_id?: string;
+          topic_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_exam_id_fkey";
+            columns: ["exam_id"];
+            isOneToOne: false;
+            referencedRelation: "exams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "study_sessions_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "study_sessions_topic_id_fkey";
+            columns: ["topic_id"];
+            isOneToOne: false;
+            referencedRelation: "topics";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       topics: {
         Row: {
           chapter_id: string | null;
@@ -1423,6 +1616,14 @@ export type Database = {
         };
         Returns: undefined;
       };
+      create_study_session: {
+        Args: {
+          p_exam_id: string;
+          p_question_count?: number;
+          p_topic_id?: string;
+        };
+        Returns: string;
+      };
       get_approved_questions: {
         Args: { p_exam_id: string; p_limit?: number; p_topic_id?: string };
         Returns: {
@@ -1435,6 +1636,33 @@ export type Database = {
           question_type: Database["public"]["Enums"]["question_type"];
           source_reference: string;
           topic_id: string;
+        }[];
+      };
+      get_study_session_questions: {
+        Args: { p_session_id: string };
+        Returns: {
+          answered_count: number;
+          attempt_id: string;
+          choices: Json;
+          cognitive_level: Database["public"]["Enums"]["cognitive_level"];
+          common_mistake: string;
+          correct_choice_id: string;
+          correct_count: number;
+          difficulty: Database["public"]["Enums"]["question_difficulty"];
+          explanation: string;
+          is_correct: boolean;
+          question_count: number;
+          question_id: string;
+          question_position: number;
+          question_text: string;
+          question_type: Database["public"]["Enums"]["question_type"];
+          remediation: string;
+          selected_choice_feedback: string;
+          selected_choice_id: string;
+          session_id: string;
+          session_question_id: string;
+          session_status: Database["public"]["Enums"]["study_session_status"];
+          source_reference: string;
         }[];
       };
       reviewer_approve_question: {
@@ -1454,6 +1682,28 @@ export type Database = {
           p_remediation?: string;
         };
         Returns: undefined;
+      };
+      submit_answer: {
+        Args: {
+          p_confidence?: number;
+          p_response_time_ms: number;
+          p_selected_choice_id: string;
+          p_session_question_id: string;
+        };
+        Returns: {
+          answered_count: number;
+          attempt_id: string;
+          common_mistake: string;
+          correct_choice_id: string;
+          correct_count: number;
+          explanation: string;
+          is_correct: boolean;
+          question_count: number;
+          remediation: string;
+          selected_choice_feedback: string;
+          session_completed: boolean;
+          source_reference: string;
+        }[];
       };
     };
     Enums: {
@@ -1501,6 +1751,8 @@ export type Database = {
       review_decision: "approve" | "request_changes" | "reject";
       role_scope_type: "global" | "organization";
       source_authorization_status: "pending" | "approved" | "restricted" | "rejected";
+      study_session_mode: "study";
+      study_session_status: "active" | "completed" | "abandoned";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1669,6 +1921,8 @@ export const Constants = {
       review_decision: ["approve", "request_changes", "reject"],
       role_scope_type: ["global", "organization"],
       source_authorization_status: ["pending", "approved", "restricted", "rejected"],
+      study_session_mode: ["study"],
+      study_session_status: ["active", "completed", "abandoned"],
     },
   },
 } as const;

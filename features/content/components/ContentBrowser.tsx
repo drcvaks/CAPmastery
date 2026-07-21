@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { type Href, useRouter } from "expo-router";
 
+import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
+import { getSafeStudyMessage } from "../../study/errors";
+import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { useApprovedQuestionPreviews, useContentCatalog } from "../hooks/useContentCatalog";
 
 export function ContentBrowser() {
+  const router = useRouter();
   const catalog = useContentCatalog();
+  const createSession = useCreateStudySession();
   const [selectedExamId, setSelectedExamId] = useState<string>();
   const [selectedTopicId, setSelectedTopicId] = useState<string>();
   const activeExamId = selectedExamId ?? catalog.data?.[0]?.id;
@@ -87,6 +93,21 @@ export function ContentBrowser() {
               />
             ))}
           </View>
+          <AppButton
+            label="Start 10-question session"
+            loading={createSession.isPending}
+            onPress={() => {
+              void createSession
+                .mutateAsync({ examId: activeExam.id, topicId: selectedTopicId })
+                .then((sessionId) => router.push(`/study-session/${sessionId}` as Href))
+                .catch(() => undefined);
+            }}
+          />
+          {createSession.isError ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {getSafeStudyMessage(createSession.error)}
+            </Text>
+          ) : null}
         </AppCard>
       ) : null}
 
