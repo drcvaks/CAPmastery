@@ -122,4 +122,4 @@ Remove-Item Env:CAP_MASTERY_DB_PASSWORD
 
 After a successful import, an authenticated administrator must assign `LTL1_C1_PILOT_10` to each intended student through `admin_set_pilot_package_assignment`. The student and administrator UUIDs/emails remain untracked owner data. Do not assign the package broadly; draft questions remain hidden from all unassigned students.
 
-The owner confirmed the initial import (10 inserted) and idempotency run (10 updated, 0 inserted), followed by 101/101 passing linked pgTAP assertions. Remaining manual acceptance is to assign the package to the chosen pilot student accounts and complete a ten-question session in the web application.
+The owner confirmed the initial import (10 inserted) and idempotency run (10 updated, 0 inserted), followed by 101/101 passing linked pgTAP assertions. The private package was assigned through the audited administrator function, and the owner confirmed that the imported questions worked in the web Study flow. Checkpoint 4 manual acceptance is complete.

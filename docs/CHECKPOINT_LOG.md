@@ -188,7 +188,7 @@ Recommended next checkpoint after completion and owner approval: Checkpoint 4, S
 
 ## Checkpoint 4 — Basic study session and secure answer submission
 
-Status: implementation complete; awaiting owner review and an approved question bank for manual student acceptance. Date: 2026-07-20.
+Status: complete and owner-approved. Date: 2026-07-20.
 
 Completed:
 
@@ -237,8 +237,9 @@ Known limitations:
 - Owner idempotency run: 0 inserted, 10 updated, 0 skipped, 0 failed, and the same 14 expected warnings. Content permissions passed 32/32 and identity/access passed 15/15. The new pilot suite executed 19 successful assertions with no failures but declared an incorrect `1..17` plan; its plan is corrected to `1..19` and awaits owner rerun.
 - The next linked run passed content 32/32, identity/access 15/15, and pilot access 19/19. Study sessions passed 34 assertions; its sparse-bank assertion still expected the earlier approved-only error text. The expected message now uses the accurate broader wording, “available questions,” because explicitly assigned pilot drafts are eligible.
 - Final owner-linked pgTAP run: content permissions 32/32, identity/access 15/15, pilot package access 19/19, study sessions 35/35, aggregate 101/101 passed. All transaction fixtures rolled back; the ten authorized draft pilot questions remain persistent.
+- Owner web acceptance: the private pilot package was assigned through the audited administrator function, and the assigned student successfully used the imported questions in the Study flow.
 - Basic selection is ordered, not adaptive. Mastery, spaced review, practice-test behavior, progress calculations, and delayed feedback remain later checkpoints.
 - Physical Expo Go remains incompatible with SDK 57 on the owner's current Android installation; production web/Android bundles pass.
 - Docker is unavailable, so linked development-project validation replaces local reset/pgTAP.
 
-Recommended next checkpoint after completion and owner approval: Checkpoint 5, Mastery and Adaptive Selection.
+Checkpoint 4 is complete. Stop here. Recommended next checkpoint after explicit owner authorization: Checkpoint 5, Mastery and Adaptive Selection.
