@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository has completed **Checkpoint 2: Supabase foundation and authentication**, pending owner review. It contains a typed Supabase boundary, persisted email/password sessions, recovery screens, database-backed route guards, versioned identity/access migrations, explicit grants, RLS policies, generated database types, and linked database tests. The migrations are applied only to the separate CAP Mastery development project; no production database exists.
+The repository is implementing **Checkpoint 3: Content hierarchy and question bank**. The development project now has a normalized content catalog, protected private answer storage, reviewer approval gates, RLS-filtered student delivery, and a read-only Study catalog. Completion awaits linked database-test confirmation and an owner-authorized, human-reviewed sample bank. No production database exists.
 
 ## Repository boundaries
 
@@ -28,7 +28,7 @@ types/                  Shared application types
 docs/                   Product, architecture, security, and runbooks
 ```
 
-Unimplemented planned directories contain `.gitkeep` placeholders only.
+Some later-checkpoint directories still contain `.gitkeep` placeholders only.
 
 ## Local development
 
@@ -54,6 +54,8 @@ npm run db:lint
 ```
 
 Add the separate CAP Mastery development project URL and publishable key to ignored `.env.local`. With no valid client configuration, the app shows a safe setup screen rather than attempting a connection. Authenticated users are routed by database roles; client routing is not the authorization boundary.
+
+The physical Expo Go version currently available to the owner is incompatible with SDK 57. SDK 57 is intentionally retained; use web/production export checks for now and revisit Expo Go or a development build before physical-device testing.
 
 ## Documentation
 

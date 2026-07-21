@@ -21,16 +21,24 @@
 
 All primary keys are UUIDs except the identity audit sequence. Enums and checks constrain status, role, scope, organization type, and relationship state. Foreign keys use deliberate cascade, restrict, or null behavior.
 
+## Checkpoint 3 content schema
+
+- Curriculum is normalized as programs, exams, courses, optional volumes, chapters, sections, topics, and learning objectives. Validation triggers reject inconsistent cross-level links.
+- `source_documents` records authorization and publication metadata. Full source passages are stored only in `private.source_passages`, which has no client grants.
+- Concepts, objective/concept relationships, nested subsections, question families, purposes, concept tags, and reinforcement links implement the content-development plan's traceability model. Private tutor notes have no direct client grants.
+- Public question rows contain prompts and delivery metadata only. Public choices contain text and ordering only; neither table has a correctness column.
+- `private.question_answer_keys` and `private.question_choice_feedback` hold correctness and post-submission teaching material with no client table grants.
+- Question versions, quality reviews, reports, approval metadata, constraints, and indexes support a human-reviewed workflow.
+- `reviewer_approve_question` requires an authorized active source, objective, valid choice count, private answer/explanation, and approving quality review. Approved questions and choices cannot be edited directly.
+- `get_approved_questions` is a security-invoker, RLS-filtered student projection containing only approved prompts, choices, and source references.
+
 ## Later domains
 
-- Identity/access: profiles, user roles with scope, guardian links, organizations, memberships.
-- Curriculum/content: programs, exams, courses, volumes, chapters, sections, topics, objectives, source documents/passages.
-- Question bank: questions, choices, tags, versions, quality reviews, and reports.
 - Study: sessions, session questions, attempts, per-question state, topic mastery, and readiness.
 - Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
 - Operations: CSV import jobs, audit log, and feature flags.
 
-Content and later-domain columns begin from the build plan but will be normalized and constrained during their scheduled checkpoint. Hierarchy links may be nullable where future exams omit a level.
+Hierarchy links are nullable where an exam omits a level. Study, coaching, and operational schemas remain proposals until their checkpoints.
 
 ## Secure grading transaction
 
@@ -46,4 +54,4 @@ Clients cannot select answer-key columns or write `question_attempts.is_correct`
 4. Generate types from the resulting schema.
 5. Apply to shared environments only after review and record the result in `CHECKPOINT_LOG.md`.
 
-Checkpoint 2 introduces three forward migrations: identity/access schema and triggers, RLS/grants, and audited admin functions. `supabase/seed.sql` intentionally contains no real accounts or credentials. SQL tests under `supabase/tests/` verify trigger behavior, RLS enablement, cross-user profile visibility, role visibility, and privilege escalation denial.
+Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

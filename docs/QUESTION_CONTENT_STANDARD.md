@@ -26,4 +26,6 @@ Import validates and previews before writing. Accepted rows enter as drafts rega
 
 ## Initial content decision
 
+Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.
+
 Technical testing may use a small clearly labeled sample, but adaptivity evaluation requires broad objective coverage and approximately 150–250 reviewed questions per exam, including difficulty and cognitive-level variety.

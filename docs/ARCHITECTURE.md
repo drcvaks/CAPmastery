@@ -27,7 +27,7 @@ Do not recreate mySCP's single global provider that loads unrelated tables at st
 
 The lazily created typed client uses only the Supabase URL and publishable key. Invalid or absent configuration produces a setup state rather than an import-time crash. Queries live in services, and RLS protects every exposed relation. Sensitive workflows use carefully scoped PostgreSQL functions with explicit authorization, empty `search_path`, minimal grants, validation, and audit entries.
 
-Question delivery must return safe question/choice fields without `is_correct`. `submit_answer` validates ownership and membership in the session, grades internally, writes the attempt and derived state atomically, and only then returns feedback.
+Question delivery uses the typed `contentService`, narrow TanStack Query keys, and the RLS-filtered `get_approved_questions` projection. Correctness and teaching feedback are private-schema data and are not modeled in the client delivery type. The future `submit_answer` validates ownership and membership in the session, grades internally, writes the attempt and derived state atomically, and only then returns feedback.
 
 ## Navigation
 
@@ -53,3 +53,7 @@ The shell uses a clean, encouraging navy/red visual direction without official C
 ## Checkpoint 2 boundary
 
 Identity, scoped roles, guardian links, future-ready organizations, audit logging, authentication, recovery, and route guards are in scope. Content, questions, study behavior, server-side grading, mastery, AI, and production infrastructure remain out of scope.
+
+## Checkpoint 3 boundary
+
+The content hierarchy, concepts/relationships, private tutor notes, question families/reinforcement metadata, protected question bank, catalog seed, approval gate, student-safe retrieval service, query hooks, and read-only Study catalog are implemented. Real CAP source ingestion and sample questions require owner authorization. Sessions, answer submission, grading, mastery, administrative editing/import UI, AI, Storage, and production infrastructure remain out of scope.

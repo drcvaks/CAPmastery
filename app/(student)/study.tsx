@@ -1,12 +1,14 @@
-import { PlaceholderScreen } from "../../features/shell/components/PlaceholderScreen";
+import { AppScreen } from "../../components/common/AppScreen";
+import { ContentBrowser } from "../../features/content/components/ContentBrowser";
 
 export default function StudyScreen() {
   return (
-    <PlaceholderScreen
-      area="Student"
-      title="Study"
-      description="Recommended, quick, focus-area, and practice-test sessions will be added incrementally."
-      checkpoint="Checkpoints 3–7"
-    />
+    <AppScreen
+      eyebrow="Student"
+      title="Study catalog"
+      description="Browse authorized Leadership and Aerospace content. Correct answers remain protected until a future server-graded submission flow."
+    >
+      <ContentBrowser />
+    </AppScreen>
   );
 }

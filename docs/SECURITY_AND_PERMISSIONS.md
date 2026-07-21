@@ -37,7 +37,9 @@ Server-side secrets, if later required, belong in Supabase Function secrets or a
 
 ## Answer protection
 
-Question delivery uses a safe view/function or explicit field selection that cannot expose `question_choices.is_correct`. Grading is atomic and server-side. The client cannot submit `is_correct`, modify counters, or retrieve explanations/correct text early. Duplicate taps and replayed calls require idempotent or conflict-safe handling.
+Checkpoint 3 makes answer leakage structurally difficult: public questions and choices have no correctness fields. Answer keys, explanations, remediation, choice feedback, and source passages are private-schema tables with no `anon` or `authenticated` table grants. The student-safe `get_approved_questions` function is security-invoker and RLS-filtered; drafts and source-document records are hidden from students.
+
+Reviewers write answer keys only through an authorized, audited function. Approval requires source authorization, an objective, valid choices, an answer/explanation, and an approving quality review. RLS prevents direct approval and direct edits to approved prompts/choices; a private trigger prevents changing an approved answer key. Server-side grading is intentionally deferred to Checkpoint 4.
 
 ## Audit/privacy
 

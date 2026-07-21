@@ -96,3 +96,14 @@ Completed by the owner and Codex:
 Remaining later-pilot configuration: exercise a real password-recovery email/deep link on the chosen Android and web targets, configure production-ready SMTP if Supabase development delivery is insufficient, and record retention/consent decisions before collecting pilot data.
 
 No production project, Storage bucket, service-role client configuration, AI provider, or real content is required or authorized in Checkpoint 2.
+
+## Checkpoint 3 content inputs
+
+The development database now has the Leadership/Aerospace catalog and protected question workflow, but no real source or question rows. To finish the required manually reviewed sample bank, the owner must provide:
+
+1. A written authorization decision for each source: exact title/edition/publication date, whether CAP Mastery may use it, whether full passages may be stored or only citations, and whether the two untracked workspace PDFs are authorized inputs. Codex will not infer authorization from file presence.
+2. A small human-written and human-reviewed sample bank in the documented CSV shape (recommended minimum: three questions per track for a meaningful permission/browser smoke test). Do not provide recalled or protected exam items.
+3. The reviewer/approver identity for the sample. An existing administrator can approve; assigning a separate `content_reviewer` is optional.
+4. Confirmation of the exact volume/chapter/section/topic/objective mapping and source page/reference for each sample question.
+
+No service-role key, production database, Storage bucket, AI API, or new account is needed. The database password is used only as a process-scoped value when the owner runs linked pgTAP and must not be pasted into chat or saved in the repository.

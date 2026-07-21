@@ -95,7 +95,7 @@ Recommended next checkpoint after owner approval: Checkpoint 2, Supabase Foundat
 
 ## Checkpoint 2 — Supabase foundation and authentication
 
-Status: complete pending owner review. Date: 2026-07-20.
+Status: complete and owner-approved. Date: 2026-07-20.
 
 Completed:
 
@@ -141,3 +141,47 @@ Known limitations:
 Manual action required for review: none. Keep `.env.local`, `supabase/.temp/`, account emails/passwords, and database credentials out of Git. The owner manages Git.
 
 Recommended next checkpoint after owner approval: Checkpoint 3, Content Hierarchy and Question Bank.
+
+## Checkpoint 3 — Content hierarchy and question bank
+
+Status: implementation complete; awaiting linked pgTAP result and owner-authorized sample content. Date: 2026-07-20.
+
+Completed:
+
+- Added normalized programs, exams, courses, optional volumes, chapters/subsections, sections, topics, objectives, concepts, relationships, source documents, and private source passages/tutor notes with hierarchy validation.
+- Added questions, choices, private answer keys/feedback, versions, quality reviews, reports, constraints, indexes, and update triggers.
+- Added RLS and explicit grants for all 14 API-exposed content tables. Students see approved active prompts/choices only; drafts and source records are hidden; private answer/source tables have no client grants.
+- Added audited reviewer answer entry and approval functions. Approval requires an authorized source, objective, valid choice count, private answer/explanation, and approving quality review.
+- Hardened approved content against direct prompt, choice, or answer-key edits and validated exam/topic/objective consistency.
+- Added catalog-only Leadership and Aerospace structure with explicit pending-source placeholders and no real questions, answers, scores, times, or source text.
+- Added a typed content service, narrow TanStack Query hooks, strict Zod parsing of the safe choice projection, and a read-only student Study catalog with honest empty states.
+- Updated the linked pgTAP runner to discover all SQL test files and validate their individual plans.
+
+Database changes:
+
+- Applied development-only migrations `202607200004` through `202607200010`. No production database exists or was initialized.
+- Added 21 public content tables, four private content tables, content/question enums, RLS policies, reviewer/delivery functions, integrity helpers/triggers, and catalog-only seed rows.
+- No workspace PDF, real CAP question, answer, source passage, or AI-generated content was imported.
+
+Validation results so far:
+
+- `npm run check`: exit 0; typecheck and lint passed; 6 Jest suites passed, 13 tests passed, 0 failed; formatting passed.
+- `npm run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- `npx expo-doctor`: exit 0; 20/20 checks passed.
+- `npm run export:web`: exit 0; 1,549 modules bundled to ignored `dist/web`.
+- `npm run export:android`: exit 0 on isolated elevated rerun; 1,979 modules bundled and a 5.9 MB Hermes bytecode bundle written to ignored `dist/android`.
+- `supabase db push --linked --dry-run`: exit 0 before each push; only the expected Checkpoint 3 migrations were listed.
+- `supabase db push --linked`: migrations through `202607200010` applied. The CLI emitted a non-fatal Docker catalog-cache warning because Docker Desktop is unavailable.
+- `supabase db lint --linked --level warning`: exit 0; no schema errors found.
+- `supabase migration list --linked`: exit 0; local and remote versions match through `202607200010`.
+- Linked pgTAP: pending owner execution with the database password supplied only to the invoking process. Expected plans are 15 identity/access tests plus 32 content tests.
+- Initial owner run during implementation: the then-current content suite passed 24/24; identity passed 13/15 because two assertions counted all hosted profiles rather than only transaction fixtures. Those assertions were corrected to filter fixture UUIDs, and the runner now prints failing TAP lines. A final run of the current 32+15 plans is pending.
+
+Known limitations and required owner input:
+
+- Physical Expo Go on the owner's Android device does not currently support this SDK 57 project. The owner chose to retain SDK 57; production web/Android bundles pass.
+- Checkpoint 3 cannot be marked complete until linked pgTAP passes and the owner provides authorized source metadata plus a small human-written/reviewed question bank. File presence is not authorization.
+- Docker is unavailable, so linked development-project migration/lint/pgTAP validation is used instead of local reset.
+- Study sessions, submission, server-side grading, mastery, imports/admin editor UI, AI, Storage, and production infrastructure remain out of scope.
+
+Recommended next checkpoint after completion and owner approval: Checkpoint 4, Study Sessions and Secure Answer Submission.
