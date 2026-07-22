@@ -370,3 +370,12 @@ Checkpoint 6 implementation and automated acceptance gates are complete. Stop he
 - Applied forward migration `202607210018_zero_attempt_readiness.sql` to the linked development project; local and remote histories match through 018 and linked database lint reports no schema errors. No table, RLS, access, grading, or answer-key behavior changes.
 - Owner-executed linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, progress/readiness 34/34, and study sessions 38/38: aggregate 184/184 passed.
 - Owner completed the Checkpoint 6 web review on 2026-07-22, including student progress, zero-attempt Not started behavior, topic detail, family progress, and linked-child switching. Checkpoint 6 is accepted.
+
+### Post–Checkpoint 6 complete learning-support extension — 2026-07-22
+
+- Validated the owner-supplied replacement adaptive bank: 30 rows, 30 stable unique external IDs, 30 short explanations, 30 memory aids, display version 1 throughout, and 30 unique complete visual metadata keys. Short explanations contain 9–16 words.
+- Compared every field against the prior adaptive 30-row file. Only the ten learning-support fields changed; prompts, choices, answers, explanations, remediation, sources, adaptive metadata, and reinforcement references are identical.
+- Updated the existing idempotent `content:import:adaptive30` command to use the complete-support file. No importer, schema, migration, RLS, grading, mastery, readiness, or AI change was required.
+- All visual display modes remain optional after answering. No image files or approved visual-asset records were supplied, so Show visual remains hidden and missing assets should produce 30 nonfatal warnings.
+- Owner persistent import completed and emitted exactly 52 expected nonfatal warnings: 22 reinforcement targets outside the current bank and 30 visual metadata keys without registered approved assets. Warning output occurs only after the transaction commits.
+- Post-import linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, progress/readiness 34/34, and study sessions 38/38: aggregate 184/184 passed.

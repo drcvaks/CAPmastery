@@ -22,6 +22,8 @@ Multiple choice requires at least three choices. True/false uses only TRUE and F
 
 The adaptive 30-question technical bank may leave `short_explanation`, memory, and visual fields blank on rows that have not received reviewed learning support. Such rows use the existing concise main-explanation fallback and do not create an empty private support record. If memory or visual metadata is present, `short_explanation` remains required. Finer source classifications map to the existing delivery enum without losing purpose: recognition uses cognitive level `recall` plus purpose `recognition`, while analysis uses cognitive level `application` plus purpose `analysis`.
 
+The replacement 30-question complete-support file supplies reviewed short explanations, memory aids, display version 1, and complete visual metadata for every row. It changes no prompt, choice, answer, full explanation, remediation, source, mastery, or reinforcement field from the prior adaptive file. Visual metadata alone never makes an image student-visible; an independently registered approved asset is still required.
+
 ## Workflow
 
 Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.

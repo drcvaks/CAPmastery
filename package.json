@@ -19,7 +19,7 @@
     "db:test": "supabase test db --local",
     "db:test:linked": "node scripts/run-linked-database-tests.cjs",
     "content:import:pilot10": "node scripts/import-pilot-questions.cjs",
-    "content:import:adaptive30": "node scripts/import-pilot-questions.cjs Content/LTL_V1_Chapter_1_Adaptive_Test_30_Questions.csv 30",
+    "content:import:adaptive30": "node scripts/import-pilot-questions.cjs Content/LTL_V1_Chapter_1_Adaptive_Test_30_Questions_Complete_Support.csv 30",
     "db:lint": "supabase db lint --local --level error",
     "db:reset": "supabase db reset --local",
     "types:database": "supabase gen types typescript --linked --schema public > types/database.ts",

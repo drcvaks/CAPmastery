@@ -20,6 +20,12 @@ const adaptiveInputPath = path.resolve(
   __dirname,
   "..",
   "Content",
+  "LTL_V1_Chapter_1_Adaptive_Test_30_Questions_Complete_Support.csv",
+);
+const legacyAdaptiveInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
   "LTL_V1_Chapter_1_Adaptive_Test_30_Questions.csv",
 );
 
@@ -90,14 +96,43 @@ describe("Chapter 1 pilot import validation", () => {
 describe("Chapter 1 adaptive 30-question validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(adaptiveInputPath)));
 
-  it("accepts thirty unique draft questions and optional blank support", () => {
+  it("accepts thirty unique draft questions with complete learning support", () => {
     const validation = validateImport(rows, 30);
 
     expect(validation.errors).toEqual([]);
     expect(rows).toHaveLength(30);
     expect(new Set(rows.map((row) => row.external_id)).size).toBe(30);
-    expect(rows.filter((row) => !row.short_explanation)).toHaveLength(20);
-    expect(rows.filter((row) => row.visual_asset_key)).toHaveLength(10);
+    expect(rows.every((row) => row.short_explanation)).toBe(true);
+    expect(rows.every((row) => row.memory_aid)).toBe(true);
+    expect(rows.every((row) => row.feedback_display_version === "1")).toBe(true);
+    expect(rows.every((row) => row.visual_asset_key)).toBe(true);
+    expect(new Set(rows.map((row) => row.visual_asset_key)).size).toBe(30);
+    expect(rows.every((row) => row.visual_alt_text)).toBe(true);
+  });
+
+  it("changes only learning-support fields from the prior adaptive bank", () => {
+    const legacyRows = parseImport(decodeImportBuffer(fs.readFileSync(legacyAdaptiveInputPath)));
+    const supportFields = new Set([
+      "short_explanation",
+      "feedback_display_version",
+      "memory_aid",
+      "visual_priority",
+      "visual_type",
+      "visual_display_mode",
+      "visual_asset_key",
+      "visual_brief",
+      "visual_caption",
+      "visual_alt_text",
+    ]);
+    const legacyById = new Map(legacyRows.map((row) => [row.external_id, row]));
+
+    for (const row of rows) {
+      const legacy = legacyById.get(row.external_id);
+      expect(legacy).toBeDefined();
+      for (const [field, value] of Object.entries(row)) {
+        if (!supportFields.has(field)) expect(value).toBe(legacy[field]);
+      }
+    }
   });
 
   it("matches the documented adaptive-bank distribution", () => {
