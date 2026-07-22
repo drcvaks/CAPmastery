@@ -573,6 +573,94 @@ export type Database = {
           },
         ];
       };
+      practice_test_blueprint_rules: {
+        Row: {
+          blueprint_id: string;
+          cognitive_level: Database["public"]["Enums"]["cognitive_level"];
+          created_at: string;
+          difficulty: Database["public"]["Enums"]["question_difficulty"];
+          id: string;
+          target_count: number;
+        };
+        Insert: {
+          blueprint_id: string;
+          cognitive_level: Database["public"]["Enums"]["cognitive_level"];
+          created_at?: string;
+          difficulty: Database["public"]["Enums"]["question_difficulty"];
+          id?: string;
+          target_count: number;
+        };
+        Update: {
+          blueprint_id?: string;
+          cognitive_level?: Database["public"]["Enums"]["cognitive_level"];
+          created_at?: string;
+          difficulty?: Database["public"]["Enums"]["question_difficulty"];
+          id?: string;
+          target_count?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "practice_test_blueprint_rules_blueprint_id_fkey";
+            columns: ["blueprint_id"];
+            isOneToOne: false;
+            referencedRelation: "practice_test_blueprints";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      practice_test_blueprints: {
+        Row: {
+          allow_pause: boolean;
+          allow_untimed: boolean;
+          code: string;
+          created_at: string;
+          description: string;
+          exam_id: string;
+          id: string;
+          name: string;
+          question_count: number;
+          status: string;
+          time_limit_seconds: number;
+          updated_at: string;
+        };
+        Insert: {
+          allow_pause?: boolean;
+          allow_untimed?: boolean;
+          code: string;
+          created_at?: string;
+          description: string;
+          exam_id: string;
+          id?: string;
+          name: string;
+          question_count: number;
+          status?: string;
+          time_limit_seconds: number;
+          updated_at?: string;
+        };
+        Update: {
+          allow_pause?: boolean;
+          allow_untimed?: boolean;
+          code?: string;
+          created_at?: string;
+          description?: string;
+          exam_id?: string;
+          id?: string;
+          name?: string;
+          question_count?: number;
+          status?: string;
+          time_limit_seconds?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "practice_test_blueprints_exam_id_fkey";
+            columns: ["exam_id"];
+            isOneToOne: false;
+            referencedRelation: "exams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -1275,6 +1363,70 @@ export type Database = {
           },
         ];
       };
+      student_guardian_links: {
+        Row: {
+          can_assign_content: boolean;
+          can_manage_challenges: boolean;
+          can_view_progress: boolean;
+          created_at: string;
+          created_by: string;
+          guardian_id: string;
+          id: string;
+          relationship_type: string;
+          status: Database["public"]["Enums"]["relationship_status"];
+          student_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          can_assign_content?: boolean;
+          can_manage_challenges?: boolean;
+          can_view_progress?: boolean;
+          created_at?: string;
+          created_by: string;
+          guardian_id: string;
+          id?: string;
+          relationship_type: string;
+          status?: Database["public"]["Enums"]["relationship_status"];
+          student_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          can_assign_content?: boolean;
+          can_manage_challenges?: boolean;
+          can_view_progress?: boolean;
+          created_at?: string;
+          created_by?: string;
+          guardian_id?: string;
+          id?: string;
+          relationship_type?: string;
+          status?: Database["public"]["Enums"]["relationship_status"];
+          student_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_guardian_links_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_guardian_links_guardian_id_fkey";
+            columns: ["guardian_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_guardian_links_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       student_question_state: {
         Row: {
           consecutive_correct: number;
@@ -1416,70 +1568,6 @@ export type Database = {
           },
         ];
       };
-      student_guardian_links: {
-        Row: {
-          can_assign_content: boolean;
-          can_manage_challenges: boolean;
-          can_view_progress: boolean;
-          created_at: string;
-          created_by: string;
-          guardian_id: string;
-          id: string;
-          relationship_type: string;
-          status: Database["public"]["Enums"]["relationship_status"];
-          student_id: string;
-          updated_at: string;
-        };
-        Insert: {
-          can_assign_content?: boolean;
-          can_manage_challenges?: boolean;
-          can_view_progress?: boolean;
-          created_at?: string;
-          created_by: string;
-          guardian_id: string;
-          id?: string;
-          relationship_type: string;
-          status?: Database["public"]["Enums"]["relationship_status"];
-          student_id: string;
-          updated_at?: string;
-        };
-        Update: {
-          can_assign_content?: boolean;
-          can_manage_challenges?: boolean;
-          can_view_progress?: boolean;
-          created_at?: string;
-          created_by?: string;
-          guardian_id?: string;
-          id?: string;
-          relationship_type?: string;
-          status?: Database["public"]["Enums"]["relationship_status"];
-          student_id?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "student_guardian_links_created_by_fkey";
-            columns: ["created_by"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "student_guardian_links_guardian_id_fkey";
-            columns: ["guardian_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "student_guardian_links_student_id_fkey";
-            columns: ["student_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       study_session_questions: {
         Row: {
           created_at: string;
@@ -1527,54 +1615,79 @@ export type Database = {
       };
       study_sessions: {
         Row: {
+          allow_pause_snapshot: boolean;
           answered_count: number;
+          blueprint_id: string | null;
           completed_at: string | null;
           correct_count: number;
           created_at: string;
           exam_id: string;
           id: string;
           mode: Database["public"]["Enums"]["study_session_mode"];
+          paused_at: string | null;
           question_count: number;
           requested_count: number;
           started_at: string;
           status: Database["public"]["Enums"]["study_session_status"];
           student_id: string;
+          time_limit_seconds: number | null;
+          timed: boolean;
           topic_id: string | null;
+          total_paused_seconds: number;
           updated_at: string;
         };
         Insert: {
+          allow_pause_snapshot?: boolean;
           answered_count?: number;
+          blueprint_id?: string | null;
           completed_at?: string | null;
           correct_count?: number;
           created_at?: string;
           exam_id: string;
           id?: string;
           mode?: Database["public"]["Enums"]["study_session_mode"];
+          paused_at?: string | null;
           question_count: number;
           requested_count: number;
           started_at?: string;
           status?: Database["public"]["Enums"]["study_session_status"];
           student_id: string;
+          time_limit_seconds?: number | null;
+          timed?: boolean;
           topic_id?: string | null;
+          total_paused_seconds?: number;
           updated_at?: string;
         };
         Update: {
+          allow_pause_snapshot?: boolean;
           answered_count?: number;
+          blueprint_id?: string | null;
           completed_at?: string | null;
           correct_count?: number;
           created_at?: string;
           exam_id?: string;
           id?: string;
           mode?: Database["public"]["Enums"]["study_session_mode"];
+          paused_at?: string | null;
           question_count?: number;
           requested_count?: number;
           started_at?: string;
           status?: Database["public"]["Enums"]["study_session_status"];
           student_id?: string;
+          time_limit_seconds?: number | null;
+          timed?: boolean;
           topic_id?: string | null;
+          total_paused_seconds?: number;
           updated_at?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "study_sessions_blueprint_id_fkey";
+            columns: ["blueprint_id"];
+            isOneToOne: false;
+            referencedRelation: "practice_test_blueprints";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "study_sessions_exam_id_fkey";
             columns: ["exam_id"];
@@ -1816,6 +1929,14 @@ export type Database = {
         };
         Returns: undefined;
       };
+      complete_practice_test: {
+        Args: { p_session_id: string };
+        Returns: undefined;
+      };
+      create_practice_test: {
+        Args: { p_blueprint_id: string; p_timed?: boolean };
+        Returns: string;
+      };
       create_study_session: {
         Args: {
           p_exam_id: string;
@@ -1838,6 +1959,32 @@ export type Database = {
           topic_id: string;
         }[];
       };
+      get_practice_test_options: {
+        Args: never;
+        Returns: {
+          allow_pause: boolean;
+          allow_untimed: boolean;
+          blueprint_id: string;
+          blueprint_name: string;
+          description: string;
+          exam_id: string;
+          exam_title: string;
+          question_count: number;
+          time_limit_seconds: number;
+        }[];
+      };
+      get_practice_test_results: {
+        Args: { p_session_id: string };
+        Returns: {
+          answered_count: number;
+          correct_count: number;
+          performance_label: string;
+          question_count: number;
+          score_percent: number;
+          topic_id: string;
+          topic_title: string;
+        }[];
+      };
       get_progress_dashboard: {
         Args: { p_exam_id?: string; p_student_id: string };
         Returns: {
@@ -1853,8 +2000,8 @@ export type Database = {
           readiness_score: number;
           recent_accuracy_score: number;
           recommended_action: string;
-          recommended_topic_id: string | null;
-          recommended_topic_title: string | null;
+          recommended_topic_id: string;
+          recommended_topic_title: string;
           retention_score: number;
           student_id: string;
           student_name: string;
@@ -1863,7 +2010,7 @@ export type Database = {
         }[];
       };
       get_progress_students: {
-        Args: Record<PropertyKey, never>;
+        Args: never;
         Returns: {
           display_name: string;
           student_id: string;
@@ -1881,6 +2028,7 @@ export type Database = {
       get_study_session_questions: {
         Args: { p_session_id: string };
         Returns: {
+          allow_pause: boolean;
           answered_count: number;
           attempt_id: string;
           choices: Json;
@@ -1891,21 +2039,27 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["question_difficulty"];
           explanation: string;
           feedback_display_version: number;
+          feedback_released: boolean;
           is_correct: boolean;
+          is_paused: boolean;
           memory_aid: string;
           question_count: number;
           question_id: string;
           question_position: number;
           question_text: string;
           question_type: Database["public"]["Enums"]["question_type"];
+          remaining_seconds: number;
           remediation: string;
           selected_choice_feedback: string;
           selected_choice_id: string;
           session_id: string;
+          session_mode: Database["public"]["Enums"]["study_session_mode"];
           session_question_id: string;
           session_status: Database["public"]["Enums"]["study_session_status"];
           short_explanation: string;
           source_reference: string;
+          time_limit_seconds: number;
+          timed: boolean;
           visual_alt_text: string;
           visual_asset_key: string;
           visual_caption: string;
@@ -1925,9 +2079,9 @@ export type Database = {
           correct_count: number;
           due_question_count: number;
           eligible_question_count: number;
-          last_practiced_at: string | null;
+          last_practiced_at: string;
           mastery_score: number;
-          next_review_at: string | null;
+          next_review_at: string;
           recommended: boolean;
           retention_score: number;
           status: Database["public"]["Enums"]["mastery_status"];
@@ -1951,6 +2105,10 @@ export type Database = {
           p_question_id: string;
           p_remediation?: string;
         };
+        Returns: undefined;
+      };
+      set_practice_test_paused: {
+        Args: { p_paused: boolean; p_session_id: string };
         Returns: undefined;
       };
       submit_answer: {
@@ -2024,7 +2182,7 @@ export type Database = {
       review_decision: "approve" | "request_changes" | "reject";
       role_scope_type: "global" | "organization";
       source_authorization_status: "pending" | "approved" | "restricted" | "rejected";
-      study_session_mode: "study";
+      study_session_mode: "study" | "practice_test";
       study_session_status: "active" | "completed" | "abandoned";
     };
     CompositeTypes: {
@@ -2203,7 +2361,7 @@ export const Constants = {
       review_decision: ["approve", "request_changes", "reject"],
       role_scope_type: ["global", "organization"],
       source_authorization_status: ["pending", "approved", "restricted", "rejected"],
-      study_session_mode: ["study"],
+      study_session_mode: ["study", "practice_test"],
       study_session_status: ["active", "completed", "abandoned"],
     },
   },

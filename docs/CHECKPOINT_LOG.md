@@ -379,3 +379,45 @@ Checkpoint 6 implementation and automated acceptance gates are complete. Stop he
 - All visual display modes remain optional after answering. No image files or approved visual-asset records were supplied, so Show visual remains hidden and missing assets should produce 30 nonfatal warnings.
 - Owner persistent import completed and emitted exactly 52 expected nonfatal warnings: 22 reinforcement targets outside the current bank and 30 visual metadata keys without registered approved assets. Warning output occurs only after the transaction commits.
 - Post-import linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, progress/readiness 34/34, and study sessions 38/38: aggregate 184/184 passed.
+
+## Checkpoint 7 — Practice test mode
+
+Status: implementation complete; linked pgTAP and owner web acceptance pending. Date: 2026-07-22.
+
+Completed:
+
+- Added an unofficial, configurable Leadership Chapter 1 pilot blueprint for ten questions with exact difficulty/cognitive strata, balanced deterministic selection, an optional 15-minute timer, and pause disabled.
+- Added a practice-test launcher and extended the shared session flow with countdown/untimed display, server-enforced pause policy, early completion, neutral active-test acknowledgements, completed score/topic analysis, and answer review.
+- Withheld correctness, answer keys, explanations, remediation, memory support, and aggregate score while a practice test is active. Only answered items release feedback after completion.
+- Kept practice attempts out of normal question mastery, topic mastery, recent accuracy, and study trends. Completed practice scores contribute a separate readiness component; all eligible attempts contribute to coverage.
+- Kept the blueprint explicitly unofficial. No AI, production database, official-result claim, or protected exam content was added.
+
+Database changes:
+
+- Applied development-only migrations `202607220019_practice_test_mode_enum.sql`, `202607220020_practice_test_mode.sql`, and `202607220021_practice_readiness_analytics.sql`; local and remote history match through 021.
+- Added read-only blueprint tables with RLS, session timing/pause snapshots, protected create/pause/complete/results RPCs, delayed-feedback study projections, and practice-aware readiness/trend projections.
+- Regenerated checked-in database TypeScript types from the linked development schema. Linked database lint at warning level reports no schema errors.
+
+Validation so far:
+
+- `npm.cmd run typecheck`: exit 0.
+- `npm.cmd run lint`: exit 0.
+- `npm.cmd test -- --runInBand`: exit 0; 17 suites and 66/66 tests passed.
+- `npx.cmd supabase db lint --linked --level warning`: exit 0; no schema errors.
+- `npx.cmd supabase migration list --linked`: exit 0; local and remote versions match through 021.
+- `practice_tests.test.sql` declares 56 transaction-only assertions. Owner execution of the complete linked suite is pending because the database password remains process-only and unavailable to Codex.
+
+Known limitations and manual decisions:
+
+- The pilot count, timer, no-pause rule, and distributions are provisional product configuration, not an authorized official CAP exam blueprint. Owner/source review is required before broader or official-simulation claims.
+- Linked pgTAP and owner browser acceptance remain to be completed before Checkpoint 7 can be marked complete.
+
+Additional application validation:
+
+- `npm.cmd run check`: exit 0; typecheck, lint, formatting, 17 Jest suites, and 66/66 tests passed.
+- `npm.cmd run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- `npx.cmd expo-doctor`: exit 0; 20/20 checks passed.
+- `npm.cmd run export:web`: exit 0; 1,569 modules bundled to ignored `dist/web`.
+- `npm.cmd run export:android`: the sandboxed Hermes compiler was denied, then the approved rerun passed; 1,999 modules bundled and a 6 MB bytecode bundle was written to ignored `dist/android`.
+- First owner-linked run passed every existing suite and 48/56 practice assertions. Eight blueprint-distribution assertions saw zero because the authenticated test role correctly could not join draft questions directly. The assertions now join their granted transaction-local metadata fixture instead; no application schema, RLS policy, blueprint, or selection behavior changed. `npm.cmd run check` still passes 17 suites and 66/66 tests; linked pgTAP rerun is pending.
+- Second owner-linked run passed the new practice suite 56/56, then exposed a legacy progress fixture that represented five covered questions in mastery state but created only one attempt row. Forward migration `202607220022_practice_coverage_union.sql` now calculates coverage from the distinct union of normal mastery state and all server-recorded attempts, preserving prior dashboard behavior while adding practice coverage. Ordinary recent accuracy and trends remain study-only. Migration 022 is applied to development, linked lint has no errors, and histories match through 022; linked pgTAP rerun is pending.

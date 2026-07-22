@@ -12,6 +12,8 @@ Recent accuracy uses a 75/25 exponential update. Confidence grows with evidence 
 
 Checkpoint 6 uses this transparent pilot formula: 15% coverage + 30% recent accuracy + 35% mastery + 20% retention, minus up to 15 points for weak topics. The result is rounded and bounded to 0–100.
 
+Checkpoint 7 adds completed practice-test performance as a distinct component. When a completed practice score exists, weights are 15% coverage, 20% normal-study recent accuracy, 25% topic mastery, 15% retention, and 25% mean score from the last three completed practice tests, minus the same weak-topic penalty. Before any completed practice test, the Checkpoint 6 formula remains in effect. Evidence caps still apply.
+
 Before the first answer, readiness is 0 and the label is Not started; the neutral topic-mastery prior does not count as earned readiness. After practice begins, evidence caps are applied after weighting: fewer than 10 attempts or less than 20% coverage caps readiness at 40; fewer than 20 attempts or less than 50% coverage caps it at 65; fewer than 30 attempts or less than 70% coverage caps it at 79. Labels are Developing (below 50), Getting Close (below 70), Practice-Test Ready (below 85), and Strong Readiness. The interface always says: “This is a study estimate, not an official CAP result.” These defaults require later review and must not be interpreted as an official passing prediction.
 
 Statuses are `not_started`, `beginning`, `developing`, `proficient`, `mastered`, and `needs_review`.
@@ -52,3 +54,7 @@ Readiness combines topic coverage, recent accuracy, retention, unseen-question p
 ## Required tests
 
 Test every coefficient path, confidence behavior, decay, status boundary, schedule interval, bucket allocation and fallback, duplicate avoidance, seeded ordering, sparse-bank handling, coverage cap, and deterministic replay. Do not tune from only two users without documenting the limitation.
+
+## Practice-test blueprint
+
+The provisional Chapter 1 pilot uses exactly ten questions across eight difficulty/cognitive strata. Selection is deterministic for a student and blueprint, balances topics within each stratum when possible, excludes duplicates, and fails clearly if any stratum is sparse. This pilot blueprint must be reviewed against an authorized official source before it is described as representative of a CAP examination.

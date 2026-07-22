@@ -7,6 +7,7 @@ export type ReadinessInput = {
   recentAccuracy: number;
   masteryScore: number;
   retentionScore: number;
+  practiceTestScore?: number | null;
   weakTopicCount: number;
   topicCount: number;
 };
@@ -33,11 +34,18 @@ export function calculateReadiness(input: ReadinessInput): ReadinessResult {
       ? Math.min(15, (Math.max(0, input.weakTopicCount) / input.topicCount) * 15)
       : 0;
   const weighted =
-    coverageScore * 0.15 +
-    clamp(input.recentAccuracy) * 0.3 +
-    clamp(input.masteryScore) * 0.35 +
-    clamp(input.retentionScore) * 0.2 -
-    weakPenalty;
+    input.practiceTestScore === null || input.practiceTestScore === undefined
+      ? coverageScore * 0.15 +
+        clamp(input.recentAccuracy) * 0.3 +
+        clamp(input.masteryScore) * 0.35 +
+        clamp(input.retentionScore) * 0.2 -
+        weakPenalty
+      : coverageScore * 0.15 +
+        clamp(input.recentAccuracy) * 0.2 +
+        clamp(input.masteryScore) * 0.25 +
+        clamp(input.retentionScore) * 0.15 +
+        clamp(input.practiceTestScore) * 0.25 -
+        weakPenalty;
   const readinessScore = round(Math.min(coverageCap, clamp(weighted)));
 
   return {

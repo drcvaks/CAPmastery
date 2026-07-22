@@ -84,6 +84,14 @@ Migration `202607210017` adds no client-writable progress table. It adds a priva
 
 Dashboard coverage uses all questions the target student may actually study, including a draft package assigned to that exact student. Trends are UTC daily aggregates over a validated 7–180 day window. Retention is recalculated from stored mastery evidence at read time. Function execution is granted only to authenticated users, with explicit UUID authorization inside every target-specific function.
 
+## Checkpoint 7 practice-test schema
+
+Migrations `202607220019`–`202607220021` add the `practice_test` session mode, blueprint and blueprint-rule tables, immutable session timing/pause snapshots, and protected practice-test RPCs. Blueprint rules define exact difficulty/cognitive strata whose totals must equal the blueprint question count; creation fails rather than silently producing an unbalanced test.
+
+Active practice delivery returns prompts and choices but nulls correctness, answer keys, explanations, learning support, and aggregate scores. `submit_answer` still grades and stores the attempt on the server, but its active-test response is neutral. `complete_practice_test` releases only submitted-answer feedback; unanswered items remain protected. `get_practice_test_results` provides owned completed-session score and topic analysis.
+
+The readiness wrapper keeps ordinary recent accuracy and trends limited to `study` sessions, adds the mean of the last three completed practice tests as a separate 25% component, and applies the existing evidence caps. Coverage is the distinct union of normal mastery state and all server-recorded attempts. Practice sessions do not update `student_question_state` or `student_topic_mastery`. Forward correction `202607220022` preserves legacy mastery-state coverage while adding practice-attempt coverage.
+
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.
 3. Reset/replay migrations against a disposable database.

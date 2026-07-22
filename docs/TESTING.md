@@ -62,4 +62,6 @@ Checkpoint 5 adds pure deterministic tests for difficulty/cognitive/confidence c
 
 Checkpoint 6 adds pure readiness formula/cap tests and shared dashboard component tests for student metrics, weak-topic guidance, trends, the unofficial disclaimer, compact Home behavior, and switching between two linked children. `progress_readiness.test.sql` verifies all four progress RPCs, low-evidence caps, topic/trend output, parent access to two linked students, unrelated-user denial, lack of direct mastery-table access, and trend-range validation.
 
+Checkpoint 7 adds deterministic blueprint unit tests, active/completed practice-session component tests, delayed-feedback schema tests, and `practice_tests.test.sql`. The SQL suite checks blueprint/RLS grants, exact strata and topic balance, duplicate avoidance, active-test answer-key and score withholding, server timing/pause rules, cross-student denial, completion release, topic analysis, mastery isolation, ordinary-trend isolation, readiness integration, and sparse-stratum failure.
+
 The adaptive-bank file tests verify 30 unique draft rows, five batches of six, the documented 11/14/5 difficulty distribution, all six supplied cognitive classifications, 20 intentionally blank optional support records, ten complete support records, safe recognition/analysis normalization, and exactly 22 out-of-bank reinforcement warnings.

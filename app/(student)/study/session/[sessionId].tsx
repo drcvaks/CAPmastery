@@ -10,8 +10,8 @@ export default function StudySessionScreen() {
   return (
     <AppScreen
       eyebrow="Study session"
-      title="Focused review"
-      description="Submit one answer at a time. Correctness and feedback are computed securely after submission."
+      title="Question session"
+      description="Answers are graded securely. Practice-test feedback remains hidden until completion."
     >
       <StudySessionView sessionId={sessionId ?? ""} />
     </AppScreen>

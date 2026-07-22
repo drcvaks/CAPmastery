@@ -82,3 +82,11 @@ Checkpoint 5 does not add the Checkpoint 6 Progress/readiness UI, practice-test 
 Progress reads use four narrow security-definer projections: available students, dashboard summary, topic detail, and daily trends. The database rechecks self-or-active-guardian authorization on every call; selecting a different UUID in the client cannot expand access. Administrators and reviewers receive no implicit access to private student progress.
 
 Readiness is a study estimate derived from coverage, recent accuracy, mastery, retention, and weak-topic count. Evidence caps prevent a high score from a small sample. The client mirrors the formula only for deterministic unit tests; PostgreSQL is authoritative for displayed data. Home shows a compact summary, Progress shows topic/trend detail, and the parent/coach route switches among explicitly linked students. Practice tests and official certification predictions remain outside this checkpoint.
+
+## Checkpoint 7 boundary
+
+Practice tests reuse the owned study-session infrastructure but have an explicit `practice_test` mode and immutable blueprint, timing, and pause snapshots. A thin launcher calls a typed service; the shared session component switches to neutral answer acknowledgements while the test is active and releases scoring, explanations, memory support, and topic analysis only after server-recorded completion.
+
+The initial Leadership Chapter 1 blueprint is an unofficial pilot configuration: ten questions, optional 15-minute timer, no pause, difficulty targets 4 easy/4 medium/2 hard, and cognitive targets 4 recall/3 understanding/1 application/2 scenario. It is configuration data, not a claim about the official CAP exam. An approved official blueprint can replace it without changing the session model.
+
+Normal study attempts continue to drive question state, topic mastery, recent accuracy, and ordinary trends. Practice attempts do not mutate those normal-study records. Completed practice scores contribute a distinct readiness component, while all attempts can contribute to coverage. AI, challenge mode, production deployment, and official-result claims remain outside this checkpoint.

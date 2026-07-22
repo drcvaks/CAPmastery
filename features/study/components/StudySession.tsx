@@ -5,6 +5,12 @@ import { useRouter } from "expo-router";
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
+import {
+  useCompletePracticeTest,
+  usePracticeTestResults,
+  useSetPracticeTestPaused,
+} from "../../practice/hooks/usePracticeTest";
+import type { PracticeTopicResult } from "../../practice/schemas";
 import { getSafeStudyMessage } from "../errors";
 import { useStudySession, useSubmitStudyAnswer } from "../hooks/useStudySession";
 import { AnswerResultCard } from "./AnswerResultCard";
@@ -13,14 +19,22 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const sessionQuery = useStudySession(sessionId);
   const submitAnswer = useSubmitStudyAnswer(sessionId);
+  const completePractice = useCompletePracticeTest(sessionId);
+  const setPaused = useSetPracticeTestPaused(sessionId);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoiceId, setSelectedChoiceId] = useState<string>();
   const [showResults, setShowResults] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const initialized = useRef(false);
+  const timeoutRequested = useRef(false);
   const questionStartedAt = useRef(Date.now());
 
   const session = sessionQuery.data;
   const currentQuestion = session?.questions[currentIndex];
+  const practiceResults = usePracticeTestResults(
+    sessionId,
+    session?.mode === "practice_test" && session.status === "completed",
+  );
 
   useEffect(() => {
     if (!session || initialized.current) return;
@@ -35,6 +49,49 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     questionStartedAt.current = Date.now();
   }, [currentIndex]);
 
+  useEffect(() => {
+    if (session?.remainingSeconds !== undefined) {
+      setRemainingSeconds(session.remainingSeconds);
+    }
+  }, [session?.remainingSeconds]);
+
+  useEffect(() => {
+    if (
+      session?.mode !== "practice_test" ||
+      session.status !== "active" ||
+      !session.timed ||
+      session.isPaused ||
+      remainingSeconds === null
+    ) {
+      return;
+    }
+    const timer = setInterval(() => {
+      setRemainingSeconds((current) => (current === null ? null : Math.max(0, current - 1)));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [remainingSeconds, session?.isPaused, session?.mode, session?.status, session?.timed]);
+
+  useEffect(() => {
+    if (
+      remainingSeconds !== 0 ||
+      session?.mode !== "practice_test" ||
+      session.status !== "active" ||
+      timeoutRequested.current
+    ) {
+      return;
+    }
+    timeoutRequested.current = true;
+    void completePractice
+      .mutateAsync()
+      .then(async () => {
+        const refreshed = await sessionQuery.refetch();
+        if (refreshed.data?.status === "completed") setShowResults(true);
+      })
+      .catch(() => {
+        timeoutRequested.current = false;
+      });
+  }, [completePractice, remainingSeconds, session, sessionQuery]);
+
   if (sessionQuery.isPending) {
     return <AppCard title="Loading session" description="Preparing your approved questions…" />;
   }
@@ -47,6 +104,27 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   }
 
   if (showResults) {
+    if (session.mode === "practice_test") {
+      return (
+        <PracticeResults
+          loading={practiceResults.isPending}
+          onBack={() => router.replace("/study")}
+          onRetry={() => void practiceResults.refetch()}
+          onReview={() => {
+            const firstAttempted = session.questions.findIndex((question) => question.attempt_id);
+            if (firstAttempted >= 0) {
+              setCurrentIndex(firstAttempted);
+              setShowResults(false);
+            }
+          }}
+          questionCount={session.questionCount}
+          correctCount={session.correctCount}
+          answeredCount={session.answeredCount}
+          results={practiceResults.data}
+          error={practiceResults.isError}
+        />
+      );
+    }
     const percentage = Math.round((session.correctCount / session.questionCount) * 100);
     return (
       <AppCard
@@ -64,6 +142,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
 
   const answered = Boolean(currentQuestion.attempt_id);
   const chosenChoiceId = currentQuestion.selected_choice_id ?? selectedChoiceId;
+  const practiceActive = session.mode === "practice_test" && session.status === "active";
 
   async function handleSubmit() {
     if (!selectedChoiceId || !currentQuestion) return;
@@ -73,7 +152,8 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         selectedChoiceId,
         responseTimeMs: Date.now() - questionStartedAt.current,
       });
-      await sessionQuery.refetch();
+      const refreshed = await sessionQuery.refetch();
+      if (refreshed.data?.status === "completed") setShowResults(true);
     } catch {
       // The mutation retains its error for the retry state below.
     }
@@ -81,6 +161,17 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
 
   function advance() {
     if (!session) return;
+    if (session.mode === "practice_test" && session.status === "completed") {
+      const nextAttempted = session.questions.findIndex(
+        (question, index) => index > currentIndex && question.attempt_id,
+      );
+      if (nextAttempted < 0) {
+        setShowResults(true);
+      } else {
+        setCurrentIndex(nextAttempted);
+      }
+      return;
+    }
     if (currentIndex + 1 >= session.questions.length) {
       setShowResults(true);
       return;
@@ -88,8 +179,49 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     setCurrentIndex((index) => index + 1);
   }
 
+  async function finishPracticeTest() {
+    try {
+      await completePractice.mutateAsync();
+      const refreshed = await sessionQuery.refetch();
+      if (refreshed.data?.status === "completed") setShowResults(true);
+    } catch {
+      // The mutation exposes a safe retry message below.
+    }
+  }
+
   return (
     <View style={styles.stack}>
+      {session.mode === "practice_test" ? (
+        <AppCard
+          title="Unofficial practice test"
+          description="Answers are saved securely. Scores and explanations stay hidden until the test ends."
+        >
+          <View style={styles.testStatus}>
+            <Text style={styles.timer}>
+              {session.timed ? formatTimer(remainingSeconds ?? 0) : "Untimed"}
+            </Text>
+            <Text style={styles.muted}>
+              {session.isPaused ? "Paused" : `${session.answeredCount} answered`}
+            </Text>
+          </View>
+          {session.allowPause ? (
+            <AppButton
+              label={session.isPaused ? "Resume test" : "Pause test"}
+              loading={setPaused.isPending}
+              onPress={() => void setPaused.mutateAsync(!session.isPaused)}
+            />
+          ) : (
+            <Text style={styles.muted}>Pausing is not available for this blueprint.</Text>
+          )}
+          <AppButton
+            label="Finish test and view results"
+            loading={completePractice.isPending}
+            onPress={() => void finishPracticeTest()}
+            variant="secondary"
+          />
+        </AppCard>
+      ) : null}
+
       <View style={styles.progressRow}>
         <Text style={styles.progress}>
           Question {currentQuestion.question_position} of {session.questionCount}
@@ -100,13 +232,21 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       <AppCard title={currentQuestion.question_text}>
         {currentQuestion.choices.map((choice) => {
           const selected = choice.id === chosenChoiceId;
-          const correct = answered && choice.id === currentQuestion.correct_choice_id;
-          const incorrectSelection = answered && selected && !currentQuestion.is_correct;
+          const correct =
+            answered && session.feedbackReleased && choice.id === currentQuestion.correct_choice_id;
+          const incorrectSelection =
+            answered &&
+            session.feedbackReleased &&
+            selected &&
+            currentQuestion.is_correct === false;
           return (
             <Pressable
               accessibilityRole="radio"
-              accessibilityState={{ checked: selected, disabled: answered }}
-              disabled={answered || submitAnswer.isPending}
+              accessibilityState={{
+                checked: selected,
+                disabled: answered || session.isPaused,
+              }}
+              disabled={answered || submitAnswer.isPending || session.isPaused}
               key={choice.id}
               onPress={() => setSelectedChoiceId(choice.id)}
               style={[
@@ -124,7 +264,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
 
         {!answered ? (
           <AppButton
-            disabled={!selectedChoiceId}
+            disabled={!selectedChoiceId || session.isPaused}
             label="Submit answer"
             loading={submitAnswer.isPending}
             onPress={() => void handleSubmit()}
@@ -141,15 +281,18 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         ) : null}
       </AppCard>
 
-      {answered ? (
+      {answered && session.feedbackReleased ? (
         <AnswerResultCard
           explanation={currentQuestion.explanation}
           isCorrect={Boolean(currentQuestion.is_correct)}
           key={currentQuestion.session_question_id}
           memoryAid={currentQuestion.memory_aid}
-          nextLabel={
-            currentIndex + 1 === session.questions.length ? "View results" : "Next question"
-          }
+          nextLabel={nextLabel(
+            session.mode,
+            session.status,
+            currentIndex,
+            session.questions.length,
+          )}
           onNext={advance}
           remediation={currentQuestion.remediation}
           selectedChoiceFeedback={currentQuestion.selected_choice_feedback}
@@ -171,9 +314,96 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               : null
           }
         />
+      ) : answered && practiceActive ? (
+        <AppCard
+          title="Answer saved"
+          description="Correctness and explanations will be available when the practice test ends."
+        >
+          <AppButton
+            label={currentIndex + 1 === session.questions.length ? "View results" : "Next question"}
+            onPress={advance}
+          />
+        </AppCard>
       ) : null}
     </View>
   );
+}
+
+function PracticeResults({
+  answeredCount,
+  correctCount,
+  error,
+  loading,
+  onBack,
+  onRetry,
+  onReview,
+  questionCount,
+  results,
+}: {
+  answeredCount: number;
+  correctCount: number;
+  error: boolean;
+  loading: boolean;
+  onBack: () => void;
+  onRetry: () => void;
+  onReview: () => void;
+  questionCount: number;
+  results?: PracticeTopicResult[];
+}) {
+  const percentage = Math.round((correctCount / questionCount) * 100);
+  return (
+    <View style={styles.stack}>
+      <AppCard
+        title="Practice test complete"
+        description={`${correctCount} of ${questionCount} correct (${percentage}%). ${questionCount - answeredCount} unanswered.`}
+      >
+        <Text style={styles.unofficial}>Unofficial study result—not an official CAP result.</Text>
+        <Text style={styles.supportive}>
+          Use this result to choose what to study next. One test does not define your readiness.
+        </Text>
+      </AppCard>
+      <AppCard title="Topic analysis" description="Strengths and review areas from this test only.">
+        {loading ? <Text style={styles.muted}>Calculating topic results…</Text> : null}
+        {error ? (
+          <>
+            <Text accessibilityRole="alert" style={styles.error}>
+              Topic analysis could not be loaded.
+            </Text>
+            <AppButton label="Try again" onPress={onRetry} />
+          </>
+        ) : null}
+        {results?.map((result) => (
+          <View key={result.topic_id} style={styles.topicResult}>
+            <Text style={styles.topicTitle}>{result.topic_title}</Text>
+            <Text style={styles.muted}>
+              {result.correct_count}/{result.question_count} · {Math.round(result.score_percent)}% ·{" "}
+              {result.performance_label}
+            </Text>
+          </View>
+        ))}
+      </AppCard>
+      {answeredCount > 0 ? (
+        <AppButton label="Review answers and explanations" onPress={onReview} />
+      ) : null}
+      <AppButton label="Back to study catalog" onPress={onBack} variant="secondary" />
+    </View>
+  );
+}
+
+function nextLabel(
+  mode: "study" | "practice_test",
+  status: "active" | "completed" | "abandoned",
+  currentIndex: number,
+  questionCount: number,
+): string {
+  if (mode === "practice_test" && status === "completed") return "Next reviewed answer";
+  return currentIndex + 1 === questionCount ? "View results" : "Next question";
+}
+
+function formatTimer(seconds: number): string {
+  const safe = Math.max(0, seconds);
+  const minutes = Math.floor(safe / 60);
+  return `${minutes}:${String(safe % 60).padStart(2, "0")}`;
 }
 
 const styles = StyleSheet.create({
@@ -194,9 +424,18 @@ const styles = StyleSheet.create({
   choiceText: { color: theme.colors.ink, flex: 1, fontSize: 16, lineHeight: 23 },
   error: { color: theme.colors.danger, fontSize: 15, fontWeight: "700" },
   errorBox: { gap: theme.spacing.xs },
-  muted: { color: theme.colors.muted, fontSize: 15, lineHeight: 22 },
+  muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
   progress: { color: theme.colors.muted, fontSize: 14, fontWeight: "700" },
   progressRow: { flexDirection: "row", justifyContent: "space-between" },
   stack: { gap: theme.spacing.lg },
   supportive: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
+  testStatus: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  timer: { color: theme.colors.primary, fontSize: 28, fontWeight: "900" },
+  topicResult: {
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    paddingTop: theme.spacing.sm,
+  },
+  topicTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
+  unofficial: { color: theme.colors.accent, fontSize: 14, fontWeight: "800", lineHeight: 20 },
 });

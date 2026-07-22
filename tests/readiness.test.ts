@@ -36,6 +36,31 @@ describe("readiness calculation", () => {
     expect(result.label).toBe("Developing");
   });
 
+  it("uses a distinct practice-test component only after a completed result exists", () => {
+    const withoutPractice = calculateReadiness({
+      eligibleQuestionCount: 30,
+      attemptedQuestionCount: 20,
+      recentAccuracy: 70,
+      masteryScore: 65,
+      retentionScore: 60,
+      weakTopicCount: 0,
+      topicCount: 3,
+    });
+    const withPractice = calculateReadiness({
+      eligibleQuestionCount: 30,
+      attemptedQuestionCount: 20,
+      recentAccuracy: 70,
+      masteryScore: 65,
+      retentionScore: 60,
+      practiceTestScore: 90,
+      weakTopicCount: 0,
+      topicCount: 3,
+    });
+
+    expect(withPractice.readinessScore).not.toBe(withoutPractice.readinessScore);
+    expect(withPractice.readinessScore).toBeLessThanOrEqual(79);
+  });
+
   it("applies increasing minimum evidence and coverage caps", () => {
     expect(readinessCoverageCap(9, 100)).toBe(40);
     expect(readinessCoverageCap(10, 49)).toBe(65);

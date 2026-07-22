@@ -71,3 +71,11 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 - Possessing an administrator or reviewer role does not implicitly grant access to student learning data.
 - Every progress RPC authenticates the caller, validates the requested UUID and range, uses an empty `search_path`, and returns a student-safe projection. Direct mastery and attempt table policies remain unchanged.
 - Client route guards and student tabs improve navigation only; the database authorization helper is the security boundary.
+
+## Checkpoint 7 practice-test enforcement
+
+- Blueprint configuration is authenticated-read-only; clients cannot insert or alter blueprint rules.
+- Every practice RPC verifies the authenticated student and session owner. Another student cannot read, pause, complete, or retrieve results for the session.
+- The server enforces blueprint balance, time expiry, and pause policy. Client countdowns and hidden controls are usability aids only.
+- Correctness, correct-choice IDs, explanations, remediation, memory support, and aggregate scores remain null during an active test, including immediately after answer submission.
+- Completion releases feedback only for answered questions. Practice attempts cannot write normal mastery state and are excluded from normal recent-accuracy/trend calculations.

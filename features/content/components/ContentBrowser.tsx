@@ -5,6 +5,7 @@ import { type Href, useRouter } from "expo-router";
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
+import { PracticeTestLauncher } from "../../practice/components/PracticeTestLauncher";
 import { getSafeStudyMessage } from "../../study/errors";
 import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { useApprovedQuestionPreviews, useContentCatalog } from "../hooks/useContentCatalog";
@@ -76,7 +77,7 @@ export function ContentBrowser() {
       </View>
 
       {activeExam ? (
-        <AppCard title={activeExam.title} description={activeExam.description ?? undefined}>
+        <><AppCard title={activeExam.title} description={activeExam.description ?? undefined}>
           <Text style={styles.sectionLabel}>Browse by topic</Text>
           <View style={styles.pills}>
             <TopicButton
@@ -94,7 +95,7 @@ export function ContentBrowser() {
             ))}
           </View>
           <AppButton
-            label="Start 10-question session"
+            label="Start 10-question study session"
             loading={createSession.isPending}
             onPress={() => {
               void createSession
@@ -108,7 +109,7 @@ export function ContentBrowser() {
               {getSafeStudyMessage(createSession.error)}
             </Text>
           ) : null}
-        </AppCard>
+        </AppCard><PracticeTestLauncher examId={activeExam.id} /></>
       ) : null}
 
       <AppCard

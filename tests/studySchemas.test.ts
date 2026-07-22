@@ -3,10 +3,17 @@ import { parseAnswerSubmission, parseStudySessionRows } from "../features/study/
 
 const sessionRow = {
   session_id: "10000000-0000-4000-8000-000000000001",
+  session_mode: "study",
   session_status: "active",
   question_count: 10,
   answered_count: 0,
   correct_count: 0,
+  timed: false,
+  time_limit_seconds: null,
+  allow_pause: false,
+  is_paused: false,
+  remaining_seconds: null,
+  feedback_released: true,
   session_question_id: "20000000-0000-4000-8000-000000000001",
   question_position: 1,
   question_id: "30000000-0000-4000-8000-000000000001",
@@ -66,6 +73,26 @@ describe("study schemas", () => {
         },
       ]),
     ).toThrow();
+  });
+
+  it("parses a saved practice answer while feedback remains withheld", () => {
+    const session = parseStudySessionRows([
+      {
+        ...sessionRow,
+        session_mode: "practice_test",
+        timed: true,
+        time_limit_seconds: 900,
+        remaining_seconds: 850,
+        feedback_released: false,
+        attempt_id: "50000000-0000-4000-8000-000000000001",
+        selected_choice_id: sessionRow.choices[0]!.id,
+      },
+    ]);
+
+    expect(session.mode).toBe("practice_test");
+    expect(session.feedbackReleased).toBe(false);
+    expect(session.questions[0]?.is_correct).toBeNull();
+    expect(session.questions[0]?.explanation).toBeNull();
   });
 
   it("parses one server grading result", () => {

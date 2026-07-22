@@ -143,3 +143,9 @@ The supplied adaptive 30-question bank reuses the existing `LTL1_C1_PILOT_10` pr
 Migration `202607210017` is applied to the linked development project. No new credential, environment variable, service-role key, Storage bucket, production database, AI provider, or content import is required. The database password is needed only as a process-scoped value for the owner-run linked pgTAP suite.
 
 Student validation can use an existing assigned pilot account. A real family-dashboard smoke test additionally requires an existing adult account with the global `parent` or `coach` role and active `student_guardian_links` rows with `can_view_progress = true` for the intended students. Those identities and relationship decisions are owner data; do not create or broaden links merely to make the interface display data.
+
+## Checkpoint 7 manual validation boundary
+
+Migrations `202607220019`–`202607220022` are applied only to the linked development project. No new account, credential, environment variable, service-role key, Storage bucket, content import, production database, or AI provider is required. The database password is needed only as the existing process-scoped `CAP_MASTERY_DB_PASSWORD` for the owner-run linked pgTAP suite.
+
+The ten-question, optional 15-minute, no-pause Chapter 1 configuration is a provisional product decision for pilot validation. Before broader use, the owner must approve or replace its question count, time limit, pause policy, and difficulty/cognitive distribution using an authorized exam blueprint. It must not be labeled an official simulation until that review occurs.
