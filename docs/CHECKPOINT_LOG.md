@@ -382,7 +382,7 @@ Checkpoint 6 implementation and automated acceptance gates are complete. Stop he
 
 ## Checkpoint 7 — Practice test mode
 
-Status: implementation complete; linked pgTAP and owner web acceptance pending. Date: 2026-07-22.
+Status: complete and owner accepted. Date: 2026-07-22.
 
 Completed:
 
@@ -421,3 +421,7 @@ Additional application validation:
 - `npm.cmd run export:android`: the sandboxed Hermes compiler was denied, then the approved rerun passed; 1,999 modules bundled and a 6 MB bytecode bundle was written to ignored `dist/android`.
 - First owner-linked run passed every existing suite and 48/56 practice assertions. Eight blueprint-distribution assertions saw zero because the authenticated test role correctly could not join draft questions directly. The assertions now join their granted transaction-local metadata fixture instead; no application schema, RLS policy, blueprint, or selection behavior changed. `npm.cmd run check` still passes 17 suites and 66/66 tests; linked pgTAP rerun is pending.
 - Second owner-linked run passed the new practice suite 56/56, then exposed a legacy progress fixture that represented five covered questions in mastery state but created only one attempt row. Forward migration `202607220022_practice_coverage_union.sql` now calculates coverage from the distinct union of normal mastery state and all server-recorded attempts, preserving prior dashboard behavior while adding practice coverage. Ordinary recent accuracy and trends remain study-only. Migration 022 is applied to development, linked lint has no errors, and histories match through 022; linked pgTAP rerun is pending.
+- Final owner-linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, practice tests 56/56, progress/readiness 34/34, and study sessions 38/38: aggregate 240/240 passed.
+- Owner web acceptance passed the practice launcher, timed and untimed modes, delayed active-test feedback, tab/session preservation, early completion, score/topic analysis, post-completion answer review, and unofficial-result language.
+
+Checkpoint 7 is complete. Stop here. Recommended next checkpoint after explicit owner authorization: Checkpoint 8.

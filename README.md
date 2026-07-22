@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository is implementing **Checkpoint 7: Practice test mode**. The development project now includes blueprint-balanced practice tests, an optional timer, delayed feedback, end-of-test topic analysis, and a distinct practice-test readiness component. Chapter 1 pilot questions remain private draft content available only through explicit student assignment. No production database exists.
+The repository has completed **Checkpoint 7: Practice test mode**. The development project includes blueprint-balanced practice tests, an optional timer, delayed feedback, end-of-test topic analysis, and a distinct practice-test readiness component. Chapter 1 pilot questions remain private draft content available only through explicit student assignment. No production database exists.
 
 ## Repository boundaries
 
