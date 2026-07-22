@@ -16,6 +16,7 @@ Use Expo SDK 57 and Expo Router for Android and responsive web, with React Nativ
 ## State strategy
 
 - Supabase Auth session: `AuthProvider` restores the session, loads the RLS-filtered profile/roles, handles recovery deep links, and manages native foreground refresh. AsyncStorage persists native sessions; web uses the browser storage adapter.
+- Same-user signed-in/token-refresh events update the token without clearing the already-authorized access context. This keeps the active Expo Router navigator and study route mounted when web focus or native foregrounding refreshes authentication.
 - Server state: TanStack Query is approved for caching, invalidation, loading, and retry when Supabase integration begins. It is not installed before it is used.
 - Form state: React Hook Form plus Zod.
 - Local transient UI: component state or narrowly scoped context.
@@ -33,6 +34,7 @@ Question delivery uses the typed `contentService`, narrow TanStack Query keys, a
 
 - `(auth)`: email/password sign-in, reset request, and recovery password update.
 - `(student)`: authenticated users with the global `student` role; tabbed product screens remain placeholders for later checkpoints.
+- The Study tab owns a nested stack containing the catalog and active session. Switching to Progress/Home preserves that stack, so returning to Study resumes the same question rather than targeting the catalog or creating another session.
 - `(admin)`: authenticated users with the global `admin` role; administration features remain scheduled for later checkpoints.
 
 The root restores the session and routes to `/admin`, `/home`, or `/unauthorized`. Direct URLs are checked by route-group guards. Client routing remains a usability boundary; RLS, revoked write grants, and protected functions remain authoritative.
@@ -63,5 +65,7 @@ The content hierarchy, concepts/relationships, private tutor notes, question fam
 Basic owned study sessions use a protected creation function that snapshots an ordered set of approved question IDs and versions. A typed service and TanStack Query hooks deliver session prompts, retain selections across retry errors, and render post-answer feedback and final results. `submit_answer` accepts only the session-question ID, selected choice, response time, and optional confidence; PostgreSQL validates ownership and membership, computes correctness from the private answer key, records one attempt, and updates session counts atomically. Same-choice retries are idempotent, while changed duplicate answers are rejected.
 
 Post-answer presentation is centralized in `AnswerResultCard`. A pure formatter removes substantially overlapping feedback and limits the default display to about 35 words. Correct answers show only the main explanation. Incorrect answers lead with selected-choice feedback and add a short correct-concept reminder only when needed. Remediation is collapsed behind an accessible help control, and the source remains visible in secondary text.
+
+Reviewed `short_explanation` now takes precedence for default feedback. Memory aids and fuller explanation/remediation use independent accessible disclosure controls. Visual rendering requires both approved server metadata and a successfully resolved short-lived image URL; otherwise no visual control is shown. Repeated-concept escalation remains deferred to mastery/adaptive work rather than being inferred from component-local history.
 
 No mastery update, adaptive selection, spaced review, practice-test timing, or delayed practice-test feedback is implemented; those remain later checkpoints.

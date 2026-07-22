@@ -17,11 +17,21 @@ export async function createStudySession(examId: string, topicId?: string): Prom
 }
 
 export async function fetchStudySession(sessionId: string): Promise<StudySession> {
-  const { data, error } = await getSupabaseClient().rpc("get_study_session_questions", {
+  const client = getSupabaseClient();
+  const { data, error } = await client.rpc("get_study_session_questions", {
     p_session_id: sessionId,
   });
   if (error) throw error;
-  return parseStudySessionRows(data);
+  const rows = await Promise.all(
+    data.map(async (row) => {
+      if (!row.visual_storage_path) return { ...row, visual_uri: null };
+      const { data: signed } = await client.storage
+        .from("learning-visuals")
+        .createSignedUrl(row.visual_storage_path, 10 * 60);
+      return { ...row, visual_uri: signed?.signedUrl ?? null };
+    }),
+  );
+  return parseStudySessionRows(rows);
 }
 
 export async function submitStudyAnswer(input: {

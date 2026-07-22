@@ -99,17 +99,20 @@ export type AnswerFeedback = {
 export function buildAnswerFeedback({
   isCorrect,
   explanation,
+  shortExplanation,
   selectedChoiceFeedback,
 }: {
   isCorrect: boolean;
   explanation: string | null;
+  shortExplanation?: string | null;
   selectedChoiceFeedback: string | null;
 }): AnswerFeedback {
   const main = explanation?.trim() || "Feedback is unavailable.";
+  const concise = shortExplanation?.trim() || main;
   if (isCorrect) {
     return {
       title: "Correct.",
-      primary: shortenExplanation(main),
+      primary: shortenExplanation(concise),
     };
   }
 
@@ -121,7 +124,7 @@ export function buildAnswerFeedback({
     };
   }
 
-  const alreadyClear = explanationsOverlap(selected, main);
+  const alreadyClear = explanationsOverlap(selected, concise);
   const primaryBudget = alreadyClear ? DEFAULT_WORD_BUDGET : INCORRECT_CHOICE_BUDGET;
   const primary = shortenExplanation(selected, primaryBudget, 1);
   if (alreadyClear) return { title: "Not quite.", primary };
@@ -130,6 +133,6 @@ export function buildAnswerFeedback({
   return {
     title: "Not quite.",
     primary,
-    correctConcept: shortenExplanation(main, remainingWords, 1),
+    correctConcept: shortenExplanation(concise, remainingWords, 1),
   };
 }

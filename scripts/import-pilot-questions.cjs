@@ -10,7 +10,11 @@ const {
 } = require("./lib/pilot-import.cjs");
 
 const root = path.resolve(__dirname, "..");
-const defaultInput = path.join(root, "Content", "LTL_V1_Chapter_1_Pilot_10_Questions_Import.csv");
+const defaultInput = path.join(
+  root,
+  "Content",
+  "LTL_V1_Chapter_1_Pilot_10_Questions_Complete_Learning_Support.csv",
+);
 const poolerUrlPath = path.join(root, "supabase", ".temp", "pooler-url");
 const IMPORT_PACKAGE = "LTL1_C1_PILOT_10";
 const EXAM_ID = "20000000-0000-4000-8000-000000000001";
@@ -219,6 +223,38 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
       actorId,
     ],
   );
+  const optional = (value) => value || null;
+  await client.query(
+    `insert into private.question_learning_support (
+       question_id, short_explanation, feedback_display_version, memory_aid,
+       visual_priority, visual_type, visual_display_mode, visual_asset_key,
+       visual_brief, visual_caption, visual_alt_text
+     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+     on conflict (question_id) do update set
+       short_explanation=excluded.short_explanation,
+       feedback_display_version=excluded.feedback_display_version,
+       memory_aid=excluded.memory_aid,
+       visual_priority=excluded.visual_priority,
+       visual_type=excluded.visual_type,
+       visual_display_mode=excluded.visual_display_mode,
+       visual_asset_key=excluded.visual_asset_key,
+       visual_brief=excluded.visual_brief,
+       visual_caption=excluded.visual_caption,
+       visual_alt_text=excluded.visual_alt_text`,
+    [
+      question.id,
+      row.short_explanation,
+      Number(row.feedback_display_version),
+      optional(row.memory_aid),
+      optional(row.visual_priority),
+      optional(row.visual_type),
+      optional(row.visual_display_mode),
+      optional(row.visual_asset_key),
+      optional(row.visual_brief),
+      optional(row.visual_caption),
+      optional(row.visual_alt_text),
+    ],
+  );
   await client.query(
     `insert into public.question_concepts (question_id, concept_id, is_primary)
      values ($1, $2, true)
@@ -226,6 +262,26 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
     [question.id, metadata.conceptId],
   );
   return question.id;
+}
+
+async function warnForMissingVisualAssets(client, rows, summary) {
+  const assetKeys = [...new Set(rows.map((row) => row.visual_asset_key).filter(Boolean))];
+  for (const assetKey of assetKeys) {
+    const asset = await one(
+      client,
+      `select asset_key, status::text from private.visual_assets where asset_key=$1`,
+      [assetKey],
+    );
+    if (!asset) {
+      summary.warnings.push(
+        `${assetKey}: visual metadata imported, but no visual asset is registered; student control hidden.`,
+      );
+    } else if (asset.status !== "approved") {
+      summary.warnings.push(
+        `${assetKey}: visual asset is ${asset.status}; student control hidden until approval.`,
+      );
+    }
+  }
 }
 
 async function importReinforcements(client, rows, summary) {
@@ -302,6 +358,7 @@ async function main() {
       await importQuestion(client, row, actor.id, topicId, sourceId, summary);
     }
     await importReinforcements(client, rows, summary);
+    await warnForMissingVisualAssets(client, rows, summary);
     await client.query("commit");
   } catch (error) {
     summary.failed = rows.length;

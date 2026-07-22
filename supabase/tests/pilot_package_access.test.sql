@@ -84,7 +84,12 @@ select lives_ok(
   'administrator can assign a private pilot package'
 );
 select is(
-  (select count(*)::integer from public.audit_log where action = 'pilot.assignment_enabled'),
+  (
+    select count(*)::integer
+    from public.audit_log
+    where action = 'pilot.assignment_enabled'
+      and entity_id = 'b1111111-1111-4111-8111-111111111111'
+  ),
   1,
   'pilot assignment is audited'
 );

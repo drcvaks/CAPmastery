@@ -10,12 +10,15 @@ describe("answer feedback formatting", () => {
       isCorrect: true,
       explanation:
         "Faithful service means being true and dependable in carrying out a commitment. This additional sentence gives detail that is not needed by default. A third sentence must also remain hidden.",
+      shortExplanation: "Faithful service means staying dependable and keeping your commitment.",
       selectedChoiceFeedback:
         "Faithful service means being true and dependable in carrying out a commitment.",
     });
 
     expect(result.title).toBe("Correct.");
-    expect(result.primary).not.toContain("third sentence");
+    expect(result.primary).toBe(
+      "Faithful service means staying dependable and keeping your commitment.",
+    );
     expect(result.correctConcept).toBeUndefined();
   });
 
@@ -23,13 +26,14 @@ describe("answer feedback formatting", () => {
     const result = buildAnswerFeedback({
       isCorrect: false,
       explanation: "An oath is a solemn public promise involving duty and accountability.",
+      shortExplanation: "An oath is a serious public promise.",
       selectedChoiceFeedback:
         "An oath is made by the person taking it, not ordered by someone else.",
     });
 
     expect(result.title).toBe("Not quite.");
     expect(result.primary).toContain("not ordered by someone else");
-    expect(result.correctConcept).toContain("solemn public promise");
+    expect(result.correctConcept).toContain("serious public promise");
   });
 
   it("does not repeat a correct concept already present in selected-choice feedback", () => {

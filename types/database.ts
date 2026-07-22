@@ -1709,7 +1709,9 @@ export type Database = {
           correct_count: number;
           difficulty: Database["public"]["Enums"]["question_difficulty"];
           explanation: string;
+          feedback_display_version: number;
           is_correct: boolean;
+          memory_aid: string;
           question_count: number;
           question_id: string;
           question_position: number;
@@ -1721,7 +1723,15 @@ export type Database = {
           session_id: string;
           session_question_id: string;
           session_status: Database["public"]["Enums"]["study_session_status"];
+          short_explanation: string;
           source_reference: string;
+          visual_alt_text: string;
+          visual_asset_key: string;
+          visual_caption: string;
+          visual_height: number;
+          visual_mime_type: string;
+          visual_storage_path: string;
+          visual_width: number;
         }[];
       };
       reviewer_approve_question: {

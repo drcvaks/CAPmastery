@@ -55,3 +55,5 @@ The Chapter 1 sample adds actual-file parser/validator tests and `pilot_package_
 `npm run content:import:pilot10` imports only `Content/LTL_V1_Chapter_1_Pilot_10_Questions_Import.csv` by default. It requires the database password in process-only `CAP_MASTERY_DB_PASSWORD`, validates all rows before opening a transaction, and prints inserted/updated/skipped/failed/warning counts.
 
 The post-Checkpoint 4 feedback refinement adds pure tests for correct/incorrect selection, overlap suppression, and the 35-word default budget, plus a component test proving remediation remains hidden until the accessible “Need more help?” control is activated.
+
+The complete learning-support sample updates actual-file validation for `short_explanation`, display version, memory aids, and coherent visual metadata. Component tests verify reviewed short feedback is the default, Memory trick and Explain more remain collapsed, and Show visual is absent without an approved asset. `learning_support.test.sql` checks private storage and privilege denial; the expanded study suite checks pre-answer withholding, post-answer memory delivery, and missing-asset suppression.

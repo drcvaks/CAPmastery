@@ -57,10 +57,14 @@ Clients cannot select answer-key columns or write `question_attempts.is_correct`
 - Imported questions use nullable-but-unique `external_id` values so existing test fixtures remain compatible while every real import is required to provide a stable key. Pilot batch, import package, source status, supplied family code, objective/concept codes, page range, difficulty, cognitive level, and estimated time are retained in normalized storage.
 - `pilot_package_assignments` grants a student access to a named draft import package without publishing its questions. `create_study_session` may select draft content only when the current student has that exact package assignment.
 - The Chapter 1 importer writes choices, correctness, main explanation, per-choice explanations, misconception, and remediation to the existing protected normalized tables. Re-import updates draft rows by `external_id`, skips approved rows, and creates reinforcement links only when both external IDs exist.
+- `private.question_learning_support` stores the reviewed short explanation, display-rule version, memory aid, and visual metadata. `visual_brief` remains internal and no learning support is delivered before an answer attempt.
+- `private.visual_assets` is a separate approval registry for actual image files. Importing a question's visual metadata does not create or approve an asset; student delivery returns visual fields only for an approved registered asset.
 
 ## Migration workflow
 
 Checkpoint 4 migration `202607200013` adds import identity/provenance fields and private pilot package assignments. The import itself is deliberately an idempotent operator action, not a migration, so replaying migrations never inserts licensed or reviewable question content automatically.
+
+Post-Checkpoint 4 migration `202607210014` adds the private learning-support and visual-asset tables and extends owned session delivery with post-attempt-only short feedback, memory aids, and approved-visual metadata. No production database or Storage bucket is created.
 
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.

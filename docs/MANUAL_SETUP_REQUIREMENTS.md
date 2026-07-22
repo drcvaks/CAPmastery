@@ -123,3 +123,9 @@ Remove-Item Env:CAP_MASTERY_DB_PASSWORD
 After a successful import, an authenticated administrator must assign `LTL1_C1_PILOT_10` to each intended student through `admin_set_pilot_package_assignment`. The student and administrator UUIDs/emails remain untracked owner data. Do not assign the package broadly; draft questions remain hidden from all unassigned students.
 
 The owner confirmed the initial import (10 inserted) and idempotency run (10 updated, 0 inserted), followed by 101/101 passing linked pgTAP assertions. The private package was assigned through the audited administrator function, and the owner confirmed that the imported questions worked in the web Study flow. Checkpoint 4 manual acceptance is complete.
+
+For the 2026-07-21 learning-support update, migration `202607210014` is applied to development. The owner must rerun `npm.cmd run content:import:pilot10` with the process-only database password to update the same ten drafts from `LTL_V1_Chapter_1_Pilot_10_Questions_Complete_Learning_Support.csv`, then run linked pgTAP. No visual files were supplied: all ten visual metadata records should warn and remain hidden. Approved image files, dimensions, MIME types, and an explicit approval decision are required before visual controls can become student-visible.
+
+The owner confirmed the expanded linked database suite passes 116/116. Persistent import output and student web acceptance of the Memory trick and Explain more controls remain to be confirmed.
+
+The complete learning-support import subsequently committed with the expected 24 nonfatal warnings (14 future reinforcement links and 10 missing visual assets). Student web acceptance remains pending. No approved visual file is currently available or displayed.

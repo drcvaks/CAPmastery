@@ -32,6 +32,17 @@ const sessionQuestionRowSchema = z.object({
   selected_choice_feedback: z.string().nullable(),
   remediation: z.string().nullable(),
   common_mistake: z.string().nullable(),
+  short_explanation: z.string().nullable(),
+  feedback_display_version: z.number().int().positive().nullable(),
+  memory_aid: z.string().nullable(),
+  visual_asset_key: z.string().nullable(),
+  visual_caption: z.string().nullable(),
+  visual_alt_text: z.string().nullable(),
+  visual_storage_path: z.string().nullable(),
+  visual_mime_type: z.string().nullable(),
+  visual_width: z.number().int().positive().nullable(),
+  visual_height: z.number().int().positive().nullable(),
+  visual_uri: z.url().nullable(),
 });
 
 const submissionSchema = z.object({

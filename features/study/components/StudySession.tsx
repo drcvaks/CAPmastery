@@ -146,13 +146,30 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           explanation={currentQuestion.explanation}
           isCorrect={Boolean(currentQuestion.is_correct)}
           key={currentQuestion.session_question_id}
+          memoryAid={currentQuestion.memory_aid}
           nextLabel={
             currentIndex + 1 === session.questions.length ? "View results" : "Next question"
           }
           onNext={advance}
           remediation={currentQuestion.remediation}
           selectedChoiceFeedback={currentQuestion.selected_choice_feedback}
+          shortExplanation={currentQuestion.short_explanation}
           sourceReference={currentQuestion.source_reference}
+          visual={
+            currentQuestion.visual_uri &&
+            currentQuestion.visual_caption &&
+            currentQuestion.visual_alt_text &&
+            currentQuestion.visual_width &&
+            currentQuestion.visual_height
+              ? {
+                  altText: currentQuestion.visual_alt_text,
+                  caption: currentQuestion.visual_caption,
+                  height: currentQuestion.visual_height,
+                  uri: currentQuestion.visual_uri,
+                  width: currentQuestion.visual_width,
+                }
+              : null
+          }
         />
       ) : null}
     </View>

@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(35);
+select plan(38);
 
 select has_table('public', 'study_sessions', 'study sessions exist');
 select has_table('public', 'study_session_questions', 'session questions exist');
@@ -139,6 +139,15 @@ begin
     values
       (wrong_id, 'Synthetic wrong-choice feedback ' || i),
       (other_id, 'Synthetic alternate-choice feedback ' || i);
+    insert into private.question_learning_support (
+      question_id, short_explanation, feedback_display_version, memory_aid,
+      visual_priority, visual_type, visual_display_mode, visual_asset_key,
+      visual_brief, visual_caption, visual_alt_text
+    ) values (
+      q_id, 'Synthetic short explanation ' || i, 1, 'Synthetic memory aid ' || i,
+      'medium', 'concept_diagram', 'optional_after_answer', 'missing_asset_' || i,
+      'Synthetic internal brief ' || i, 'Synthetic caption ' || i, 'Synthetic alt text ' || i
+    );
     insert into public.question_quality_reviews (
       question_id, reviewer_id, accuracy_rating, clarity_rating,
       source_alignment_rating, decision
@@ -198,6 +207,15 @@ select is(
   ),
   0,
   'Unanswered delivery exposes no answer or explanation'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.get_study_session_questions((select id from study_test_session))
+    where short_explanation is not null or memory_aid is not null
+  ),
+  0,
+  'Unanswered delivery exposes no learning support'
 );
 
 select set_config('request.jwt.claim.sub', 'a2222222-2222-4222-8222-222222222222', true);
@@ -300,6 +318,24 @@ select is(
   ),
   10,
   'Post-submission delivery returns feedback for attempted questions'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.get_study_session_questions((select id from study_test_session))
+    where short_explanation is not null and memory_aid is not null
+  ),
+  10,
+  'Post-submission delivery returns reviewed short feedback and memory aids'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.get_study_session_questions((select id from study_test_session))
+    where visual_asset_key is not null or visual_storage_path is not null
+  ),
+  0,
+  'Missing or unapproved visual assets remain hidden after submission'
 );
 
 select set_config('request.jwt.claim.sub', 'a2222222-2222-4222-8222-222222222222', true);

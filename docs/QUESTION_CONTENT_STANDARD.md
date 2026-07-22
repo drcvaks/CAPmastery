@@ -15,7 +15,7 @@ State why the correct choice is correct, teach the underlying concept, address a
 The planned template columns are:
 
 ```text
-external_id,exam_code,course_code,volume_code,chapter_code,section_code,topic_code,learning_objective_code,difficulty,cognitive_level,question_type,question_text,choice_a,choice_b,choice_c,choice_d,correct_letter,explanation,choice_a_explanation,choice_b_explanation,choice_c_explanation,choice_d_explanation,common_mistake,remediation_text,source_document,source_pages,source_reference_text,is_exam_style,review_status
+external_id,pilot_batch,objective_code,concept_code,question_family_code,difficulty,cognitive_level,question_type,question_text,choice_a,choice_b,choice_c,choice_d,correct_letter,explanation,short_explanation,feedback_display_version,choice_a_explanation,choice_b_explanation,choice_c_explanation,choice_d_explanation,common_mistake,remediation_text,memory_aid,visual_priority,visual_type,visual_display_mode,visual_asset_key,visual_brief,visual_caption,visual_alt_text,source_reference_text,source_pages,source_status,review_status,reinforcement_question_ids,estimated_time_seconds
 ```
 
 Multiple choice requires at least three choices. True/false uses only TRUE and FALSE. The correct letter must identify a populated choice. Approved content requires explanation and source. Unknown hierarchy codes are errors unless an administrator deliberately uses a controlled creation workflow. Duplicate detection uses normalized text plus exam and objective and produces warnings rather than silent merges.

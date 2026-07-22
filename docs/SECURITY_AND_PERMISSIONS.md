@@ -49,6 +49,8 @@ Correct choices and teaching feedback are joined from private tables only after 
 
 Draft pilot delivery is package-scoped. Students cannot directly insert assignments and normal question RLS still returns no draft prompts. An audited administrator function assigns a package; the security-definer session function checks that assignment internally. It returns choices but withholds the private answer key and all teaching feedback until submission, exactly as it does for approved content.
 
+Short explanations, memory aids, internal visual briefs, and the visual-asset registry live in the private schema with no client table grants. Owned session delivery returns short explanations and memory aids only after an attempt. It never returns `visual_brief`; visual key/caption/alt/storage metadata remain null unless a separately registered asset has approved status. The client also hides the visual control if a signed image cannot be resolved, preventing broken-image disclosure.
+
 ## Audit/privacy
 
 Audit role changes, link changes, publishing, imports, question deactivation/version changes, and other sensitive administrative operations. Store safe summaries, not secrets or unnecessary private content. Minimize child data and define retention/export/deletion expectations before pilot data collection.

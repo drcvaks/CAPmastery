@@ -43,11 +43,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
   const requestId = useRef(0);
+  const activeUserId = useRef<string | null>(null);
+  const activeAccess = useRef<AccessContext | null>(null);
 
   const loadSession = useCallback(async (nextSession: Session | null) => {
     const currentRequest = ++requestId.current;
+    activeUserId.current = nextSession?.user.id ?? null;
     setSession(nextSession);
     setAccess(null);
+    activeAccess.current = null;
     setErrorMessage(null);
 
     if (!nextSession) {
@@ -59,6 +63,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     try {
       const nextAccess = await fetchAccessContext(nextSession.user.id);
       if (requestId.current === currentRequest) {
+        activeAccess.current = nextAccess;
         setAccess(nextAccess);
         setStatus("signed_in");
       }
@@ -90,6 +95,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
             setPasswordRecovery(true);
           } else if (event === "SIGNED_OUT") {
             setPasswordRecovery(false);
+          }
+          if (nextSession && activeAccess.current && activeUserId.current === nextSession.user.id) {
+            setSession(nextSession);
+            return;
           }
           setTimeout(() => {
             if (mounted) {

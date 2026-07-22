@@ -14,12 +14,22 @@ const REQUIRED_FIELDS = [
   "choice_d",
   "correct_letter",
   "explanation",
+  "short_explanation",
+  "feedback_display_version",
   "choice_a_explanation",
   "choice_b_explanation",
   "choice_c_explanation",
   "choice_d_explanation",
   "common_mistake",
   "remediation_text",
+  "memory_aid",
+  "visual_priority",
+  "visual_type",
+  "visual_display_mode",
+  "visual_asset_key",
+  "visual_brief",
+  "visual_caption",
+  "visual_alt_text",
   "source_reference_text",
   "source_pages",
   "source_status",
@@ -27,6 +37,18 @@ const REQUIRED_FIELDS = [
   "reinforcement_question_ids",
   "estimated_time_seconds",
 ];
+
+const OPTIONAL_VALUE_FIELDS = new Set([
+  "reinforcement_question_ids",
+  "memory_aid",
+  "visual_priority",
+  "visual_type",
+  "visual_display_mode",
+  "visual_asset_key",
+  "visual_brief",
+  "visual_caption",
+  "visual_alt_text",
+]);
 
 function decodeImportBuffer(buffer) {
   const utf8 = buffer.toString("utf8");
@@ -144,7 +166,7 @@ function validateImport(rows, expectedCount = 10) {
 
   rows.forEach((row, index) => {
     const label = `Row ${index + 2}${row.external_id ? ` (${row.external_id})` : ""}`;
-    for (const field of REQUIRED_FIELDS.filter((name) => name !== "reinforcement_question_ids")) {
+    for (const field of REQUIRED_FIELDS.filter((name) => !OPTIONAL_VALUE_FIELDS.has(name))) {
       if (!row[field]) errors.push(`${label}: ${field} is required.`);
     }
     if (externalIds.has(row.external_id)) errors.push(`${label}: duplicate external_id.`);
@@ -166,6 +188,33 @@ function validateImport(rows, expectedCount = 10) {
     }
     if (!/^\d+$/.test(row.estimated_time_seconds) || Number(row.estimated_time_seconds) < 1) {
       errors.push(`${label}: estimated_time_seconds must be a positive integer.`);
+    }
+    if (!/^\d+$/.test(row.feedback_display_version) || Number(row.feedback_display_version) < 1) {
+      errors.push(`${label}: feedback_display_version must be a positive integer.`);
+    }
+
+    const visualFields = [
+      "visual_priority",
+      "visual_type",
+      "visual_display_mode",
+      "visual_asset_key",
+      "visual_brief",
+      "visual_caption",
+      "visual_alt_text",
+    ];
+    if (visualFields.some((field) => row[field])) {
+      for (const field of visualFields) {
+        if (!row[field]) errors.push(`${label}: ${field} is required when visual metadata exists.`);
+      }
+      if (!new Set(["low", "medium", "high"]).has(row.visual_priority)) {
+        errors.push(`${label}: invalid visual_priority '${row.visual_priority}'.`);
+      }
+      if (!/^[a-z][a-z0-9_-]{1,79}$/.test(row.visual_type)) {
+        errors.push(`${label}: invalid visual_type '${row.visual_type}'.`);
+      }
+      if (row.visual_display_mode !== "optional_after_answer") {
+        errors.push(`${label}: unsupported visual_display_mode '${row.visual_display_mode}'.`);
+      }
     }
   });
 

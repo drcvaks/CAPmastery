@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 
-import { AppScreen } from "../../../components/common/AppScreen";
-import { StudySessionView } from "../../../features/study/components/StudySession";
+import { AppScreen } from "../../../../components/common/AppScreen";
+import { StudySessionView } from "../../../../features/study/components/StudySession";
 
 export default function StudySessionScreen() {
   const params = useLocalSearchParams<{ sessionId: string | string[] }>();

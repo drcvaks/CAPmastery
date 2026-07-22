@@ -99,7 +99,7 @@ export function ContentBrowser() {
             onPress={() => {
               void createSession
                 .mutateAsync({ examId: activeExam.id, topicId: selectedTopicId })
-                .then((sessionId) => router.push(`/study-session/${sessionId}` as Href))
+                .then((sessionId) => router.push(`/study/session/${sessionId}` as Href))
                 .catch(() => undefined);
             }}
           />

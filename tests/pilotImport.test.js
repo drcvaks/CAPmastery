@@ -12,7 +12,7 @@ const inputPath = path.resolve(
   __dirname,
   "..",
   "Content",
-  "LTL_V1_Chapter_1_Pilot_10_Questions_Import.csv",
+  "LTL_V1_Chapter_1_Pilot_10_Questions_Complete_Learning_Support.csv",
 );
 
 describe("Chapter 1 pilot import validation", () => {
@@ -34,6 +34,10 @@ describe("Chapter 1 pilot import validation", () => {
         expect(row[`choice_${key}`]).not.toBe("");
         expect(row[`choice_${key}_explanation`]).not.toBe("");
       }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.feedback_display_version).toBe("1");
+      expect(row.visual_alt_text).not.toBe("");
     }
   });
 
@@ -50,10 +54,18 @@ describe("Chapter 1 pilot import validation", () => {
     expect(validation.warnings[0]).toContain("outside this file");
   });
 
+  it("accepts reviewed visual type keys containing underscores or hyphens", () => {
+    const validation = validateImport(rows, 10);
+
+    expect(rows.some((row) => row.visual_type === "four-part_icon_card")).toBe(true);
+    expect(validation.errors).toEqual([]);
+  });
+
   it("rejects invalid answer metadata before database work begins", () => {
     const invalidRows = rows.map((row) => ({ ...row }));
     invalidRows[0].correct_letter = "E";
     invalidRows[0].estimated_time_seconds = "0";
+    invalidRows[0].visual_alt_text = "";
 
     const validation = validateImport(invalidRows, 10);
 
@@ -61,6 +73,7 @@ describe("Chapter 1 pilot import validation", () => {
       expect.arrayContaining([
         expect.stringContaining("correct_letter must be A, B, C, or D"),
         expect.stringContaining("estimated_time_seconds must be a positive integer"),
+        expect.stringContaining("visual_alt_text is required when visual metadata exists"),
       ]),
     );
   });

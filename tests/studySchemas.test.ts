@@ -37,6 +37,17 @@ const sessionRow = {
   selected_choice_feedback: null,
   remediation: null,
   common_mistake: null,
+  short_explanation: null,
+  feedback_display_version: null,
+  memory_aid: null,
+  visual_asset_key: null,
+  visual_caption: null,
+  visual_alt_text: null,
+  visual_storage_path: null,
+  visual_mime_type: null,
+  visual_width: null,
+  visual_height: null,
+  visual_uri: null,
 };
 
 describe("study schemas", () => {
