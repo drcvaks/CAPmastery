@@ -54,8 +54,8 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         description={`You answered ${session.correctCount} of ${session.questionCount} correctly (${percentage}%).`}
       >
         <Text style={styles.supportive}>
-          Review is part of learning. Mastery and adaptive recommendations arrive in later
-          checkpoints.
+          Review is part of learning. Your answers updated the topics and questions selected for
+          future study sessions.
         </Text>
         <AppButton label="Back to study catalog" onPress={() => router.replace("/study")} />
       </AppCard>

@@ -270,3 +270,41 @@ Checkpoint 4 is complete. Stop here. Recommended next checkpoint after explicit 
 - Switching from an active session to the Progress tab still returned Study to its catalog because the session was modeled as a separate hidden tab. Study now owns a nested catalog/session stack, allowing the tab navigator to preserve the active question screen across normal tab switches.
 - Owner web acceptance passed: reviewed short feedback, Memory trick placement/expansion, Explain more, hidden unavailable visuals, question advancement, app-focus return, and Study → Progress/Home → Study session preservation all worked as intended.
 - Final application gate after navigation nesting: `npm run check` passed typecheck, lint, formatting, 11 Jest suites, and 33/33 tests. Web export passed with 1,558 modules. Android export remains unrerun because the elevated Hermes request was declined; the earlier pre-learning-support Android export passed.
+
+## Checkpoint 5 — Mastery and adaptive selection
+
+Status: complete; awaiting owner acceptance. Date: 2026-07-21.
+
+Completed:
+
+- Added deterministic pure mastery, retention, spaced-review, allocation, and adaptive-selection logic with injected time and stable seeded tie-breaking.
+- Added owner-scoped per-question state and topic mastery. New topics begin at mastery 40 with zero confidence; all score/status/interval changes use documented bounded coefficients.
+- Extended secure answer submission so the first server-graded attempt updates question and topic state atomically. Identical retries do not double-update mastery.
+- Replaced basic ordered selection with a 40% weak, 20% recently missed, 20% developing, 10% retention, and 10% new/harder target for ten-question sessions. Exhausted buckets use deterministic fallback, recently seen wording is deprioritized, duplicate questions remain prohibited, and sparse banks still fail clearly.
+- A miss marks an available later question on the same learning objective as `same_session_remediation`; answer keys remain private and no question is inserted or repeated.
+- Kept Checkpoint 6 readiness/progress UI, practice-test mode, AI, production infrastructure, and coefficient tuning outside this checkpoint.
+
+Database changes:
+
+- Applied development-only migration `202607210016_mastery_adaptive_selection.sql`; local and remote migration histories match through 016.
+- Added `student_question_state`, `student_topic_mastery`, two status enums, four indexes, owner-only RLS/select policies, server-only mastery helpers, adaptive session creation, and atomic grading/mastery integration.
+- Linked database lint at warning level passed with no schema errors. No production database was created or changed.
+
+Validation so far:
+
+- `npm run check`: exit 0; typecheck, lint, formatting, 12 Jest suites, and 42/42 tests passed. The 9 new algorithm tests cover coefficients, confidence, decay, interval boundaries, exact allocation, deterministic replay, weakness frequency, duplicate avoidance, fallback, and sparse banks.
+- `npm run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- `npx expo-doctor`: exit 0 on the approved registry/cache rerun; 20/20 checks passed.
+- `npm run export:web`: exit 0; 1,558 modules bundled to ignored `dist/web`.
+- `supabase db push --linked --dry-run`: exit 0 and listed only migration 016. The subsequent linked push applied 016; the nonfatal Docker catalog-cache warning remains because Docker Desktop is unavailable.
+- `supabase db lint --linked --level warning`: exit 0; no schema errors. `supabase migration list --linked`: local and remote versions match through 016.
+- Owner-executed `npm run db:test:linked`: exit 0. Adaptive mastery passed 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, and study sessions 38/38: aggregate 150/150 passed. Every synthetic mastery/session fixture rolled back.
+
+Known limitations and manual action:
+
+- With exactly ten eligible pilot questions in a ten-question session, all ten must appear; adaptive ordering/reasons and mastery still update, but visible frequency differences require a larger eligible bank or a smaller requested session. Synthetic tests cover the full bucket mix and fallback behavior.
+- The initial coefficients are transparent defaults, not evidence-derived predictions. Do not tune them from only two students.
+- Android export was not rerun in this checkpoint; web export and Expo validation pass, and the earlier Checkpoint 4 Android production export passed before the learning-support extension.
+- No further account, secret, database, Storage, or content action is required for Checkpoint 5 review.
+
+Checkpoint 5 implementation and automated acceptance gates are complete. Stop here. Recommended next checkpoint after explicit owner acceptance: Checkpoint 6, Progress and Readiness Dashboard.

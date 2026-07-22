@@ -131,3 +131,7 @@ The owner confirmed the expanded linked database suite passes 116/116. Persisten
 The complete learning-support import subsequently committed with the expected 24 nonfatal warnings (14 future reinforcement links and 10 missing visual assets). Student web acceptance remains pending. No approved visual file is currently available or displayed.
 
 Owner web acceptance is complete for short feedback, Memory trick, Explain more, hidden unavailable visuals, and preservation of an active session across app focus and Home/Progress tab changes. The remaining manual input for visuals is a reviewed set of actual image files plus approval metadata; no visual should be shown until those assets are supplied and approved.
+
+## Checkpoint 5 manual validation boundary
+
+Migration `202607210016` is applied to the linked development project and requires no new account, credential, environment variable, Storage bucket, service-role key, production database, or AI provider. The owner-executed linked database suite passed 150/150, including 34/34 adaptive-mastery assertions. The initial mastery coefficients are explicit pilot defaults; coefficient tuning should wait for broader evidence and a documented owner decision rather than being inferred from only Heshy and Avigail.

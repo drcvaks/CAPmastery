@@ -68,4 +68,10 @@ Post-answer presentation is centralized in `AnswerResultCard`. A pure formatter 
 
 Reviewed `short_explanation` now takes precedence for default feedback. Memory aids and fuller explanation/remediation use independent accessible disclosure controls. Visual rendering requires both approved server metadata and a successfully resolved short-lived image URL; otherwise no visual control is shown. Repeated-concept escalation remains deferred to mastery/adaptive work rather than being inferred from component-local history.
 
-No mastery update, adaptive selection, spaced review, practice-test timing, or delayed practice-test feedback is implemented; those remain later checkpoints.
+## Checkpoint 5 boundary
+
+Every newly recorded answer now updates per-question spaced-review state and topic mastery inside the same protected PostgreSQL transaction that grades the response. Same-choice retries return the existing attempt without applying mastery twice. The formulas are mirrored in the pure `features/adaptive/engine.ts` module with injected time and deterministic seeded tie-breaking so coefficients, boundaries, decay, allocation, and sparse-bank behavior can be tested without network state.
+
+Session creation classifies eligible questions as `weak_topic`, `recently_missed`, `developing_topic`, `retention_check`, or `new_or_harder`. A ten-question session targets 40/20/20/10/10, fills exhausted buckets deterministically, prioritizes less-seen/less-recent wording, and never duplicates a question within a session. An incorrect response marks an available later question on the same objective as `same_session_remediation` without changing the answer or exposing content.
+
+Checkpoint 5 does not add the Checkpoint 6 Progress/readiness UI, practice-test mode, automatic visual-support escalation, or tunable remote configuration. The initial coefficients are pilot defaults and must not be treated as validated from two students.

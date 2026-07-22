@@ -115,8 +115,8 @@ grant select on table pilot_session to authenticated;
 select is((select count(*)::integer from pilot_session), 1, 'assigned student creates pilot session');
 select is(
   (select selection_reason from public.study_session_questions where session_id = (select id from pilot_session)),
-  'private_pilot',
-  'draft pilot session records its private selection reason'
+  'new_or_harder',
+  'draft pilot questions participate in adaptive selection without being published'
 );
 select is(
   (

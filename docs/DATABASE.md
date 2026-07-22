@@ -34,7 +34,7 @@ All primary keys are UUIDs except the identity audit sequence. Enums and checks 
 
 ## Later domains
 
-- Study later work: per-question mastery state, topic mastery, and readiness.
+- Study later work: readiness calculations, progress trends, and practice-test evidence.
 - Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
 - Operations: CSV import jobs, audit log, and feature flags.
 
@@ -42,7 +42,7 @@ Hierarchy links are nullable where an exam omits a level. Study, coaching, and o
 
 ## Secure grading transaction
 
-The proposed `submit_answer` function accepts session, question, selected choice, response time, and optional confidence. It must authenticate the caller; verify student/session/question ownership; prevent duplicate or invalid submission; find the protected correct choice; insert the attempt with server-computed correctness; update session counters and mastery atomically; audit exceptional administrative actions; and return only post-submission feedback.
+The `submit_answer` function accepts a session-question ID, selected choice, response time, and optional confidence. It authenticates the caller; verifies student/session/question ownership; prevents duplicate or invalid submission; finds the protected correct choice; inserts the attempt with server-computed correctness; updates session counters and mastery atomically; and returns only post-submission feedback.
 
 Clients cannot select answer-key columns or write `question_attempts.is_correct`. Practice tests defer returned explanations until session completion.
 
@@ -60,11 +60,22 @@ Clients cannot select answer-key columns or write `question_attempts.is_correct`
 - `private.question_learning_support` stores the reviewed short explanation, display-rule version, memory aid, and visual metadata. `visual_brief` remains internal and no learning support is delivered before an answer attempt.
 - `private.visual_assets` is a separate approval registry for actual image files. Importing a question's visual metadata does not create or approve an asset; student delivery returns visual fields only for an approved registered asset.
 
+## Checkpoint 5 mastery and adaptive schema
+
+- `student_question_state` stores owner-scoped times seen/correct, correct and incorrect streaks, last result/time, next review, ease factor, interval, and learning state. Incorrect answers schedule one day; correct streaks schedule 2, 5, 10, then expanding intervals capped at 60 days.
+- `student_topic_mastery` begins at 40 with zero confidence and stores attempt totals, recent accuracy, deterministic 0–100 mastery/confidence/retention scores, streaks, review time, and status.
+- Both tables have RLS, owner-only select policies, and no authenticated write grants. Only the protected answer transaction writes them.
+- `submit_answer` updates question and topic state only when inserting the first attempt. A same-choice retry does not update mastery again.
+- `create_study_session` records adaptive selection reasons, applies the standard ten-question bucket targets, falls back deterministically when a bucket is exhausted, deprioritizes questions seen in the last 12 hours, and preserves the existing explicit sparse-bank error.
+- A miss labels one already-scheduled later question on the same objective as `same_session_remediation` when available. It does not insert an extra question or repeat the missed wording inside the session.
+
 ## Migration workflow
 
 Checkpoint 4 migration `202607200013` adds import identity/provenance fields and private pilot package assignments. The import itself is deliberately an idempotent operator action, not a migration, so replaying migrations never inserts licensed or reviewable question content automatically.
 
 Post-Checkpoint 4 migration `202607210014` adds the private learning-support and visual-asset tables and extends owned session delivery with post-attempt-only short feedback, memory aids, and approved-visual metadata. No production database or Storage bucket is created.
+
+Checkpoint 5 migration `202607210016` adds the two mastery tables, status enums, indexes, RLS policies, deterministic server helpers, adaptive session composition, and atomic mastery updates. It changes only the linked development project; no production database is initialized.
 
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.

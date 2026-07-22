@@ -1275,6 +1275,147 @@ export type Database = {
           },
         ];
       };
+      student_question_state: {
+        Row: {
+          consecutive_correct: number;
+          consecutive_incorrect: number;
+          created_at: string;
+          ease_factor: number;
+          id: string;
+          interval_days: number;
+          last_result: boolean | null;
+          last_seen_at: string | null;
+          next_review_at: string | null;
+          question_id: string;
+          state: Database["public"]["Enums"]["question_learning_state"];
+          student_id: string;
+          times_correct: number;
+          times_seen: number;
+          updated_at: string;
+        };
+        Insert: {
+          consecutive_correct?: number;
+          consecutive_incorrect?: number;
+          created_at?: string;
+          ease_factor?: number;
+          id?: string;
+          interval_days?: number;
+          last_result?: boolean | null;
+          last_seen_at?: string | null;
+          next_review_at?: string | null;
+          question_id: string;
+          state?: Database["public"]["Enums"]["question_learning_state"];
+          student_id: string;
+          times_correct?: number;
+          times_seen?: number;
+          updated_at?: string;
+        };
+        Update: {
+          consecutive_correct?: number;
+          consecutive_incorrect?: number;
+          created_at?: string;
+          ease_factor?: number;
+          id?: string;
+          interval_days?: number;
+          last_result?: boolean | null;
+          last_seen_at?: string | null;
+          next_review_at?: string | null;
+          question_id?: string;
+          state?: Database["public"]["Enums"]["question_learning_state"];
+          student_id?: string;
+          times_correct?: number;
+          times_seen?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_question_state_question_id_fkey";
+            columns: ["question_id"];
+            isOneToOne: false;
+            referencedRelation: "questions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_question_state_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      student_topic_mastery: {
+        Row: {
+          attempts_count: number;
+          confidence_score: number;
+          consecutive_correct: number;
+          consecutive_incorrect: number;
+          correct_count: number;
+          created_at: string;
+          id: string;
+          last_practiced_at: string | null;
+          mastery_score: number;
+          next_review_at: string | null;
+          recent_accuracy: number;
+          retention_score: number;
+          status: Database["public"]["Enums"]["mastery_status"];
+          student_id: string;
+          topic_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          attempts_count?: number;
+          confidence_score?: number;
+          consecutive_correct?: number;
+          consecutive_incorrect?: number;
+          correct_count?: number;
+          created_at?: string;
+          id?: string;
+          last_practiced_at?: string | null;
+          mastery_score?: number;
+          next_review_at?: string | null;
+          recent_accuracy?: number;
+          retention_score?: number;
+          status?: Database["public"]["Enums"]["mastery_status"];
+          student_id: string;
+          topic_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          attempts_count?: number;
+          confidence_score?: number;
+          consecutive_correct?: number;
+          consecutive_incorrect?: number;
+          correct_count?: number;
+          created_at?: string;
+          id?: string;
+          last_practiced_at?: string | null;
+          mastery_score?: number;
+          next_review_at?: string | null;
+          recent_accuracy?: number;
+          retention_score?: number;
+          status?: Database["public"]["Enums"]["mastery_status"];
+          student_id?: string;
+          topic_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_topic_mastery_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_topic_mastery_topic_id_fkey";
+            columns: ["topic_id"];
+            isOneToOne: false;
+            referencedRelation: "topics";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       student_guardian_links: {
         Row: {
           can_assign_content: boolean;
@@ -1791,11 +1932,14 @@ export type Database = {
         | "reinforces";
       content_status: "draft" | "active" | "archived";
       learning_relationship_type: "prerequisite" | "related";
+      mastery_status:
+        "not_started" | "beginning" | "developing" | "proficient" | "mastered" | "needs_review";
       membership_status: "active" | "inactive";
       organization_status: "active" | "inactive";
       organization_type: "family" | "squadron" | "group";
       profile_status: "active" | "disabled";
       question_difficulty: "easy" | "medium" | "hard";
+      question_learning_state: "new" | "learning" | "review" | "secure" | "needs_review";
       question_purpose:
         | "recall"
         | "recognition"
@@ -1959,11 +2103,20 @@ export const Constants = {
       ],
       content_status: ["draft", "active", "archived"],
       learning_relationship_type: ["prerequisite", "related"],
+      mastery_status: [
+        "not_started",
+        "beginning",
+        "developing",
+        "proficient",
+        "mastered",
+        "needs_review",
+      ],
       membership_status: ["active", "inactive"],
       organization_status: ["active", "inactive"],
       organization_type: ["family", "squadron", "group"],
       profile_status: ["active", "disabled"],
       question_difficulty: ["easy", "medium", "hard"],
+      question_learning_state: ["new", "learning", "review", "secure", "needs_review"],
       question_purpose: [
         "recall",
         "recognition",

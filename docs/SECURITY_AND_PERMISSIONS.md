@@ -51,6 +51,12 @@ Draft pilot delivery is package-scoped. Students cannot directly insert assignme
 
 Short explanations, memory aids, internal visual briefs, and the visual-asset registry live in the private schema with no client table grants. Owned session delivery returns short explanations and memory aids only after an attempt. It never returns `visual_brief`; visual key/caption/alt/storage metadata remain null unless a separately registered asset has approved status. The client also hides the visual control if a signed image cannot be resolved, preventing broken-image disclosure.
 
+## Checkpoint 5 mastery enforcement
+
+Question state and topic mastery are private student records in API-exposed tables with RLS enabled. Authenticated users receive select-only access filtered to `student_id = auth.uid()`; they cannot insert, update, delete, forge scores, or inspect another student's rows. Reviewers receive no student-mastery access by role.
+
+The security-definer grading transaction, not the client, supplies correctness to the mastery updater. The updater has an empty `search_path`, accepts the already-authorized student/question/result, clamps all score and interval ranges, and runs only for a newly inserted attempt. Adaptive session creation reads only the caller's state and continues to enforce approved-content or exact private-pilot-package eligibility.
+
 ## Audit/privacy
 
 Audit role changes, link changes, publishing, imports, question deactivation/version changes, and other sensitive administrative operations. Store safe summaries, not secrets or unnecessary private content. Minimize child data and define retention/export/deletion expectations before pilot data collection.
