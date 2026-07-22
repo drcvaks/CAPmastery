@@ -34,7 +34,7 @@ All primary keys are UUIDs except the identity audit sequence. Enums and checks 
 
 ## Later domains
 
-- Study later work: readiness calculations, progress trends, and practice-test evidence.
+- Study later work: practice-test evidence.
 - Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
 - Operations: CSV import jobs, audit log, and feature flags.
 
@@ -77,6 +77,12 @@ Checkpoint 4 migration `202607200013` adds import identity/provenance fields and
 Post-Checkpoint 4 migration `202607210014` adds the private learning-support and visual-asset tables and extends owned session delivery with post-attempt-only short feedback, memory aids, and approved-visual metadata. No production database or Storage bucket is created.
 
 Checkpoint 5 migration `202607210016` adds the two mastery tables, status enums, indexes, RLS policies, deterministic server helpers, adaptive session composition, and atomic mastery updates. It changes only the linked development project; no production database is initialized.
+
+## Checkpoint 6 progress projections
+
+Migration `202607210017` adds no client-writable progress table. It adds a private self-or-active-guardian authorization helper, private readiness helpers, and four authenticated RPCs: `get_progress_students`, `get_progress_dashboard`, `get_topic_progress`, and `get_progress_trends`.
+
+Dashboard coverage uses all questions the target student may actually study, including a draft package assigned to that exact student. Trends are UTC daily aggregates over a validated 7–180 day window. Retention is recalculated from stored mastery evidence at read time. Function execution is granted only to authenticated users, with explicit UUID authorization inside every target-specific function.
 
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.

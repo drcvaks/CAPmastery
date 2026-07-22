@@ -156,30 +156,60 @@ select is((select count(distinct question_id)::integer from public.study_session
 select is(
   (select is_correct from public.submit_answer(
     (select sq.id from public.study_session_questions sq join adaptive_questions q on q.question_id = sq.question_id
-     where sq.session_id = (select id from adaptive_session) and q.number = 1),
-    (select wrong_choice_id from adaptive_questions where number = 1), 1000, 5::smallint
+     where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+     order by sq.position limit 1),
+    (select q.wrong_choice_id from public.study_session_questions sq join adaptive_questions q on q.question_id = sq.question_id
+     where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+     order by sq.position limit 1), 1000, 5::smallint
   )),
   false,
   'secure submission grades the adaptive answer'
 );
-select is((select times_seen from public.student_question_state where question_id = (select question_id from adaptive_questions where number = 1)), 1, 'submission creates question state');
-select is((select interval_days from public.student_question_state where question_id = (select question_id from adaptive_questions where number = 1)), 1, 'incorrect question schedules next-day review');
+select is(
+  (select qs.times_seen from public.student_question_state qs
+   join public.study_session_questions sq on sq.question_id = qs.question_id
+   join adaptive_questions q on q.question_id = sq.question_id
+   where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+   order by sq.position limit 1),
+  1,
+  'submission creates question state'
+);
+select is(
+  (select qs.interval_days from public.student_question_state qs
+   join public.study_session_questions sq on sq.question_id = qs.question_id
+   join adaptive_questions q on q.question_id = sq.question_id
+   where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+   order by sq.position limit 1),
+  1,
+  'incorrect question schedules next-day review'
+);
 select is((select mastery_score from public.student_topic_mastery where topic_id = 'c4000000-0000-4000-8000-000000000001'), 20.00::numeric, 'confident medium miss decreases topic mastery deterministically');
 select is(
   (select count(*)::integer from public.study_session_questions sq join adaptive_questions q on q.question_id = sq.question_id
-   where sq.session_id = (select id from adaptive_session) and q.number between 2 and 4 and sq.selection_reason = 'same_session_remediation'),
+   where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4 and sq.selection_reason = 'same_session_remediation'),
   1,
   'a later related question is marked for same-session remediation'
 );
 select lives_ok(
   $$select * from public.submit_answer(
     (select sq.id from public.study_session_questions sq join adaptive_questions q on q.question_id = sq.question_id
-     where sq.session_id = (select id from adaptive_session) and q.number = 1),
-    (select wrong_choice_id from adaptive_questions where number = 1), 1000, 5::smallint
+     where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+     order by sq.position limit 1),
+    (select q.wrong_choice_id from public.study_session_questions sq join adaptive_questions q on q.question_id = sq.question_id
+     where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+     order by sq.position limit 1), 1000, 5::smallint
   )$$,
   'retrying the same submission remains idempotent'
 );
-select is((select times_seen from public.student_question_state where question_id = (select question_id from adaptive_questions where number = 1)), 1, 'idempotent retry does not double-update mastery');
+select is(
+  (select qs.times_seen from public.student_question_state qs
+   join public.study_session_questions sq on sq.question_id = qs.question_id
+   join adaptive_questions q on q.question_id = sq.question_id
+   where sq.session_id = (select id from adaptive_session) and q.number between 1 and 4
+   order by sq.position limit 1),
+  1,
+  'idempotent retry does not double-update mastery'
+);
 
 select set_config('request.jwt.claim.sub', 'c2222222-2222-4222-8222-222222222222', true);
 select is((select count(*)::integer from public.student_question_state), 0, 'another student cannot read question state');

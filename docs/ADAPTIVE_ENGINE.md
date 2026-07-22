@@ -8,6 +8,12 @@ Updates consider correctness, difficulty, cognitive level, confidence, streaks, 
 
 Recent accuracy uses a 75/25 exponential update. Confidence grows with evidence rather than being inferred from the starting score. Status boundaries are beginning below 35, developing below 60, proficient below 80, and mastered at 80 or above; two consecutive misses override the score with `needs_review`. These are transparent pilot defaults, not empirically validated predictions.
 
+## Readiness estimate
+
+Checkpoint 6 uses this transparent pilot formula: 15% coverage + 30% recent accuracy + 35% mastery + 20% retention, minus up to 15 points for weak topics. The result is rounded and bounded to 0–100.
+
+Before the first answer, readiness is 0 and the label is Not started; the neutral topic-mastery prior does not count as earned readiness. After practice begins, evidence caps are applied after weighting: fewer than 10 attempts or less than 20% coverage caps readiness at 40; fewer than 20 attempts or less than 50% coverage caps it at 65; fewer than 30 attempts or less than 70% coverage caps it at 79. Labels are Developing (below 50), Getting Close (below 70), Practice-Test Ready (below 85), and Strong Readiness. The interface always says: “This is a study estimate, not an official CAP result.” These defaults require later review and must not be interpreted as an official passing prediction.
+
 Statuses are `not_started`, `beginning`, `developing`, `proficient`, `mastered`, and `needs_review`.
 
 ## Standard 10-question target

@@ -320,3 +320,51 @@ Checkpoint 5 implementation and automated acceptance gates are complete. Stop he
 - Owner persistent import completed successfully. The importer emitted exactly 32 expected nonfatal warnings: 22 reinforcement targets outside this 30-row subset and ten visual metadata records without approved registered assets. Warning output is printed only after the transaction commits.
 - Post-import owner-linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, and study sessions 38/38: aggregate 150/150 passed.
 - The assigned pilot student now has 30 eligible Chapter 1 questions through the existing private package assignment. Checkpoint 5 remains complete; Checkpoint 6 has not started.
+
+## Checkpoint 6 — Progress and readiness dashboard
+
+Status: complete; awaiting owner interface acceptance. Date: 2026-07-21.
+
+Completed:
+
+- Added a deterministic readiness calculation combining coverage, recent accuracy, mastery, retention, and a weak-topic penalty. Evidence caps prevent fewer than 10 attempts or less than 20% coverage from exceeding 40, with staged caps of 65 and 79 as evidence grows.
+- Added protected student-list, dashboard, topic-detail, and 30-day trend projections. Every request is authorized for the student themself or an active guardian link with progress permission; administrator/reviewer roles do not implicitly expose private learning data.
+- Replaced the student Home and Progress placeholders with compact and detailed dashboards showing readiness, coverage, recommended action, due review count, weak topics, topic evidence, and daily trends.
+- Added a parent/coach family dashboard that switches among every linked student returned by the protected projection.
+- Added the required unofficial-result disclaimer and explicit sparse-evidence caveat. Practice-test mode, official-result claims, AI, and production infrastructure remain out of scope.
+
+Database changes:
+
+- Applied development-only migration `202607210017_progress_readiness.sql`; local and remote migration histories match through 017.
+- Added private authorization/readiness helpers and four authenticated security-definer RPCs. No new client-writable table or production database was added.
+- Linked database lint at warning level passed with no schema errors.
+
+Validation so far:
+
+- `npm.cmd run check`: exit 0; TypeScript, Expo lint, formatting, 14 Jest suites, and 54/54 tests passed.
+- `npx.cmd expo-doctor`: exit 0; 20/20 checks passed.
+- `npm.cmd run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- `npm.cmd run export:web`: exit 0; 1,565 modules bundled to ignored `dist/web`.
+- Owner-executed linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, progress/readiness 30/30, and study sessions 38/38: aggregate 180/180 passed.
+- The first linked run exposed a probabilistic assumption in the existing same-session-remediation fixture. The fixture now answers the earliest selected question in its synthetic topic and accepts any later related question; the production adaptive engine did not change.
+
+Known limitations and manual action:
+
+- Readiness coefficients and labels are transparent pilot defaults, not a validated CAP passing prediction.
+- Topic trends use UTC days and currently present compact textual bars rather than charts.
+- Android export was not rerun; web export and Expo Doctor pass, and physical Expo Go remains incompatible with the retained SDK 57 setup.
+- A real family-view smoke test requires owner-approved parent/coach roles and active progress links; automated fixtures verify two-child and unrelated-user behavior without persisting identities.
+
+Checkpoint 6 implementation and automated acceptance gates are complete. Stop here. Recommended next checkpoint after explicit owner acceptance: Checkpoint 7, Practice Test Mode.
+
+### Checkpoint 6 student-dashboard validation fix — 2026-07-21
+
+- Owner web review reached the safe `Progress unavailable` state after the protected database requests succeeded. PostgreSQL/PostgREST emits `timestamptz` values with offsets such as `+00:00`; the client’s narrow ISO validator accepted only the `Z` form.
+- Topic progress now accepts valid ISO timestamps with explicit timezone offsets while continuing to reject timezone-free timestamps. No database, RLS, readiness formula, or authorization behavior changed.
+- Added a regression test with PostgreSQL-style fractional seconds and `+00:00` offsets.
+
+### Checkpoint 6 zero-evidence readiness correction — 2026-07-21
+
+- Owner family-dashboard review found that an unpracticed student displayed 14% Developing because the neutral mastery prior of 40 contributed its 35% readiness weight.
+- Zero attempts now explicitly produce `0% — Not started`. The normal weighted formula and evidence caps begin after the first answer.
+- Applied forward migration `202607210018_zero_attempt_readiness.sql` to the linked development project; local and remote histories match through 018 and linked database lint reports no schema errors. No table, RLS, access, grading, or answer-key behavior changes.

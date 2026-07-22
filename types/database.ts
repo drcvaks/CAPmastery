@@ -1838,6 +1838,46 @@ export type Database = {
           topic_id: string;
         }[];
       };
+      get_progress_dashboard: {
+        Args: { p_exam_id?: string; p_student_id: string };
+        Returns: {
+          attempted_question_count: number;
+          coverage_score: number;
+          due_question_count: number;
+          eligible_question_count: number;
+          exam_id: string;
+          exam_title: string;
+          mastery_score: number;
+          practiced_topic_count: number;
+          readiness_label: string;
+          readiness_score: number;
+          recent_accuracy_score: number;
+          recommended_action: string;
+          recommended_topic_id: string | null;
+          recommended_topic_title: string | null;
+          retention_score: number;
+          student_id: string;
+          student_name: string;
+          topic_count: number;
+          weak_topic_count: number;
+        }[];
+      };
+      get_progress_students: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          display_name: string;
+          student_id: string;
+        }[];
+      };
+      get_progress_trends: {
+        Args: { p_days?: number; p_exam_id: string; p_student_id: string };
+        Returns: {
+          accuracy_score: number;
+          correct_count: number;
+          questions_answered: number;
+          trend_date: string;
+        }[];
+      };
       get_study_session_questions: {
         Args: { p_session_id: string };
         Returns: {
@@ -1873,6 +1913,26 @@ export type Database = {
           visual_mime_type: string;
           visual_storage_path: string;
           visual_width: number;
+        }[];
+      };
+      get_topic_progress: {
+        Args: { p_exam_id: string; p_student_id: string };
+        Returns: {
+          accuracy_score: number;
+          attempted_question_count: number;
+          attempts_count: number;
+          confidence_score: number;
+          correct_count: number;
+          due_question_count: number;
+          eligible_question_count: number;
+          last_practiced_at: string | null;
+          mastery_score: number;
+          next_review_at: string | null;
+          recommended: boolean;
+          retention_score: number;
+          status: Database["public"]["Enums"]["mastery_status"];
+          topic_id: string;
+          topic_title: string;
         }[];
       };
       reviewer_approve_question: {

@@ -30,7 +30,10 @@ export function useSubmitStudyAnswer(sessionId: string) {
   return useMutation({
     mutationFn: submitStudyAnswer,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: studyQueryKeys.session(sessionId) });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: studyQueryKeys.session(sessionId) }),
+        queryClient.invalidateQueries({ queryKey: ["progress"] }),
+      ]);
     },
   });
 }

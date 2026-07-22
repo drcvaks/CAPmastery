@@ -1,12 +1,5 @@
-import { PlaceholderScreen } from "../../features/shell/components/PlaceholderScreen";
+import { ProgressDashboard } from "../../features/progress/components/ProgressDashboard";
 
 export default function ProgressScreen() {
-  return (
-    <PlaceholderScreen
-      area="Student"
-      title="Progress"
-      description="Mastery, retention, trends, and unofficial readiness estimates will appear here."
-      checkpoint="Checkpoint 6"
-    />
-  );
+  return <ProgressDashboard audience="student" />;
 }

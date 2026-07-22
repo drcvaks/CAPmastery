@@ -15,4 +15,11 @@ describe("role-aware routing", () => {
     expect(canAccessArea([], "student")).toBe(false);
     expect(resolveSignedInRoute([])).toBe("/unauthorized");
   });
+
+  it("routes parents and coaches to linked-student progress", () => {
+    expect(canAccessArea(["parent"], "parent")).toBe(true);
+    expect(canAccessArea(["coach"], "parent")).toBe(true);
+    expect(canAccessArea(["content_reviewer"], "parent")).toBe(false);
+    expect(resolveSignedInRoute(["parent"])).toBe("/family-progress");
+  });
 });

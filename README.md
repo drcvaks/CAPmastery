@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository has completed **Checkpoint 5: Mastery and adaptive selection**. The development project supports owned 10-question sessions, server-side grading, deterministic mastery/spaced review, adaptive question selection, post-submission learning support, and retry-safe submission. Chapter 1 pilot questions remain private draft content available only through explicit student assignment. No production database exists.
+The repository has completed **Checkpoint 6: Progress and readiness dashboard**. The development project supports secure study sessions, deterministic mastery/adaptive selection, a coverage-capped readiness estimate, topic/trend detail, and linked guardian progress views. Chapter 1 pilot questions remain private draft content available only through explicit student assignment. No production database exists.
 
 ## Repository boundaries
 

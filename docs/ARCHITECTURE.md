@@ -33,8 +33,9 @@ Question delivery uses the typed `contentService`, narrow TanStack Query keys, a
 ## Navigation
 
 - `(auth)`: email/password sign-in, reset request, and recovery password update.
-- `(student)`: authenticated users with the global `student` role; tabbed product screens remain placeholders for later checkpoints.
+- `(student)`: authenticated users with the global `student` role; Home and Progress consume the protected progress projection.
 - The Study tab owns a nested stack containing the catalog and active session. Switching to Progress/Home preserves that stack, so returning to Study resumes the same question rather than targeting the catalog or creating another session.
+- `(parent)`: authenticated users with a global `parent` or `coach` role; the family dashboard can select only students returned by the linked-progress projection.
 - `(admin)`: authenticated users with the global `admin` role; administration features remain scheduled for later checkpoints.
 
 The root restores the session and routes to `/admin`, `/home`, or `/unauthorized`. Direct URLs are checked by route-group guards. Client routing remains a usability boundary; RLS, revoked write grants, and protected functions remain authoritative.
@@ -75,3 +76,9 @@ Every newly recorded answer now updates per-question spaced-review state and top
 Session creation classifies eligible questions as `weak_topic`, `recently_missed`, `developing_topic`, `retention_check`, or `new_or_harder`. A ten-question session targets 40/20/20/10/10, fills exhausted buckets deterministically, prioritizes less-seen/less-recent wording, and never duplicates a question within a session. An incorrect response marks an available later question on the same objective as `same_session_remediation` without changing the answer or exposing content.
 
 Checkpoint 5 does not add the Checkpoint 6 Progress/readiness UI, practice-test mode, automatic visual-support escalation, or tunable remote configuration. The initial coefficients are pilot defaults and must not be treated as validated from two students.
+
+## Checkpoint 6 boundary
+
+Progress reads use four narrow security-definer projections: available students, dashboard summary, topic detail, and daily trends. The database rechecks self-or-active-guardian authorization on every call; selecting a different UUID in the client cannot expand access. Administrators and reviewers receive no implicit access to private student progress.
+
+Readiness is a study estimate derived from coverage, recent accuracy, mastery, retention, and weak-topic count. Evidence caps prevent a high score from a small sample. The client mirrors the formula only for deterministic unit tests; PostgreSQL is authoritative for displayed data. Home shows a compact summary, Progress shows topic/trend detail, and the parent/coach route switches among explicitly linked students. Practice tests and official certification predictions remain outside this checkpoint.

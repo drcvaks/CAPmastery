@@ -1,17 +1,5 @@
-import { AppLinkButton } from "../../components/common/AppLinkButton";
-import { SignOutButton } from "../../features/auth/components/SignOutButton";
-import { PlaceholderScreen } from "../../features/shell/components/PlaceholderScreen";
+import { ProgressDashboard } from "../../features/progress/components/ProgressDashboard";
 
 export default function StudentHomeScreen() {
-  return (
-    <PlaceholderScreen
-      area="Student"
-      title="Student home"
-      description="The future dashboard will show exam focus, recommended review, readiness, streaks, and supportive next steps."
-      checkpoint="Checkpoint 6"
-    >
-      <AppLinkButton href="/" label="Return to shell home" variant="secondary" />
-      <SignOutButton />
-    </PlaceholderScreen>
-  );
+  return <ProgressDashboard audience="student" compact />;
 }

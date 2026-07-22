@@ -64,3 +64,10 @@ Audit role changes, link changes, publishing, imports, question deactivation/ver
 ## Threats to test
 
 ID substitution, guessed route/UUID access, changed role claims, direct REST queries, answer-table selection, duplicate answer submission, function calls on another session, draft-content reads, CSV injection/malformed input, unsafe logs, stale guardian links, and excessive admin grants.
+## Checkpoint 6 progress access
+
+- A student can request only their own progress.
+- A parent or coach can discover and request only students connected by an active guardian link with `can_view_progress = true`.
+- Possessing an administrator or reviewer role does not implicitly grant access to student learning data.
+- Every progress RPC authenticates the caller, validates the requested UUID and range, uses an empty `search_path`, and returns a student-safe projection. Direct mastery and attempt table policies remain unchanged.
+- Client route guards and student tabs improve navigation only; the database authorization helper is the security boundary.

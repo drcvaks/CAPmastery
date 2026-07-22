@@ -137,3 +137,9 @@ Owner web acceptance is complete for short feedback, Memory trick, Explain more,
 Migration `202607210016` is applied to the linked development project and requires no new account, credential, environment variable, Storage bucket, service-role key, production database, or AI provider. The owner-executed linked database suite passed 150/150, including 34/34 adaptive-mastery assertions. The initial mastery coefficients are explicit pilot defaults; coefficient tuning should wait for broader evidence and a documented owner decision rather than being inferred from only Heshy and Avigail.
 
 The supplied adaptive 30-question bank reuses the existing `LTL1_C1_PILOT_10` private package identifier so already assigned pilot students receive the additional 20 questions without another access mutation. The owner completed the persistent import with the expected 32 nonfatal warnings and the post-import linked database suite passed 150/150. No new Supabase assignment, account, environment variable, or further database action is required.
+
+## Checkpoint 6 manual validation boundary
+
+Migration `202607210017` is applied to the linked development project. No new credential, environment variable, service-role key, Storage bucket, production database, AI provider, or content import is required. The database password is needed only as a process-scoped value for the owner-run linked pgTAP suite.
+
+Student validation can use an existing assigned pilot account. A real family-dashboard smoke test additionally requires an existing adult account with the global `parent` or `coach` role and active `student_guardian_links` rows with `can_view_progress = true` for the intended students. Those identities and relationship decisions are owner data; do not create or broaden links merely to make the interface display data.
