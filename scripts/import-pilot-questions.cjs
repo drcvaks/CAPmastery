@@ -4,8 +4,10 @@ const path = require("node:path");
 const { Client } = require("pg");
 const {
   decodeImportBuffer,
+  normalizeCognitiveLevel,
   parseImport,
   parseSourcePages,
+  questionPurpose,
   validateImport,
 } = require("./lib/pilot-import.cjs");
 
@@ -130,7 +132,8 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
 
   const metadata = await ensureLearningMetadata(client, row, topicId, sourceId);
   const pages = parseSourcePages(row.source_pages);
-  const purpose = row.cognitive_level === "scenario" ? "scenario_judgment" : row.cognitive_level;
+  const cognitiveLevel = normalizeCognitiveLevel(row.cognitive_level);
+  const purpose = questionPurpose(row.cognitive_level);
   const values = [
     EXAM_ID,
     topicId,
@@ -142,7 +145,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
     row.question_text,
     row.question_type,
     row.difficulty,
-    row.cognitive_level,
+    cognitiveLevel,
     purpose,
     metadata.familyId,
     Number(row.estimated_time_seconds),
@@ -224,37 +227,39 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
     ],
   );
   const optional = (value) => value || null;
-  await client.query(
-    `insert into private.question_learning_support (
-       question_id, short_explanation, feedback_display_version, memory_aid,
-       visual_priority, visual_type, visual_display_mode, visual_asset_key,
-       visual_brief, visual_caption, visual_alt_text
-     ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-     on conflict (question_id) do update set
-       short_explanation=excluded.short_explanation,
-       feedback_display_version=excluded.feedback_display_version,
-       memory_aid=excluded.memory_aid,
-       visual_priority=excluded.visual_priority,
-       visual_type=excluded.visual_type,
-       visual_display_mode=excluded.visual_display_mode,
-       visual_asset_key=excluded.visual_asset_key,
-       visual_brief=excluded.visual_brief,
-       visual_caption=excluded.visual_caption,
-       visual_alt_text=excluded.visual_alt_text`,
-    [
-      question.id,
-      row.short_explanation,
-      Number(row.feedback_display_version),
-      optional(row.memory_aid),
-      optional(row.visual_priority),
-      optional(row.visual_type),
-      optional(row.visual_display_mode),
-      optional(row.visual_asset_key),
-      optional(row.visual_brief),
-      optional(row.visual_caption),
-      optional(row.visual_alt_text),
-    ],
-  );
+  if (row.short_explanation) {
+    await client.query(
+      `insert into private.question_learning_support (
+         question_id, short_explanation, feedback_display_version, memory_aid,
+         visual_priority, visual_type, visual_display_mode, visual_asset_key,
+         visual_brief, visual_caption, visual_alt_text
+       ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       on conflict (question_id) do update set
+         short_explanation=excluded.short_explanation,
+         feedback_display_version=excluded.feedback_display_version,
+         memory_aid=excluded.memory_aid,
+         visual_priority=excluded.visual_priority,
+         visual_type=excluded.visual_type,
+         visual_display_mode=excluded.visual_display_mode,
+         visual_asset_key=excluded.visual_asset_key,
+         visual_brief=excluded.visual_brief,
+         visual_caption=excluded.visual_caption,
+         visual_alt_text=excluded.visual_alt_text`,
+      [
+        question.id,
+        row.short_explanation,
+        Number(row.feedback_display_version),
+        optional(row.memory_aid),
+        optional(row.visual_priority),
+        optional(row.visual_type),
+        optional(row.visual_display_mode),
+        optional(row.visual_asset_key),
+        optional(row.visual_brief),
+        optional(row.visual_caption),
+        optional(row.visual_alt_text),
+      ],
+    );
+  }
   await client.query(
     `insert into public.question_concepts (question_id, concept_id, is_primary)
      values ($1, $2, true)
@@ -314,8 +319,12 @@ async function importReinforcements(client, rows, summary) {
 
 async function main() {
   const inputPath = process.argv[2] ? path.resolve(process.argv[2]) : defaultInput;
+  const expectedCount = process.argv[3] ? Number(process.argv[3]) : 10;
+  if (!Number.isInteger(expectedCount) || expectedCount < 1) {
+    throw new Error("Expected row count must be a positive integer.");
+  }
   const rows = parseImport(decodeImportBuffer(await fs.readFile(inputPath)));
-  const validation = validateImport(rows, 10);
+  const validation = validateImport(rows, expectedCount);
   if (validation.errors.length > 0) {
     throw new Error(`Import validation failed:\n${validation.errors.join("\n")}`);
   }

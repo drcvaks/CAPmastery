@@ -302,9 +302,21 @@ Validation so far:
 
 Known limitations and manual action:
 
-- With exactly ten eligible pilot questions in a ten-question session, all ten must appear; adaptive ordering/reasons and mastery still update, but visible frequency differences require a larger eligible bank or a smaller requested session. Synthetic tests cover the full bucket mix and fallback behavior.
+- The original ten-question bank could not visibly demonstrate frequency changes because every ten-question session exhausted it. The later owner-supplied 30-question validation extension removes that limitation for Chapter 1 pilot testing; synthetic tests continue to cover controlled bucket mixes and fallback behavior.
 - The initial coefficients are transparent defaults, not evidence-derived predictions. Do not tune them from only two students.
 - Android export was not rerun in this checkpoint; web export and Expo validation pass, and the earlier Checkpoint 4 Android production export passed before the learning-support extension.
 - No further account, secret, database, Storage, or content action is required for Checkpoint 5 review.
 
 Checkpoint 5 implementation and automated acceptance gates are complete. Stop here. Recommended next checkpoint after explicit owner acceptance: Checkpoint 6, Progress and Readiness Dashboard.
+
+### Checkpoint 5 adaptive 30-question validation extension — 2026-07-21
+
+- Validated the owner-supplied tab-delimited bank: 30 unique draft rows; six questions in each of Pilot A–E; 11 easy, 14 medium, and 5 hard; and the documented cognitive distribution.
+- The original ten rows retain complete reviewed short/memory/visual metadata. The additional twenty intentionally blank support rows create no empty private learning-support record and continue to receive concise post-answer main-explanation feedback.
+- Recognition maps to the supported broad cognitive level `recall` while preserving purpose `recognition`; analysis maps to `application` while preserving purpose `analysis`. No enum/schema migration was required.
+- Added `npm run content:import:adaptive30`; it uses the existing transactional, stable-ID importer and existing private package identifier, so assigned pilot students need no new assignment.
+- File validation reports exactly 22 expected reinforcement references outside the 30-row bank. The ten existing unregistered visual assets remain hidden and are expected to produce ten additional import warnings.
+- `npm run check`: exit 0; typecheck, lint, formatting, 12 Jest suites, and 46/46 tests passed.
+- Owner persistent import completed successfully. The importer emitted exactly 32 expected nonfatal warnings: 22 reinforcement targets outside this 30-row subset and ten visual metadata records without approved registered assets. Warning output is printed only after the transaction commits.
+- Post-import owner-linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, and study sessions 38/38: aggregate 150/150 passed.
+- The assigned pilot student now has 30 eligible Chapter 1 questions through the existing private package assignment. Checkpoint 5 remains complete; Checkpoint 6 has not started.

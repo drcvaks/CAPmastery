@@ -20,6 +20,8 @@ external_id,pilot_batch,objective_code,concept_code,question_family_code,difficu
 
 Multiple choice requires at least three choices. True/false uses only TRUE and FALSE. The correct letter must identify a populated choice. Approved content requires explanation and source. Unknown hierarchy codes are errors unless an administrator deliberately uses a controlled creation workflow. Duplicate detection uses normalized text plus exam and objective and produces warnings rather than silent merges.
 
+The adaptive 30-question technical bank may leave `short_explanation`, memory, and visual fields blank on rows that have not received reviewed learning support. Such rows use the existing concise main-explanation fallback and do not create an empty private support record. If memory or visual metadata is present, `short_explanation` remains required. Finer source classifications map to the existing delivery enum without losing purpose: recognition uses cognitive level `recall` plus purpose `recognition`, while analysis uses cognitive level `application` plus purpose `analysis`.
+
 ## Workflow
 
 Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.

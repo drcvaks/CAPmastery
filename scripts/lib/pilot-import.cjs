@@ -40,6 +40,7 @@ const REQUIRED_FIELDS = [
 
 const OPTIONAL_VALUE_FIELDS = new Set([
   "reinforcement_question_ids",
+  "short_explanation",
   "memory_aid",
   "visual_priority",
   "visual_type",
@@ -155,7 +156,14 @@ function validateImport(rows, expectedCount = 10) {
   const externalIds = new Set();
   const allowed = {
     difficulty: new Set(["easy", "medium", "hard"]),
-    cognitive_level: new Set(["recall", "understanding", "application", "scenario"]),
+    cognitive_level: new Set([
+      "recall",
+      "recognition",
+      "understanding",
+      "application",
+      "analysis",
+      "scenario",
+    ]),
     question_type: new Set(["multiple_choice", "true_false"]),
     review_status: new Set(["draft", "in_review", "approved", "rejected", "archived"]),
   };
@@ -191,6 +199,20 @@ function validateImport(rows, expectedCount = 10) {
     }
     if (!/^\d+$/.test(row.feedback_display_version) || Number(row.feedback_display_version) < 1) {
       errors.push(`${label}: feedback_display_version must be a positive integer.`);
+    }
+
+    const optionalSupportFields = [
+      "memory_aid",
+      "visual_priority",
+      "visual_type",
+      "visual_display_mode",
+      "visual_asset_key",
+      "visual_brief",
+      "visual_caption",
+      "visual_alt_text",
+    ];
+    if (optionalSupportFields.some((field) => row[field]) && !row.short_explanation) {
+      errors.push(`${label}: short_explanation is required when learning support exists.`);
     }
 
     const visualFields = [
@@ -232,11 +254,23 @@ function validateImport(rows, expectedCount = 10) {
   return { errors, warnings };
 }
 
+function normalizeCognitiveLevel(value) {
+  if (value === "recognition") return "recall";
+  if (value === "analysis") return "application";
+  return value;
+}
+
+function questionPurpose(value) {
+  return value === "scenario" ? "scenario_judgment" : value;
+}
+
 module.exports = {
   REQUIRED_FIELDS,
   decodeImportBuffer,
   parseDelimited,
   parseImport,
   parseSourcePages,
+  normalizeCognitiveLevel,
+  questionPurpose,
   validateImport,
 };

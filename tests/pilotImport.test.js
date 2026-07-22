@@ -3,8 +3,10 @@ const path = require("node:path");
 
 const {
   decodeImportBuffer,
+  normalizeCognitiveLevel,
   parseImport,
   parseSourcePages,
+  questionPurpose,
   validateImport,
 } = require("../scripts/lib/pilot-import.cjs");
 
@@ -13,6 +15,12 @@ const inputPath = path.resolve(
   "..",
   "Content",
   "LTL_V1_Chapter_1_Pilot_10_Questions_Complete_Learning_Support.csv",
+);
+const adaptiveInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "LTL_V1_Chapter_1_Adaptive_Test_30_Questions.csv",
 );
 
 describe("Chapter 1 pilot import validation", () => {
@@ -75,6 +83,56 @@ describe("Chapter 1 pilot import validation", () => {
         expect.stringContaining("estimated_time_seconds must be a positive integer"),
         expect.stringContaining("visual_alt_text is required when visual metadata exists"),
       ]),
+    );
+  });
+});
+
+describe("Chapter 1 adaptive 30-question validation", () => {
+  const rows = parseImport(decodeImportBuffer(fs.readFileSync(adaptiveInputPath)));
+
+  it("accepts thirty unique draft questions and optional blank support", () => {
+    const validation = validateImport(rows, 30);
+
+    expect(validation.errors).toEqual([]);
+    expect(rows).toHaveLength(30);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(30);
+    expect(rows.filter((row) => !row.short_explanation)).toHaveLength(20);
+    expect(rows.filter((row) => row.visual_asset_key)).toHaveLength(10);
+  });
+
+  it("matches the documented adaptive-bank distribution", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+
+    expect(
+      ["Pilot A", "Pilot B", "Pilot C", "Pilot D", "Pilot E"].map((value) =>
+        count("pilot_batch", value),
+      ),
+    ).toEqual([6, 6, 6, 6, 6]);
+    expect(["easy", "medium", "hard"].map((value) => count("difficulty", value))).toEqual([
+      11, 14, 5,
+    ]);
+    expect(
+      ["analysis", "application", "recall", "recognition", "scenario", "understanding"].map(
+        (value) => count("cognitive_level", value),
+      ),
+    ).toEqual([1, 5, 9, 1, 7, 7]);
+  });
+
+  it("maps finer cognitive intent into supported delivery categories without losing purpose", () => {
+    expect(normalizeCognitiveLevel("recognition")).toBe("recall");
+    expect(normalizeCognitiveLevel("analysis")).toBe("application");
+    expect(normalizeCognitiveLevel("scenario")).toBe("scenario");
+    expect(questionPurpose("recognition")).toBe("recognition");
+    expect(questionPurpose("analysis")).toBe("analysis");
+    expect(questionPurpose("scenario")).toBe("scenario_judgment");
+  });
+
+  it("reports only the documented out-of-bank reinforcement warnings", () => {
+    const validation = validateImport(rows, 30);
+
+    expect(validation.warnings).toHaveLength(22);
+    expect(validation.warnings.every((warning) => warning.includes("outside this file"))).toBe(
+      true,
     );
   });
 });

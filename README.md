@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository has completed **Checkpoint 4: Basic study sessions and secure answer submission**. The development project supports owned 10-question sessions, server-side grading, post-submission feedback, retry-safe submission, and session results. The supplied ten-question Chapter 1 sample is imported as private draft pilot content and is available only through explicit student assignment. No production database exists.
+The repository has completed **Checkpoint 5: Mastery and adaptive selection**. The development project supports owned 10-question sessions, server-side grading, deterministic mastery/spaced review, adaptive question selection, post-submission learning support, and retry-safe submission. Chapter 1 pilot questions remain private draft content available only through explicit student assignment. No production database exists.
 
 ## Repository boundaries
 
@@ -52,6 +52,7 @@ npm run db:reset
 npm run db:test
 npm run db:lint
 npm run content:import:pilot10
+npm run content:import:adaptive30
 ```
 
 Add the separate CAP Mastery development project URL and publishable key to ignored `.env.local`. With no valid client configuration, the app shows a safe setup screen rather than attempting a connection. Authenticated users are routed by database roles; client routing is not the authorization boundary.
