@@ -129,3 +129,5 @@ For the 2026-07-21 learning-support update, migration `202607210014` is applied 
 The owner confirmed the expanded linked database suite passes 116/116. Persistent import output and student web acceptance of the Memory trick and Explain more controls remain to be confirmed.
 
 The complete learning-support import subsequently committed with the expected 24 nonfatal warnings (14 future reinforcement links and 10 missing visual assets). Student web acceptance remains pending. No approved visual file is currently available or displayed.
+
+Owner web acceptance is complete for short feedback, Memory trick, Explain more, hidden unavailable visuals, and preservation of an active session across app focus and Home/Progress tab changes. The remaining manual input for visuals is a reviewed set of actual image files plus approval metadata; no visual should be shown until those assets are supplied and approved.
