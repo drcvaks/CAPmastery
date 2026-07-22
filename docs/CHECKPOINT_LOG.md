@@ -323,7 +323,7 @@ Checkpoint 5 implementation and automated acceptance gates are complete. Stop he
 
 ## Checkpoint 6 — Progress and readiness dashboard
 
-Status: complete; awaiting owner interface acceptance. Date: 2026-07-21.
+Status: complete and owner accepted. Date: 2026-07-22.
 
 Completed:
 
@@ -368,3 +368,5 @@ Checkpoint 6 implementation and automated acceptance gates are complete. Stop he
 - Owner family-dashboard review found that an unpracticed student displayed 14% Developing because the neutral mastery prior of 40 contributed its 35% readiness weight.
 - Zero attempts now explicitly produce `0% — Not started`. The normal weighted formula and evidence caps begin after the first answer.
 - Applied forward migration `202607210018_zero_attempt_readiness.sql` to the linked development project; local and remote histories match through 018 and linked database lint reports no schema errors. No table, RLS, access, grading, or answer-key behavior changes.
+- Owner-executed linked pgTAP passed adaptive mastery 34/34, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, progress/readiness 34/34, and study sessions 38/38: aggregate 184/184 passed.
+- Owner completed the Checkpoint 6 web review on 2026-07-22, including student progress, zero-attempt Not started behavior, topic detail, family progress, and linked-child switching. Checkpoint 6 is accepted.
