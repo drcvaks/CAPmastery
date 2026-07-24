@@ -428,7 +428,7 @@ Checkpoint 7 is complete. Stop here. Recommended next checkpoint after explicit 
 
 ## Checkpoint 8 — CSV question import and review workflow
 
-Status: implementation complete; linked pgTAP and owner review pending. Date: 2026-07-22.
+Status: complete and owner accepted. Date: 2026-07-24.
 
 Completed:
 
@@ -457,6 +457,7 @@ Validation so far:
 - First owner-linked run passed 44/50 import-review assertions. One revision fixture blanked the approval-required misconception field, and protected history/audit assertions were still executing as the intentionally restricted reviewer role. The fixture now supplies valid revision metadata and resets to the transaction owner only for direct protected-table verification; no application schema, RLS, audit, versioning, or approval behavior changed. `npm.cmd run check` remains green with 19 suites and 74/74 tests; linked pgTAP rerun is pending.
 - Final owner-linked pgTAP passed adaptive mastery 34/34, content import/review 50/50, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, practice tests 56/56, progress/readiness 34/34, and study sessions 38/38: aggregate 290/290 passed.
 - Owner review found the editor rendered below the potentially long review queue. Selecting a question now replaces the queue with the editor immediately and provides a `Back to review queue` control, avoiding fragile scroll-to-position behavior across web and Android. Direct TypeScript, ESLint, and formatting checks passed; the reviewer-workspace component suite passed 2/2 and verifies the list-to-editor transition and return path.
+- Owner web acceptance passed the CSV template/validation view, review queue, immediate list-to-editor navigation, editor fields and controls, and return-to-queue flow.
 
 Known limitations and owner decisions:
 
@@ -465,4 +466,6 @@ Known limitations and owner decisions:
 - In-app localhost inspection was blocked by the browser tool's URL policy. Component tests and Expo exports cover the implementation; an authenticated owner browser check remains required.
 - Before real publication, the owner must confirm source authorization and the final reviewer-count, approval-authority, versioning, report, and audit-retention rules.
 
-Manual action required: run the linked database test command with the existing process-scoped development password and review the content workspace while signed in as an administrator or content reviewer. Do not initialize a production database.
+Manual actions completed: the owner ran the linked database suite and reviewed the workspace while signed in as an administrator. No production database was initialized.
+
+Checkpoint 8 is complete. Stop here. Recommended next checkpoint after explicit owner authorization: Checkpoint 9, Achievements and Family Challenge.
