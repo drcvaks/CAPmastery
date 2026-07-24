@@ -23,8 +23,12 @@ export async function fetchChallengeCreationStudents(): Promise<ChallengeCreatio
   return z.array(challengeCreationStudentSchema).parse(data);
 }
 
-export async function fetchChallengeCreationExams(): Promise<ChallengeCreationExam[]> {
-  const { data, error } = await getSupabaseClient().rpc("get_challenge_creation_exams");
+export async function fetchChallengeCreationExams(
+  studentIds: string[],
+): Promise<ChallengeCreationExam[]> {
+  const { data, error } = await getSupabaseClient().rpc("get_challenge_creation_exams", {
+    p_student_ids: studentIds,
+  });
   if (error) throw error;
   return z.array(challengeCreationExamSchema).parse(data);
 }

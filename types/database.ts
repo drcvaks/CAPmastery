@@ -2370,7 +2370,7 @@ export type Database = {
         }[];
       };
       get_challenge_creation_exams: {
-        Args: never;
+        Args: { p_student_ids: string[] };
         Returns: {
           available_question_count: number;
           exam_id: string;

@@ -110,7 +110,6 @@ export function ChallengeWorkspace({ audience }: { audience: "guardian" | "stude
 
 function CreateChallengeCard() {
   const students = useChallengeCreationStudents(true);
-  const exams = useChallengeCreationExams(true);
   const create = useCreatePrivateChallenge();
   const {
     control,
@@ -128,6 +127,7 @@ function CreateChallengeCard() {
     mode: "onChange",
   });
   const studentIds = useWatch({ control, name: "studentIds" });
+  const exams = useChallengeCreationExams(studentIds);
   const examId = useWatch({ control, name: "examId" });
   const questionCount = useWatch({ control, name: "questionCount" });
   const selectedExam = exams.data?.find((exam) => exam.exam_id === examId);
@@ -143,6 +143,8 @@ function CreateChallengeCard() {
         ? [...studentIds, studentId]
         : studentIds;
     setValue("studentIds", next, { shouldValidate: true });
+    setValue("examId", "", { shouldValidate: true });
+    setValue("questionCount", 5, { shouldValidate: true });
   }
 
   return (
@@ -189,7 +191,12 @@ function CreateChallengeCard() {
         </Text>
       ) : null}
 
-      <Text style={styles.fieldLabel}>Approved question bank</Text>
+      <Text style={styles.fieldLabel}>Shared question bank</Text>
+      {studentIds.length !== 2 ? (
+        <Text style={styles.muted}>
+          Choose two students to see approved questions and private pilot questions they share.
+        </Text>
+      ) : null}
       {exams.isPending ? <Text style={styles.muted}>Loading available exams…</Text> : null}
       {exams.data?.map((exam) => {
         const selected = exam.exam_id === examId;
@@ -223,7 +230,8 @@ function CreateChallengeCard() {
       })}
       {exams.data?.length === 0 ? (
         <Text style={styles.warning}>
-          At least three approved active questions are required before a challenge can be created.
+          At least three approved questions or questions from a private pilot package assigned to
+          both students are required.
         </Text>
       ) : null}
 

@@ -96,7 +96,7 @@ The readiness wrapper keeps ordinary recent accuracy and trends limited to `stud
 
 ## Checkpoint 9 achievements and challenges
 
-Migrations `202607240025`–`202607240028` add the `challenge` study-session mode, compatible session constraints, policy-helper grants, and seven RLS-protected motivation tables:
+Migrations `202607240025`–`202607240029` add the `challenge` study-session mode, compatible session constraints, policy-helper grants, governed metadata activation, and seven RLS-protected motivation tables:
 
 - `achievements` and `student_achievements` hold predefined recognition and evidence-backed, idempotent awards.
 - `challenges` stores the private two-student lifecycle, approved exam, duration, immutable scoring method, and private-family visibility.
@@ -106,6 +106,10 @@ Migrations `202607240025`–`202607240028` add the `challenge` study-session mod
 - `encouragements` accepts only the predefined reaction enum; no free-text message column exists.
 
 `create_private_challenge` requires a parent/coach and exactly two active guardian links with `can_manage_challenges`. It creates both sessions atomically. Session-completion triggers calculate results and achievements from server data. One result may be stored privately while the other student is still working, but RLS and the challenge projection withhold both scores until every participant completes. Challenge attempts do not modify ordinary mastery, preserving normal adaptive evidence.
+
+Forward migrations `202607240029`–`202607240030` close the review-workflow gap exposed by the first real challenge setup. An explicit approving review now atomically activates only that question's linked objective, primary concept, and exam-scoped family, records an audit event, and then runs the existing strict question approval gate. Import remains draft-only; request-changes and reject decisions never activate metadata. Migration 030 preserves the established `archived` content status for rejected questions.
+
+Migration `202607240031` makes private challenge eligibility the intersection of the two selected students' access. A question is eligible when it has a protected answer key and is either approved/active or remains draft inside an `import_package` assigned to both students. A package assigned to only one participant cannot enter the shared set.
 
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.

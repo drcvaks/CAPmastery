@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(66);
+select plan(67);
 
 select has_table('public', 'achievements', 'achievement definitions exist');
 select has_table('public', 'student_achievements', 'student achievement awards exist');
@@ -34,7 +34,7 @@ select is(has_table_privilege('authenticated', 'public.challenge_participants', 
 select is(has_table_privilege('authenticated', 'public.challenge_results', 'insert'), false, 'clients cannot write results');
 select is(has_table_privilege('authenticated', 'public.encouragements', 'insert'), false, 'clients cannot bypass predefined reaction RPC');
 select has_function('public', 'get_challenge_creation_students', array[]::text[], 'challenge student picker function exists');
-select has_function('public', 'get_challenge_creation_exams', array[]::text[], 'challenge exam picker function exists');
+select has_function('public', 'get_challenge_creation_exams', array['uuid[]'], 'challenge exam picker function exists');
 select has_function(
   'public', 'create_private_challenge',
   array['text', 'uuid', 'uuid[]', 'integer', 'timestamp with time zone'],
@@ -140,7 +140,7 @@ declare
   correct_id uuid;
   wrong_id uuid;
 begin
-  for item in 1..3 loop
+  for item in 1..4 loop
     question_id := gen_random_uuid();
     correct_id := gen_random_uuid();
     wrong_id := gen_random_uuid();
@@ -174,14 +174,45 @@ begin
     values (wrong_id, 'This choice does not match the source.');
     insert into public.question_concepts (question_id, concept_id, is_primary)
     values (question_id, '95000000-0000-4000-8000-000000000001', true);
-    update public.questions
-    set review_status = 'approved', status = 'active',
-        approved_by = '91111111-1111-4111-8111-111111111111', approved_at = now()
-    where id = question_id;
+    if item <= 3 then
+      update public.questions
+      set review_status = 'approved', status = 'active',
+          approved_by = '91111111-1111-4111-8111-111111111111', approved_at = now()
+      where id = question_id;
+    else
+      update public.questions
+      set import_package = 'CHECKPOINT9_PRIVATE'
+      where id = question_id;
+    end if;
     insert into challenge_questions values (item, question_id, correct_id, wrong_id);
   end loop;
 end;
 $$;
+
+insert into public.pilot_package_assignments (
+  student_id, import_package, assigned_by
+) values
+  (
+    '92222222-2222-4222-8222-222222222222',
+    'CHECKPOINT9_PRIVATE',
+    '91111111-1111-4111-8111-111111111111'
+  ),
+  (
+    '93333333-3333-4333-8333-333333333333',
+    'CHECKPOINT9_PRIVATE',
+    '91111111-1111-4111-8111-111111111111'
+  );
+select is(
+  private.challenge_question_is_eligible(
+    (select question_id from challenge_questions where number = 4),
+    array[
+      '92222222-2222-4222-8222-222222222222'::uuid,
+      '94444444-4444-4444-8444-444444444444'::uuid
+    ]
+  ),
+  false,
+  'one student package assignment cannot expose a draft to another student'
+);
 
 create temporary table created_challenge (id uuid primary key);
 grant select, insert on table created_challenge to authenticated;
@@ -192,19 +223,22 @@ select is((select count(*)::integer from public.get_challenge_creation_students(
 select is(
   (
     select count(*)::integer
-    from public.get_challenge_creation_exams()
+    from public.get_challenge_creation_exams(array[
+      '92222222-2222-4222-8222-222222222222'::uuid,
+      '93333333-3333-4333-8333-333333333333'::uuid
+    ])
     where exam_id = '20000000-0000-4000-8000-000000000001'
-      and available_question_count >= 3
+      and available_question_count >= 4
   ),
   1,
-  'parent sees an exam with enough approved questions'
+  'parent sees the approved and mutually assigned package questions'
 );
 select throws_ok(
   $$select public.create_private_challenge(
     'Invalid one-student challenge',
     '20000000-0000-4000-8000-000000000001',
     array['92222222-2222-4222-8222-222222222222'::uuid],
-    3, now() + interval '7 days'
+    4, now() + interval '7 days'
   )$$,
   '22023', 'A private family challenge requires exactly two students',
   'challenge requires exactly two students'
@@ -219,7 +253,7 @@ select throws_ok(
       '92222222-2222-4222-8222-222222222222'::uuid,
       '93333333-3333-4333-8333-333333333333'::uuid
     ],
-    3, now() + interval '7 days'
+    4, now() + interval '7 days'
   )$$,
   '42501', 'Not authorized', 'student cannot create a challenge'
 );
@@ -233,7 +267,7 @@ select public.create_private_challenge(
     '92222222-2222-4222-8222-222222222222'::uuid,
     '93333333-3333-4333-8333-333333333333'::uuid
   ],
-  3, now() + interval '7 days'
+  4, now() + interval '7 days'
 );
 select is((select count(*)::integer from created_challenge), 1, 'parent creates a private challenge');
 select is(
@@ -282,8 +316,8 @@ select is(
     from public.challenge_question_sets
     where challenge_id = (select id from created_challenge)
   ),
-  3,
-  'shared challenge question set is snapshotted'
+  4,
+  'shared challenge set includes the package question available to both students'
 );
 select is(
   (
@@ -390,7 +424,7 @@ set baseline_accuracy = case
   else 80 end
 where challenge_id = (select id from created_challenge);
 update public.study_sessions
-set answered_count = 3, correct_count = 2, status = 'completed', completed_at = now()
+set answered_count = 4, correct_count = 3, status = 'completed', completed_at = now()
 where id = (
   select session_id from public.challenge_participants
   where challenge_id = (select id from created_challenge)
@@ -420,7 +454,7 @@ select is(
   'first result is stored securely'
 );
 update public.study_sessions
-set answered_count = 3, correct_count = 3, status = 'completed', completed_at = now()
+set answered_count = 4, correct_count = 4, status = 'completed', completed_at = now()
 where id = (
   select session_id from public.challenge_participants
   where challenge_id = (select id from created_challenge)
@@ -449,7 +483,7 @@ select is(
     select total_points from public.challenge_results
     where student_id = '92222222-2222-4222-8222-222222222222'
   ),
-  87,
+  90,
   'completion, accuracy, and capped improvement produce positive points'
 );
 select is(

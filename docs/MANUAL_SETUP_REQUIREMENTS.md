@@ -156,7 +156,7 @@ The ten-question, optional 15-minute, no-pause Chapter 1 configuration is a prov
 
 No new account, credential, environment variable, service-role key, Storage bucket, production database, AI provider, or content import is required.
 
-To create a real family challenge, the existing adult account must have the global `parent` or `coach` role. Both intended student accounts must have active `student_guardian_links` to that adult with `can_manage_challenges = true`. At least three questions in the chosen exam must be reviewed as `approved` and `active`; private pilot drafts are intentionally not eligible for challenges.
+To create a real family challenge, the existing adult account must have the global `parent` or `coach` role. Both intended student accounts must have active `student_guardian_links` to that adult with `can_manage_challenges = true`. At least three questions in the chosen exam must either be reviewed as `approved`/`active` or belong to the exact private pilot package assigned to both selected students.
 
 The database password remains necessary only as process-scoped `CAP_MASTERY_DB_PASSWORD` for the owner-run linked pgTAP suite. Do not save it in `.env.local`, source files, Git, or chat.
 

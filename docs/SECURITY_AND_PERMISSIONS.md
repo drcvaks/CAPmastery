@@ -43,6 +43,8 @@ Reviewers write answer keys only through an authorized, audited function. Approv
 
 CSV import and review use reviewer-only security-definer functions with an explicit search path. Authenticated clients have no direct insert/update/delete grant on import jobs, questions, choices, private answer data, or snapshots. Import is draft-only and whole-payload validation prevents partial question writes for reported row errors. Students continue to receive only approved active projections, never draft content or answer keys. Administrator and `content_reviewer` access is checked in the database and every import, correction, approval, requested change, and rejection is audited.
 
+An approving review may activate the question's already-linked objective, primary concept, and exam-scoped family inside the same transaction. The helper rechecks reviewer authorization and relationship consistency, is not client-executable, and records `question.learning_metadata_activated`. Failed approval rolls the metadata activation and quality review back together.
+
 ## Checkpoint 4 grading enforcement
 
 Authenticated clients receive select-only grants on their own sessions, session questions, and attempts. They cannot directly create an attempt, set `is_correct`, change a session score, or inspect another student's records. The security-definer study functions use an empty `search_path` and explicitly verify `auth.uid()`, student role, session ownership, question membership, selected-choice membership, active status, and input bounds.
@@ -77,7 +79,8 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 ## Checkpoint 9 challenge and achievement access
 
 - Only a parent/coach may create a challenge, and both selected students must have active links to that creator with `can_manage_challenges = true`.
-- The database chooses approved active questions with protected answer keys, snapshots one set, and creates a separately owned session for each participant. A student cannot select the other participant's session or attempts.
+- The database chooses mutually eligible questions with protected answer keys, snapshots one set, and creates a separately owned session for each participant. A student cannot select the other participant's session or attempts.
+- Private pilot drafts may also enter a challenge only when both selected students hold the exact same `pilot_package_assignments` package. The database—not the parent client—computes this intersection. One student's private assignment never grants the other student access.
 - The creator and two participants can read the private challenge summary. Unrelated students, reviewers, and administrators receive no implicit access.
 - Challenge result rows are RLS-hidden until the challenge is complete. The read projection also nulls scores until both students finish, preventing an early score leak.
 - Authenticated clients have no direct write grant on achievements, awards, challenges, participants, sets, results, or encouragements. Narrow security-definer functions use an empty `search_path` and explicit identity/link checks.

@@ -13,7 +13,8 @@ import {
 export const challengeQueryKeys = {
   all: ["challenges"] as const,
   creationStudents: ["challenges", "creation-students"] as const,
-  creationExams: ["challenges", "creation-exams"] as const,
+  creationExams: (studentIds: string[]) =>
+    ["challenges", "creation-exams", [...studentIds].sort()] as const,
   encouragements: (challengeId: string) => ["challenges", challengeId, "encouragements"] as const,
   achievements: (studentId = "self") => ["achievements", studentId] as const,
 };
@@ -30,11 +31,11 @@ export function useChallengeCreationStudents(enabled: boolean) {
   });
 }
 
-export function useChallengeCreationExams(enabled: boolean) {
+export function useChallengeCreationExams(studentIds: string[]) {
   return useQuery({
-    queryKey: challengeQueryKeys.creationExams,
-    queryFn: fetchChallengeCreationExams,
-    enabled,
+    queryKey: challengeQueryKeys.creationExams(studentIds),
+    queryFn: () => fetchChallengeCreationExams(studentIds),
+    enabled: studentIds.length === 2,
   });
 }
 

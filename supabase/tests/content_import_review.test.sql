@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(50);
+select plan(53);
 
 select has_table('public', 'csv_import_jobs', 'CSV import jobs exist');
 select is((select relrowsecurity from pg_class where oid = 'public.csv_import_jobs'::regclass), true, 'CSV import jobs have RLS');
@@ -40,7 +40,7 @@ values (
   '84000000-0000-4000-8000-000000000001',
   '40000000-0000-4000-8000-000000000001',
   'CHECKPOINT8_OBJECTIVE', 'Checkpoint 8 objective',
-  '83000000-0000-4000-8000-000000000001', 'active'
+  '83000000-0000-4000-8000-000000000001', 'draft'
 );
 insert into public.concepts (
   id, topic_id, source_document_id, code, title, source_reference, status
@@ -48,7 +48,7 @@ insert into public.concepts (
   '85000000-0000-4000-8000-000000000001',
   '40000000-0000-4000-8000-000000000001',
   '83000000-0000-4000-8000-000000000001',
-  'CHECKPOINT8_CONCEPT', 'Checkpoint 8 concept', 'Fixture page 1', 'active'
+  'CHECKPOINT8_CONCEPT', 'Checkpoint 8 concept', 'Fixture page 1', 'draft'
 );
 insert into public.concept_objectives (concept_id, learning_objective_id)
 values ('85000000-0000-4000-8000-000000000001', '84000000-0000-4000-8000-000000000001');
@@ -56,7 +56,7 @@ insert into public.question_families (id, exam_id, code, source_code, title, sta
 values (
   '86000000-0000-4000-8000-000000000001',
   '20000000-0000-4000-8000-000000000001',
-  'CHECKPOINT8_FAMILY_CANONICAL', 'CHECKPOINT8_FAMILY', 'Checkpoint 8 family', 'active'
+  'CHECKPOINT8_FAMILY_CANONICAL', 'CHECKPOINT8_FAMILY', 'Checkpoint 8 family', 'draft'
 );
 
 insert into public.questions (
@@ -211,6 +211,9 @@ select lives_ok(
 );
 select is((select review_status::text from public.questions where external_id = 'CHECKPOINT8-IMPORTED'), 'approved', 'approved review status is set');
 select is((select status::text from public.questions where external_id = 'CHECKPOINT8-IMPORTED'), 'active', 'approved question becomes student active');
+select is((select status::text from public.learning_objectives where id = '84000000-0000-4000-8000-000000000001'), 'active', 'approval activates the linked objective');
+select is((select status::text from public.concepts where id = '85000000-0000-4000-8000-000000000001'), 'active', 'approval activates the primary concept');
+select is((select status::text from public.question_families where id = '86000000-0000-4000-8000-000000000001'), 'active', 'approval activates the exam-scoped question family');
 select is((select jsonb_array_length(snapshot->'choices') from public.question_versions where question_id = (select id from public.questions where external_id = 'CHECKPOINT8-IMPORTED') and version = 1), 4, 'approved version stores complete choice snapshot');
 
 reset role;

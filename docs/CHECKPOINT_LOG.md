@@ -491,7 +491,10 @@ Database changes:
 - Applied development-only migration `202607240026_achievements_family_challenges.sql`, adding seven RLS-enabled tables, indexes, policies, award/finalization triggers, and protected creation/read/reaction RPCs.
 - Added forward correction `202607240027_challenge_session_constraints.sql` after the first linked test exposed that the Checkpoint 7 practice configuration and selection-reason checks did not yet admit the new challenge mode. It permits only untimed/unpaused challenge sessions and the `challenge_shared` selection reason.
 - Added forward correction `202607240028_challenge_policy_helper_grants.sql` after the next linked run showed that authenticated RLS evaluation could not execute the otherwise-correct private challenge helper. Only the two boolean policy helpers receive authenticated execute permission; all mutation/award helpers remain revoked.
-- Regenerated checked-in database TypeScript types. Local and remote development histories match through migration 026; linked database lint reports no schema errors. No production database, service-role client key, Storage bucket, AI service, or new environment variable was added.
+- Added forward migration `202607240029_activate_reviewed_question_metadata.sql` after owner challenge setup exposed that the original pilot importer correctly created families/concepts/objectives as drafts but the review UI had no governed activation action. An approving review now activates only its linked metadata, audits that transition, and then applies the unchanged strict approval gate.
+- Linked database lint caught that migration 029 had copied the pre-Checkpoint-8 `inactive` rejection status instead of the corrected `archived` value. Forward migration `202607240030_preserve_archived_rejection_status.sql` restores the established rejection branch while retaining governed metadata activation.
+- At owner direction, migration `202607240031_shared_private_package_challenges.sql` removes approval as a prerequisite for the existing family pilot. Challenge options and creation now use the intersection of both selected students' access: approved questions plus drafts from an exact pilot package assigned to both. Approval remains the general-publication gate.
+- Regenerated checked-in database TypeScript types. Local and remote development histories match through migration 031; linked database lint reports no schema errors. No production database, service-role client key, Storage bucket, AI service, or new environment variable was added.
 
 Validation so far:
 
@@ -504,16 +507,18 @@ Validation so far:
 - `npx.cmd expo-doctor`: exit 0; 20/20 checks passed.
 - Final `npm.cmd run export:web`: exit 0; 1,581 modules bundled to ignored `dist/web`.
 - Final `npm.cmd run export:android`: exit 0; 2,017 modules bundled and a 6.1 MB Hermes bytecode bundle was written to ignored `dist/android`.
-- `npx.cmd supabase migration list --linked`: exit 0; local and remote histories match through migration 028.
+- `npx.cmd supabase migration list --linked`: exit 0; local and remote histories match through migration 031.
 - `npx.cmd supabase db lint --linked --level warning`: exit 0; no schema errors.
 - Final owner-linked pgTAP passed achievements/challenges 66/66, adaptive mastery 34/34, content import/review 50/50, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, practice tests 56/56, progress/readiness 34/34, and study sessions 38/38: aggregate 356/356 passed.
 - The first owner-linked Checkpoint 9 run stopped when challenge creation reached the legacy `study_sessions_practice_configuration_check`. No challenge was persisted because the pgTAP file runs in a transaction. Migration 027 corrects both that constraint and the immediately downstream selection-reason constraint. It is applied to development; histories match and linked lint reports no schema errors. The pgTAP rerun is pending.
 - The next linked run reached challenge access checks and exposed the missing authenticated execute grant on `private.can_access_challenge`. Migration 028 adds the same narrow policy-helper grant pattern already used by identity, content, and study RLS. The test now asserts both challenge policy-helper grants explicitly. Migration 028 is applied; histories match and linked lint reports no schema errors.
 - The following linked run reached the final persistence-award fixture and correctly rejected its test-only `achievement_fixture` selection reason. The transaction rolled back. The fixture now uses the existing allowed `basic_ordered` value; no application schema, RLS, scoring, or challenge behavior changed.
+- The content import/review suite now uses draft learning metadata and adds three assertions proving that explicit approval activates the linked objective, primary concept, and exam-scoped family. The challenge suite adds one assertion proving a one-student package assignment cannot leak a draft to another student. The expected full linked aggregate after migration 031 is 360 assertions.
+- After the shared-package change, TypeScript, targeted ESLint, and the full 22-suite Jest run pass with 82/82 tests. Migration 031 is applied to development and linked database lint reports no schema errors.
 
 Known limitations and owner decisions:
 
-- Real challenge creation requires two existing linked students with `can_manage_challenges = true` and at least three approved active questions. Draft-only pilot content is not eligible.
+- Real challenge creation requires two existing linked students with `can_manage_challenges = true` and at least three questions that are approved or belong to a private pilot package assigned to both selected students.
 - The seven-day duration, supported counts, point weights, achievements, and reaction set are provisional pilot product choices.
 - There is no challenge cancellation UI, notification, public competition, free-form chat, assignment/goal system, or AI behavior in this checkpoint.
 - A parent-created challenge smoke test, both-student completion, delayed result reveal, and unrelated-user isolation remain to be owner-checked before this checkpoint is marked complete. Unrelated-user isolation is already covered automatically by the passing linked suite.
