@@ -41,6 +41,8 @@ Checkpoint 3 makes answer leakage structurally difficult: public questions and c
 
 Reviewers write answer keys only through an authorized, audited function. Approval requires source authorization, an objective, valid choices, an answer/explanation, and an approving quality review. RLS prevents direct approval and direct edits to approved prompts/choices; a private trigger prevents changing an approved answer key. Server-side grading is intentionally deferred to Checkpoint 4.
 
+CSV import and review use reviewer-only security-definer functions with an explicit search path. Authenticated clients have no direct insert/update/delete grant on import jobs, questions, choices, private answer data, or snapshots. Import is draft-only and whole-payload validation prevents partial question writes for reported row errors. Students continue to receive only approved active projections, never draft content or answer keys. Administrator and `content_reviewer` access is checked in the database and every import, correction, approval, requested change, and rejection is audited.
+
 ## Checkpoint 4 grading enforcement
 
 Authenticated clients receive select-only grants on their own sessions, session questions, and attempts. They cannot directly create an attempt, set `is_correct`, change a session score, or inspect another student's records. The security-definer study functions use an empty `search_path` and explicitly verify `auth.uid()`, student role, session ownership, question membership, selected-choice membership, active status, and input bounds.

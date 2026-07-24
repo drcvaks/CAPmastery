@@ -17,6 +17,8 @@ From Checkpoint 1 onward, every checkpoint runs the configured TypeScript check,
 
 Unit: mastery, spaced dates, adaptive selection, readiness, practice blueprints, CSV validation, duplicate detection, role helpers.
 
+Checkpoint 8 adds pure parser/validator tests and reviewer-workspace component tests. `content_import_review.test.sql` covers grants, RLS, reviewer authorization, duplicate preview, all-or-nothing invalid imports, draft-only delivery, correction and review decisions, complete approved snapshots, version increments, and preservation of an attempt's original `question_version`. The linked aggregate is expected to increase from 240 to 290 assertions after the owner-run database gate.
+
 Integration: session lifecycle, answer submission, linked-parent access, question approval, challenge lifecycle, and unauthorized content access.
 
 RLS: Student A versus Student B, linked versus unrelated adult, reviewer versus private records, role escalation, draft/deactivated content, answer-key reads, and public-client calls to server-only operations.

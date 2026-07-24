@@ -292,6 +292,56 @@ export type Database = {
           },
         ];
       };
+      csv_import_jobs: {
+        Row: {
+          completed_at: string | null;
+          created_at: string;
+          error_report: Json;
+          file_name: string;
+          id: string;
+          importer_id: string;
+          rows_accepted: number;
+          rows_received: number;
+          rows_rejected: number;
+          status: Database["public"]["Enums"]["csv_import_status"];
+          warning_report: Json;
+        };
+        Insert: {
+          completed_at?: string | null;
+          created_at?: string;
+          error_report?: Json;
+          file_name: string;
+          id?: string;
+          importer_id: string;
+          rows_accepted?: number;
+          rows_received: number;
+          rows_rejected?: number;
+          status?: Database["public"]["Enums"]["csv_import_status"];
+          warning_report?: Json;
+        };
+        Update: {
+          completed_at?: string | null;
+          created_at?: string;
+          error_report?: Json;
+          file_name?: string;
+          id?: string;
+          importer_id?: string;
+          rows_accepted?: number;
+          rows_received?: number;
+          rows_rejected?: number;
+          status?: Database["public"]["Enums"]["csv_import_status"];
+          warning_report?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "csv_import_jobs_importer_id_fkey";
+            columns: ["importer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       exams: {
         Row: {
           code: string;
@@ -1959,6 +2009,23 @@ export type Database = {
           topic_id: string;
         }[];
       };
+      get_content_review_question: {
+        Args: { p_question_id: string };
+        Returns: Json;
+      };
+      get_content_review_queue: {
+        Args: never;
+        Returns: {
+          exam_title: string;
+          external_id: string;
+          question_id: string;
+          question_text: string;
+          review_status: Database["public"]["Enums"]["question_review_status"];
+          topic_title: string;
+          updated_at: string;
+          version: number;
+        }[];
+      };
       get_practice_test_options: {
         Args: never;
         Returns: {
@@ -2093,6 +2160,26 @@ export type Database = {
         Args: { p_question_id: string };
         Returns: undefined;
       };
+      reviewer_check_import_duplicates: {
+        Args: { p_rows: Json };
+        Returns: {
+          external_id: string;
+          row_number: number;
+          warning: string;
+        }[];
+      };
+      reviewer_import_question_csv: {
+        Args: { p_file_name: string; p_rows: Json };
+        Returns: string;
+      };
+      reviewer_save_question: {
+        Args: {
+          p_change_reason: string;
+          p_payload: Json;
+          p_question_id: string;
+        };
+        Returns: number;
+      };
       reviewer_set_choice_feedback: {
         Args: { p_choice_id: string; p_feedback_text: string };
         Returns: undefined;
@@ -2104,6 +2191,17 @@ export type Database = {
           p_explanation: string;
           p_question_id: string;
           p_remediation?: string;
+        };
+        Returns: undefined;
+      };
+      reviewer_submit_question_review: {
+        Args: {
+          p_accuracy_rating: number;
+          p_clarity_rating: number;
+          p_decision: Database["public"]["Enums"]["review_decision"];
+          p_notes: string;
+          p_question_id: string;
+          p_source_alignment_rating: number;
         };
         Returns: undefined;
       };
@@ -2149,6 +2247,7 @@ export type Database = {
         | "prerequisite_for"
         | "reinforces";
       content_status: "draft" | "active" | "archived";
+      csv_import_status: "validating" | "failed" | "completed";
       learning_relationship_type: "prerequisite" | "related";
       mastery_status:
         "not_started" | "beginning" | "developing" | "proficient" | "mastered" | "needs_review";
@@ -2320,6 +2419,7 @@ export const Constants = {
         "reinforces",
       ],
       content_status: ["draft", "active", "archived"],
+      csv_import_status: ["validating", "failed", "completed"],
       learning_relationship_type: ["prerequisite", "related"],
       mastery_status: [
         "not_started",

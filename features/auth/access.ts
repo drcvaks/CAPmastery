@@ -6,11 +6,12 @@ export type ProtectedArea = "admin" | "parent" | "student";
 
 export function canAccessArea(roles: AppRole[], area: ProtectedArea): boolean {
   if (area === "parent") return roles.includes("parent") || roles.includes("coach");
-  return roles.includes(area === "admin" ? "admin" : "student");
+  if (area === "admin") return roles.includes("admin") || roles.includes("content_reviewer");
+  return roles.includes("student");
 }
 
 export function resolveSignedInRoute(roles: AppRole[]): Href {
-  if (roles.includes("admin")) {
+  if (roles.includes("admin") || roles.includes("content_reviewer")) {
     return "/admin";
   }
 

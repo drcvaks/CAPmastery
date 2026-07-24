@@ -28,6 +28,8 @@ The replacement 30-question complete-support file supplies reviewed short explan
 
 Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.
 
+Checkpoint 8 implements the canonical 37-column template as a pasteable comma- or tab-delimited workflow. Client validation reports missing columns, malformed rows, unsafe spreadsheet formulas, duplicate external IDs, normalized duplicate prompts, and inconsistent support metadata before import. The server repeats authoritative checks and rejects the whole question payload when any row is invalid. Objective, concept, and family codes must already exist; hierarchy creation is intentionally a separate governed decision. This checkpoint imports multiple-choice questions only.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

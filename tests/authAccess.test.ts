@@ -11,6 +11,12 @@ describe("role-aware routing", () => {
     expect(resolveSignedInRoute(["admin"])).toBe("/admin");
   });
 
+  it("routes a content reviewer to the restricted content workspace", () => {
+    expect(canAccessArea(["content_reviewer"], "admin")).toBe(true);
+    expect(canAccessArea(["content_reviewer"], "student")).toBe(false);
+    expect(resolveSignedInRoute(["content_reviewer"])).toBe("/admin");
+  });
+
   it("does not invent access for an unassigned account", () => {
     expect(canAccessArea([], "student")).toBe(false);
     expect(resolveSignedInRoute([])).toBe("/unauthorized");

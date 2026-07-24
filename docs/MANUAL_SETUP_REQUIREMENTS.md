@@ -72,6 +72,8 @@ Codex can perform CLI/configuration steps when the account is authenticated and 
 - Confidence prompt frequency, daily/streak timezone, session sizes, pause policy, practice-test timer/blueprint, mastery/readiness coefficient review, and acceptable readiness language.
 - Achievement names/thresholds and wording review to ensure supportive motivation.
 - CSV controlled hierarchy-creation policy, required reviewer count, approval authority, versioning threshold, question-report workflow, and audit retention.
+
+Checkpoint 8 requires no new account, environment variable, credential, Supabase Storage action, AI service, or production database. The development migrations must be applied and the linked pgTAP suite must be run with the existing process-scoped database password. An existing administrator can use the reviewer workspace; creating a dedicated `content_reviewer` account remains optional. Before real publication, the owner must still confirm source authorization, the controlled hierarchy codes, review authority/count, and retention policy.
 - Pilot success thresholds, feedback collection method, support contact, backup/restore expectations, data retention, incident contact, and go/no-go approval.
 - Web admin hosting and Android distribution choice for pilot; later error-monitoring provider and privacy configuration.
 

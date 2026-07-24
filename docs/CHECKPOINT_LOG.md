@@ -425,3 +425,44 @@ Additional application validation:
 - Owner web acceptance passed the practice launcher, timed and untimed modes, delayed active-test feedback, tab/session preservation, early completion, score/topic analysis, post-completion answer review, and unofficial-result language.
 
 Checkpoint 7 is complete. Stop here. Recommended next checkpoint after explicit owner authorization: Checkpoint 8.
+
+## Checkpoint 8 — CSV question import and review workflow
+
+Status: implementation complete; linked pgTAP and owner review pending. Date: 2026-07-22.
+
+Completed:
+
+- Added the canonical 37-column CSV template, quoted comma/tab parsing, pre-import validation, five-row preview, within-file and database duplicate warnings, and explicit error/warning summaries.
+- Added an authoritative reviewer-only, all-or-nothing import function. Invalid payloads retain a failed import report without question writes; accepted questions always begin as drafts.
+- Replaced the admin placeholder with a responsive content workspace for draft correction, quality ratings, approval, requested changes, and rejection. Review decisions save the displayed corrections before recording the decision.
+- Added complete private question snapshots and approved-edit versioning. Approved edits create the next draft version while existing attempts retain their recorded question version.
+- Allowed the existing `content_reviewer` role to reach the admin content route without granting student-progress access. Database authorization and RLS remain the security boundaries.
+
+Database changes:
+
+- Applied development-only migrations `202607220023_csv_review_workflow.sql` and `202607220024_rejected_content_status.sql`.
+- Added `csv_import_jobs`, its RLS policy, complete private snapshot helper, duplicate/import/queue/detail/save/review RPCs, and audited approval behavior.
+- Regenerated checked-in database TypeScript types from the linked development schema. No production database, service-role client key, Storage bucket, AI service, or new environment variable was added.
+
+Validation so far:
+
+- `npm.cmd run check`: exit 0; typecheck, lint, formatting, 19 Jest suites, and 74/74 tests passed.
+- `npm.cmd run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- Expo Doctor initially reported five SDK 57 compatibility updates. Updated Expo to 57.0.8, Expo Constants to 57.0.7, Expo Linking to 57.0.4, Expo Router to 57.0.8, and React Native Screens to the compatible 4.26 range; `npx.cmd expo-doctor` then passed 20/20 checks.
+- `npm.cmd run export:web`: exit 0; 1,573 modules bundled to ignored `dist/web`.
+- `npm.cmd run export:android`: the sandboxed Hermes compiler was denied, then the approved rerun passed; 2,009 modules bundled and a 6.1 MB bytecode bundle was written to ignored `dist/android`.
+- `npx.cmd supabase migration list --linked`: exit 0; local and remote histories match through migration 024.
+- `npx.cmd supabase db lint --linked --level warning`: exit 0 after migrations 023–024; no schema errors.
+- `content_import_review.test.sql` declares 50 transaction-only assertions. The complete linked suite is expected to report 290/290 and awaits owner execution because the database password remains process-scoped and unavailable to Codex.
+- First owner-linked run passed 44/50 import-review assertions. One revision fixture blanked the approval-required misconception field, and protected history/audit assertions were still executing as the intentionally restricted reviewer role. The fixture now supplies valid revision metadata and resets to the transaction owner only for direct protected-table verification; no application schema, RLS, audit, versioning, or approval behavior changed. `npm.cmd run check` remains green with 19 suites and 74/74 tests; linked pgTAP rerun is pending.
+- Final owner-linked pgTAP passed adaptive mastery 34/34, content import/review 50/50, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, practice tests 56/56, progress/readiness 34/34, and study sessions 38/38: aggregate 290/290 passed.
+- Owner review found the editor rendered below the potentially long review queue. Selecting a question now replaces the queue with the editor immediately and provides a `Back to review queue` control, avoiding fragile scroll-to-position behavior across web and Android. Direct TypeScript, ESLint, and formatting checks passed; the reviewer-workspace component suite passed 2/2 and verifies the list-to-editor transition and return path.
+
+Known limitations and owner decisions:
+
+- The importer intentionally supports multiple-choice rows only and requires objective, concept, and question-family codes to exist already. Automatic hierarchy creation is not authorized.
+- The workspace uses a pasteable CSV text area and canonical blank template; it does not add a native document-picker dependency.
+- In-app localhost inspection was blocked by the browser tool's URL policy. Component tests and Expo exports cover the implementation; an authenticated owner browser check remains required.
+- Before real publication, the owner must confirm source authorization and the final reviewer-count, approval-authority, versioning, report, and audit-retention rules.
+
+Manual action required: run the linked database test command with the existing process-scoped development password and review the content workspace while signed in as an administrator or content reviewer. Do not initialize a production database.

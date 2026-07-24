@@ -38,6 +38,8 @@ All primary keys are UUIDs except the identity audit sequence. Enums and checks 
 - Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
 - Operations: CSV import jobs, audit log, and feature flags.
 
+Checkpoint 8 adds `csv_import_jobs` for safe import summaries, row-level errors, and warnings. `reviewer_import_question_csv` validates the entire payload before writing any question, forces accepted rows to draft, and records an audited job. `private.question_content_snapshot` captures the complete approved question, choices, answer feedback, and learning support before approval or an approved edit. Reviewer save and decision functions are the only supported mutation path; editing approved content creates the next draft version instead of rewriting history.
+
 Hierarchy links are nullable where an exam omits a level. Study, coaching, and operational schemas remain proposals until their checkpoints.
 
 ## Secure grading transaction
