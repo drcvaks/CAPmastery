@@ -11,7 +11,7 @@ export default function StudySessionScreen() {
     <AppScreen
       eyebrow="Study session"
       title="Question session"
-      description="Answers are graded securely. Practice-test feedback remains hidden until completion."
+      description="Answers are graded securely. Practice-test and challenge feedback remains hidden until completion."
     >
       <StudySessionView sessionId={sessionId ?? ""} />
     </AppScreen>

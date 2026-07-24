@@ -110,6 +110,25 @@ describe("practice test session", () => {
     expect(screen.queryByText("Synthetic explanation")).toBeNull();
   });
 
+  it("withholds challenge feedback until the student's set is complete", async () => {
+    jest.mocked(useStudySession).mockReturnValue({
+      data: { ...activeSession, mode: "challenge" },
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    await render(<StudySessionView sessionId={activeSession.id} />);
+
+    expect(screen.getByText("Answer saved")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Correctness and explanations will be available after you finish your challenge set.",
+      ),
+    ).toBeVisible();
+    expect(screen.queryByText("Correct.")).toBeNull();
+  });
+
   it("shows topic strengths and weaknesses only after completion", async () => {
     jest.mocked(useStudySession).mockReturnValue({
       data: {

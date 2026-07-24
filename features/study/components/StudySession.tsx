@@ -22,15 +22,18 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const completePractice = useCompletePracticeTest(sessionId);
   const setPaused = useSetPracticeTestPaused(sessionId);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedChoiceId, setSelectedChoiceId] = useState<string>();
+  const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const initialized = useRef(false);
   const timeoutRequested = useRef(false);
-  const questionStartedAt = useRef(Date.now());
+  const questionStartedAt = useRef<number | undefined>(undefined);
 
   const session = sessionQuery.data;
   const currentQuestion = session?.questions[currentIndex];
+  const selectedChoiceId = currentQuestion
+    ? selectedChoices[currentQuestion.session_question_id]
+    : undefined;
   const practiceResults = usePracticeTestResults(
     sessionId,
     session?.mode === "practice_test" && session.status === "completed",
@@ -45,12 +48,13 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   }, [session]);
 
   useEffect(() => {
-    setSelectedChoiceId(undefined);
     questionStartedAt.current = Date.now();
-  }, [currentIndex]);
+  }, [currentQuestion?.session_question_id]);
 
   useEffect(() => {
     if (session?.remainingSeconds !== undefined) {
+      // The server timer snapshot is authoritative after a fetch or resume.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRemainingSeconds(session.remainingSeconds);
     }
   }, [session?.remainingSeconds]);
@@ -125,6 +129,34 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         />
       );
     }
+    if (session.mode === "challenge") {
+      return (
+        <AppCard
+          title="Your challenge set is complete"
+          description="Your effort is recorded. Shared results unlock in the Challenge tab after both students finish."
+        >
+          <Text style={styles.supportive}>
+            Completion, improvement, and accuracy all contribute positive points. There is no public
+            lowest-score ranking.
+          </Text>
+          <AppButton
+            label="Review my answers"
+            onPress={() => {
+              const firstAttempted = session.questions.findIndex((question) => question.attempt_id);
+              if (firstAttempted >= 0) {
+                setCurrentIndex(firstAttempted);
+                setShowResults(false);
+              }
+            }}
+          />
+          <AppButton
+            label="Back to family challenge"
+            onPress={() => router.replace("/challenge")}
+            variant="secondary"
+          />
+        </AppCard>
+      );
+    }
     const percentage = Math.round((session.correctCount / session.questionCount) * 100);
     return (
       <AppCard
@@ -142,7 +174,9 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
 
   const answered = Boolean(currentQuestion.attempt_id);
   const chosenChoiceId = currentQuestion.selected_choice_id ?? selectedChoiceId;
-  const practiceActive = session.mode === "practice_test" && session.status === "active";
+  const delayedFeedbackActive =
+    (session.mode === "practice_test" || session.mode === "challenge") &&
+    session.status === "active";
 
   async function handleSubmit() {
     if (!selectedChoiceId || !currentQuestion) return;
@@ -150,7 +184,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       await submitAnswer.mutateAsync({
         sessionQuestionId: currentQuestion.session_question_id,
         selectedChoiceId,
-        responseTimeMs: Date.now() - questionStartedAt.current,
+        responseTimeMs: Date.now() - (questionStartedAt.current ?? Date.now()),
       });
       const refreshed = await sessionQuery.refetch();
       if (refreshed.data?.status === "completed") setShowResults(true);
@@ -248,7 +282,12 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               }}
               disabled={answered || submitAnswer.isPending || session.isPaused}
               key={choice.id}
-              onPress={() => setSelectedChoiceId(choice.id)}
+              onPress={() =>
+                setSelectedChoices((current) => ({
+                  ...current,
+                  [currentQuestion.session_question_id]: choice.id,
+                }))
+              }
               style={[
                 styles.choice,
                 selected && styles.choiceSelected,
@@ -314,10 +353,14 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               : null
           }
         />
-      ) : answered && practiceActive ? (
+      ) : answered && delayedFeedbackActive ? (
         <AppCard
           title="Answer saved"
-          description="Correctness and explanations will be available when the practice test ends."
+          description={
+            session.mode === "challenge"
+              ? "Correctness and explanations will be available after you finish your challenge set."
+              : "Correctness and explanations will be available when the practice test ends."
+          }
         >
           <AppButton
             label={currentIndex + 1 === session.questions.length ? "View results" : "Next question"}
@@ -391,7 +434,7 @@ function PracticeResults({
 }
 
 function nextLabel(
-  mode: "study" | "practice_test",
+  mode: "study" | "practice_test" | "challenge",
   status: "active" | "completed" | "abandoned",
   currentIndex: number,
   questionCount: number,

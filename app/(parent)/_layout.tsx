@@ -15,6 +15,7 @@ export default function ParentLayout() {
         }}
       >
         <Stack.Screen name="family-progress" options={{ headerShown: false }} />
+        <Stack.Screen name="family-challenge" options={{ headerShown: false }} />
       </Stack>
     </RequireRole>
   );

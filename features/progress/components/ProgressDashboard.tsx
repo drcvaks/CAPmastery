@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
+import { AppLinkButton } from "../../../components/common/AppLinkButton";
 import { AppScreen } from "../../../components/common/AppScreen";
 import { theme } from "../../../lib/constants/theme";
 import { SignOutButton } from "../../auth/components/SignOutButton";
@@ -17,14 +18,9 @@ type ProgressDashboardProps = {
 
 export function ProgressDashboard({ audience, compact = false }: ProgressDashboardProps) {
   const students = useProgressStudents();
-  const [selectedStudentId, setSelectedStudentId] = useState<string>();
+  const [selectedStudentOverride, setSelectedStudentId] = useState<string>();
+  const selectedStudentId = selectedStudentOverride ?? students.data?.[0]?.student_id;
   const dashboard = useProgressDashboard(selectedStudentId);
-
-  useEffect(() => {
-    if (!selectedStudentId && students.data?.[0]) {
-      setSelectedStudentId(students.data[0].student_id);
-    }
-  }, [selectedStudentId, students.data]);
 
   const title = compact
     ? "Student dashboard"
@@ -38,7 +34,16 @@ export function ProgressDashboard({ audience, compact = false }: ProgressDashboa
 
   return (
     <AppScreen
-      actions={compact || audience === "guardian" ? <SignOutButton /> : undefined}
+      actions={
+        audience === "guardian" ? (
+          <View style={styles.studentTabs}>
+            <AppLinkButton href="/family-challenge" label="Family challenge" variant="secondary" />
+            <SignOutButton />
+          </View>
+        ) : compact ? (
+          <SignOutButton />
+        ) : undefined
+      }
       description={description}
       eyebrow={audience === "guardian" ? "Parent or coach" : "Student"}
       title={title}

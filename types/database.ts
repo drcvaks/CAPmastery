@@ -1,4 +1,4 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+﻿export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -6,8 +6,66 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5";
   };
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          active: boolean;
+          category: string;
+          code: string;
+          created_at: string;
+          description: string;
+          id: string;
+          sort_order: number;
+          title: string;
+        };
+        Insert: {
+          active?: boolean;
+          category: string;
+          code: string;
+          created_at?: string;
+          description: string;
+          id?: string;
+          sort_order: number;
+          title: string;
+        };
+        Update: {
+          active?: boolean;
+          category?: string;
+          code?: string;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          sort_order?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           action: string;
@@ -45,6 +103,210 @@ export type Database = {
             columns: ["actor_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      challenge_participants: {
+        Row: {
+          baseline_accuracy: number | null;
+          challenge_id: string;
+          completed_at: string | null;
+          created_at: string;
+          session_id: string;
+          student_id: string;
+        };
+        Insert: {
+          baseline_accuracy?: number | null;
+          challenge_id: string;
+          completed_at?: string | null;
+          created_at?: string;
+          session_id: string;
+          student_id: string;
+        };
+        Update: {
+          baseline_accuracy?: number | null;
+          challenge_id?: string;
+          completed_at?: string | null;
+          created_at?: string;
+          session_id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey";
+            columns: ["challenge_id"];
+            isOneToOne: false;
+            referencedRelation: "challenges";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "challenge_participants_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: true;
+            referencedRelation: "study_sessions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "challenge_participants_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      challenge_question_sets: {
+        Row: {
+          challenge_id: string;
+          position: number;
+          question_id: string;
+          question_version: number;
+        };
+        Insert: {
+          challenge_id: string;
+          position: number;
+          question_id: string;
+          question_version: number;
+        };
+        Update: {
+          challenge_id?: string;
+          position?: number;
+          question_id?: string;
+          question_version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "challenge_question_sets_challenge_id_fkey";
+            columns: ["challenge_id"];
+            isOneToOne: false;
+            referencedRelation: "challenges";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "challenge_question_sets_question_id_fkey";
+            columns: ["question_id"];
+            isOneToOne: false;
+            referencedRelation: "questions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      challenge_results: {
+        Row: {
+          accuracy_points: number;
+          baseline_accuracy: number | null;
+          challenge_id: string;
+          completed_at: string;
+          completion_points: number;
+          correct_count: number;
+          improvement_percent: number | null;
+          improvement_points: number;
+          question_count: number;
+          recognition: string;
+          score_percent: number;
+          student_id: string;
+          total_points: number;
+        };
+        Insert: {
+          accuracy_points: number;
+          baseline_accuracy?: number | null;
+          challenge_id: string;
+          completed_at?: string;
+          completion_points: number;
+          correct_count: number;
+          improvement_percent?: number | null;
+          improvement_points: number;
+          question_count: number;
+          recognition: string;
+          score_percent: number;
+          student_id: string;
+          total_points: number;
+        };
+        Update: {
+          accuracy_points?: number;
+          baseline_accuracy?: number | null;
+          challenge_id?: string;
+          completed_at?: string;
+          completion_points?: number;
+          correct_count?: number;
+          improvement_percent?: number | null;
+          improvement_points?: number;
+          question_count?: number;
+          recognition?: string;
+          score_percent?: number;
+          student_id?: string;
+          total_points?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "challenge_results_challenge_id_student_id_fkey";
+            columns: ["challenge_id", "student_id"];
+            isOneToOne: true;
+            referencedRelation: "challenge_participants";
+            referencedColumns: ["challenge_id", "student_id"];
+          },
+        ];
+      };
+      challenges: {
+        Row: {
+          completed_at: string | null;
+          created_at: string;
+          created_by: string;
+          ends_at: string;
+          exam_id: string;
+          id: string;
+          question_count: number;
+          scoring_method: string;
+          starts_at: string;
+          status: Database["public"]["Enums"]["challenge_status"];
+          title: string;
+          updated_at: string;
+          visibility: string;
+        };
+        Insert: {
+          completed_at?: string | null;
+          created_at?: string;
+          created_by: string;
+          ends_at: string;
+          exam_id: string;
+          id?: string;
+          question_count: number;
+          scoring_method?: string;
+          starts_at?: string;
+          status?: Database["public"]["Enums"]["challenge_status"];
+          title: string;
+          updated_at?: string;
+          visibility?: string;
+        };
+        Update: {
+          completed_at?: string | null;
+          created_at?: string;
+          created_by?: string;
+          ends_at?: string;
+          exam_id?: string;
+          id?: string;
+          question_count?: number;
+          scoring_method?: string;
+          starts_at?: string;
+          status?: Database["public"]["Enums"]["challenge_status"];
+          title?: string;
+          updated_at?: string;
+          visibility?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "challenges_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "challenges_exam_id_fkey";
+            columns: ["exam_id"];
+            isOneToOne: false;
+            referencedRelation: "exams";
             referencedColumns: ["id"];
           },
         ];
@@ -336,6 +598,55 @@ export type Database = {
           {
             foreignKeyName: "csv_import_jobs_importer_id_fkey";
             columns: ["importer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      encouragements: {
+        Row: {
+          challenge_id: string;
+          created_at: string;
+          id: string;
+          reaction: Database["public"]["Enums"]["encouragement_reaction"];
+          recipient_id: string;
+          sender_id: string;
+        };
+        Insert: {
+          challenge_id: string;
+          created_at?: string;
+          id?: string;
+          reaction: Database["public"]["Enums"]["encouragement_reaction"];
+          recipient_id: string;
+          sender_id: string;
+        };
+        Update: {
+          challenge_id?: string;
+          created_at?: string;
+          id?: string;
+          reaction?: Database["public"]["Enums"]["encouragement_reaction"];
+          recipient_id?: string;
+          sender_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "encouragements_challenge_id_fkey";
+            columns: ["challenge_id"];
+            isOneToOne: false;
+            referencedRelation: "challenges";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "encouragements_recipient_id_fkey";
+            columns: ["recipient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "encouragements_sender_id_fkey";
+            columns: ["sender_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -1413,6 +1724,45 @@ export type Database = {
           },
         ];
       };
+      student_achievements: {
+        Row: {
+          achievement_id: string;
+          awarded_at: string;
+          evidence: Json;
+          id: string;
+          student_id: string;
+        };
+        Insert: {
+          achievement_id: string;
+          awarded_at?: string;
+          evidence?: Json;
+          id?: string;
+          student_id: string;
+        };
+        Update: {
+          achievement_id?: string;
+          awarded_at?: string;
+          evidence?: Json;
+          id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_achievements_achievement_id_fkey";
+            columns: ["achievement_id"];
+            isOneToOne: false;
+            referencedRelation: "achievements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "student_achievements_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       student_guardian_links: {
         Row: {
           can_assign_content: boolean;
@@ -1987,6 +2337,16 @@ export type Database = {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;
       };
+      create_private_challenge: {
+        Args: {
+          p_ends_at?: string;
+          p_exam_id: string;
+          p_question_count?: number;
+          p_student_ids: string[];
+          p_title: string;
+        };
+        Returns: string;
+      };
       create_study_session: {
         Args: {
           p_exam_id: string;
@@ -2007,6 +2367,33 @@ export type Database = {
           question_type: Database["public"]["Enums"]["question_type"];
           source_reference: string;
           topic_id: string;
+        }[];
+      };
+      get_challenge_creation_exams: {
+        Args: never;
+        Returns: {
+          available_question_count: number;
+          exam_id: string;
+          exam_title: string;
+        }[];
+      };
+      get_challenge_creation_students: {
+        Args: never;
+        Returns: {
+          display_name: string;
+          student_id: string;
+        }[];
+      };
+      get_challenge_encouragements: {
+        Args: { p_challenge_id: string };
+        Returns: {
+          created_at: string;
+          encouragement_id: string;
+          reaction: Database["public"]["Enums"]["encouragement_reaction"];
+          recipient_id: string;
+          recipient_name: string;
+          sender_id: string;
+          sender_name: string;
         }[];
       };
       get_content_review_question: {
@@ -2052,6 +2439,30 @@ export type Database = {
           topic_title: string;
         }[];
       };
+      get_private_challenges: {
+        Args: never;
+        Returns: {
+          can_manage: boolean;
+          challenge_id: string;
+          challenge_status: Database["public"]["Enums"]["challenge_status"];
+          created_by: string;
+          ends_at: string;
+          exam_id: string;
+          exam_title: string;
+          improvement_percent: number;
+          participant_completed: boolean;
+          participant_name: string;
+          participant_session_id: string;
+          participant_student_id: string;
+          question_count: number;
+          recognition: string;
+          results_revealed: boolean;
+          score_percent: number;
+          starts_at: string;
+          title: string;
+          total_points: number;
+        }[];
+      };
       get_progress_dashboard: {
         Args: { p_exam_id?: string; p_student_id: string };
         Returns: {
@@ -2090,6 +2501,18 @@ export type Database = {
           correct_count: number;
           questions_answered: number;
           trend_date: string;
+        }[];
+      };
+      get_student_achievements: {
+        Args: { p_student_id?: string };
+        Returns: {
+          achievement_id: string;
+          awarded_at: string;
+          category: string;
+          code: string;
+          description: string;
+          earned: boolean;
+          title: string;
         }[];
       };
       get_study_session_questions: {
@@ -2205,6 +2628,14 @@ export type Database = {
         };
         Returns: undefined;
       };
+      send_challenge_encouragement: {
+        Args: {
+          p_challenge_id: string;
+          p_reaction: Database["public"]["Enums"]["encouragement_reaction"];
+          p_recipient_id: string;
+        };
+        Returns: string;
+      };
       set_practice_test_paused: {
         Args: { p_paused: boolean; p_session_id: string };
         Returns: undefined;
@@ -2234,6 +2665,7 @@ export type Database = {
     };
     Enums: {
       app_role: "student" | "parent" | "coach" | "content_reviewer" | "squadron_leader" | "admin";
+      challenge_status: "active" | "completed" | "cancelled";
       cognitive_level: "recall" | "understanding" | "application" | "scenario";
       concept_relationship_type:
         | "supports"
@@ -2248,6 +2680,8 @@ export type Database = {
         | "reinforces";
       content_status: "draft" | "active" | "archived";
       csv_import_status: "validating" | "failed" | "completed";
+      encouragement_reaction:
+        "great_effort" | "keep_going" | "proud_of_you" | "nice_comeback" | "team_spirit";
       learning_relationship_type: "prerequisite" | "related";
       mastery_status:
         "not_started" | "beginning" | "developing" | "proficient" | "mastered" | "needs_review";
@@ -2281,7 +2715,7 @@ export type Database = {
       review_decision: "approve" | "request_changes" | "reject";
       role_scope_type: "global" | "organization";
       source_authorization_status: "pending" | "approved" | "restricted" | "rejected";
-      study_session_mode: "study" | "practice_test";
+      study_session_mode: "study" | "practice_test" | "challenge";
       study_session_status: "active" | "completed" | "abandoned";
     };
     CompositeTypes: {
@@ -2402,9 +2836,13 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["student", "parent", "coach", "content_reviewer", "squadron_leader", "admin"],
+      challenge_status: ["active", "completed", "cancelled"],
       cognitive_level: ["recall", "understanding", "application", "scenario"],
       concept_relationship_type: [
         "supports",
@@ -2420,6 +2858,13 @@ export const Constants = {
       ],
       content_status: ["draft", "active", "archived"],
       csv_import_status: ["validating", "failed", "completed"],
+      encouragement_reaction: [
+        "great_effort",
+        "keep_going",
+        "proud_of_you",
+        "nice_comeback",
+        "team_spirit",
+      ],
       learning_relationship_type: ["prerequisite", "related"],
       mastery_status: [
         "not_started",
@@ -2461,7 +2906,7 @@ export const Constants = {
       review_decision: ["approve", "request_changes", "reject"],
       role_scope_type: ["global", "organization"],
       source_authorization_status: ["pending", "approved", "restricted", "rejected"],
-      study_session_mode: ["study", "practice_test"],
+      study_session_mode: ["study", "practice_test", "challenge"],
       study_session_status: ["active", "completed", "abandoned"],
     },
   },

@@ -2,6 +2,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { WorkspaceSwitcher } from "../../features/auth/components/WorkspaceSwitcher";
 import { theme } from "../../lib/constants/theme";
 
 type AppScreenProps = PropsWithChildren<{
@@ -17,20 +18,24 @@ export function AppScreen({ eyebrow, title, description, actions, children }: Ap
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, wide && styles.scrollContentWide]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.header}>
-          {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-          <Text accessibilityRole="header" style={[styles.title, wide && styles.titleWide]}>
-            {title}
-          </Text>
-          {description ? <Text style={styles.description}>{description}</Text> : null}
-          {actions ? <View style={styles.actions}>{actions}</View> : null}
-        </View>
-        {children}
-      </ScrollView>
+      <View style={[styles.shell, wide && styles.shellWide]}>
+        <WorkspaceSwitcher vertical={wide} />
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, wide && styles.scrollContentWide]}
+          keyboardShouldPersistTaps="handled"
+          style={styles.scroller}
+        >
+          <View style={styles.header}>
+            {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
+            <Text accessibilityRole="header" style={[styles.title, wide && styles.titleWide]}>
+              {title}
+            </Text>
+            {description ? <Text style={styles.description}>{description}</Text> : null}
+            {actions ? <View style={styles.actions}>{actions}</View> : null}
+          </View>
+          {children}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -40,6 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     flex: 1,
   },
+  scroller: { flex: 1 },
   scrollContent: {
     alignSelf: "center",
     gap: theme.spacing.lg,
@@ -54,6 +60,8 @@ const styles = StyleSheet.create({
   header: {
     gap: theme.spacing.sm,
   },
+  shell: { flex: 1 },
+  shellWide: { flexDirection: "row" },
   eyebrow: {
     color: theme.colors.accent,
     fontSize: 13,

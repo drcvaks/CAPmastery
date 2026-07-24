@@ -151,3 +151,13 @@ Student validation can use an existing assigned pilot account. A real family-das
 Migrations `202607220019`–`202607220022` are applied only to the linked development project. No new account, credential, environment variable, service-role key, Storage bucket, content import, production database, or AI provider is required. The database password is needed only as the existing process-scoped `CAP_MASTERY_DB_PASSWORD` for the owner-run linked pgTAP suite.
 
 The ten-question, optional 15-minute, no-pause Chapter 1 configuration is a provisional product decision for pilot validation. Before broader use, the owner must approve or replace its question count, time limit, pause policy, and difficulty/cognitive distribution using an authorized exam blueprint. It must not be labeled an official simulation until that review occurs.
+
+## Checkpoint 9 manual validation boundary
+
+No new account, credential, environment variable, service-role key, Storage bucket, production database, AI provider, or content import is required.
+
+To create a real family challenge, the existing adult account must have the global `parent` or `coach` role. Both intended student accounts must have active `student_guardian_links` to that adult with `can_manage_challenges = true`. At least three questions in the chosen exam must be reviewed as `approved` and `active`; private pilot drafts are intentionally not eligible for challenges.
+
+The database password remains necessary only as process-scoped `CAP_MASTERY_DB_PASSWORD` for the owner-run linked pgTAP suite. Do not save it in `.env.local`, source files, Git, or chat.
+
+The provisional pilot decisions are: exactly two students, a seven-day duration, selectable sets of 3/5/10/15/20 approved questions, and positive points weighted as completion 40, accuracy up to 40, and improvement up to 20. The five reactions are Great effort, Keep going, Proud of you, Nice comeback, and Team spirit. The owner should approve or revise these product choices before broader deployment.

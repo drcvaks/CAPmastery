@@ -37,6 +37,7 @@ Question delivery uses the typed `contentService`, narrow TanStack Query keys, a
 - The Study tab owns a nested stack containing the catalog and active session. Switching to Progress/Home preserves that stack, so returning to Study resumes the same question rather than targeting the catalog or creating another session.
 - `(parent)`: authenticated users with a global `parent` or `coach` role; the family dashboard can select only students returned by the linked-progress projection.
 - `(admin)`: authenticated users with the global `admin` role; administration features remain scheduled for later checkpoints.
+- Every authenticated `AppScreen` includes a role-aware workspace switcher. It renders as a left rail on wide screens and a compact top row on smaller screens, and offers only Student, Family, or Admin destinations authorized by the loaded database roles. Route-group guards still independently recheck each destination.
 
 The root restores the session and routes to `/admin`, `/home`, or `/unauthorized`. Direct URLs are checked by route-group guards. Client routing remains a usability boundary; RLS, revoked write grants, and protected functions remain authoritative.
 
@@ -92,3 +93,11 @@ Practice tests reuse the owned study-session infrastructure but have an explicit
 The initial Leadership Chapter 1 blueprint is an unofficial pilot configuration: ten questions, optional 15-minute timer, no pause, difficulty targets 4 easy/4 medium/2 hard, and cognitive targets 4 recall/3 understanding/1 application/2 scenario. It is configuration data, not a claim about the official CAP exam. An approved official blueprint can replace it without changing the session model.
 
 Normal study attempts continue to drive question state, topic mastery, recent accuracy, and ordinary trends. Practice attempts do not mutate those normal-study records. Completed practice scores contribute a distinct readiness component, while all attempts can contribute to coverage. AI, challenge mode, production deployment, and official-result claims remain outside this checkpoint.
+
+## Checkpoint 9 boundary
+
+Private family challenges reuse the owned study-session infrastructure with an explicit `challenge` mode. The parent/coach creates one immutable approved-question snapshot, and the database copies the same question IDs, versions, and order into one separately owned session per student. Active challenge submissions are graded on the server but return neutral acknowledgements; results unlock together only after both sessions finish.
+
+`features/challenges/` owns schemas, pure positive scoring, TanStack Query hooks, and the shared parent/student workspace. Thin routes expose a student Challenge tab and a linked-parent Family Challenge screen. Challenge scoring recognizes completion, accuracy, and improvement without winner, rank, or lowest-score concepts. Achievements are derived from server evidence and include first steps, persistence, steady effort, topic mastery, comeback, improvement, and helping the team.
+
+Challenge visibility does not broaden ordinary study access. Participants still own only their own session and attempt history. The creator and two participants can see the challenge summary, while unrelated identities cannot. Predefined reactions replace open messaging. AI, public competition, assignments/goals, notifications, production deployment, and broader challenge formats remain outside this checkpoint.

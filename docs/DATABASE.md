@@ -35,7 +35,7 @@ All primary keys are UUIDs except the identity audit sequence. Enums and checks 
 ## Later domains
 
 - Study later work: practice-test evidence.
-- Coaching/motivation: assignments, goals, achievements, private challenges, participants/results, and predefined encouragements.
+- Coaching/motivation later work: assignments and goals.
 - Operations: CSV import jobs, audit log, and feature flags.
 
 Checkpoint 8 adds `csv_import_jobs` for safe import summaries, row-level errors, and warnings. `reviewer_import_question_csv` validates the entire payload before writing any question, forces accepted rows to draft, and records an audited job. `private.question_content_snapshot` captures the complete approved question, choices, answer feedback, and learning support before approval or an approved edit. Reviewer save and decision functions are the only supported mutation path; editing approved content creates the next draft version instead of rewriting history.
@@ -93,6 +93,19 @@ Migrations `202607220019`–`202607220021` add the `practice_test` session mode,
 Active practice delivery returns prompts and choices but nulls correctness, answer keys, explanations, learning support, and aggregate scores. `submit_answer` still grades and stores the attempt on the server, but its active-test response is neutral. `complete_practice_test` releases only submitted-answer feedback; unanswered items remain protected. `get_practice_test_results` provides owned completed-session score and topic analysis.
 
 The readiness wrapper keeps ordinary recent accuracy and trends limited to `study` sessions, adds the mean of the last three completed practice tests as a separate 25% component, and applies the existing evidence caps. Coverage is the distinct union of normal mastery state and all server-recorded attempts. Practice sessions do not update `student_question_state` or `student_topic_mastery`. Forward correction `202607220022` preserves legacy mastery-state coverage while adding practice-attempt coverage.
+
+## Checkpoint 9 achievements and challenges
+
+Migrations `202607240025`–`202607240028` add the `challenge` study-session mode, compatible session constraints, policy-helper grants, and seven RLS-protected motivation tables:
+
+- `achievements` and `student_achievements` hold predefined recognition and evidence-backed, idempotent awards.
+- `challenges` stores the private two-student lifecycle, approved exam, duration, immutable scoring method, and private-family visibility.
+- `challenge_question_sets` snapshots one shared ordered set of approved question IDs and versions.
+- `challenge_participants` connects each student to a separately owned challenge session and snapshots a recent non-challenge accuracy baseline.
+- `challenge_results` stores completion, accuracy, improvement, positive point components, and supportive recognition.
+- `encouragements` accepts only the predefined reaction enum; no free-text message column exists.
+
+`create_private_challenge` requires a parent/coach and exactly two active guardian links with `can_manage_challenges`. It creates both sessions atomically. Session-completion triggers calculate results and achievements from server data. One result may be stored privately while the other student is still working, but RLS and the challenge projection withhold both scores until every participant completes. Challenge attempts do not modify ordinary mastery, preserving normal adaptive evidence.
 
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.

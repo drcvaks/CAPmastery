@@ -11,7 +11,7 @@ const choiceSchema = z
 
 const sessionQuestionRowSchema = z.object({
   session_id: z.uuid(),
-  session_mode: z.enum(["study", "practice_test"]),
+  session_mode: z.enum(["study", "practice_test", "challenge"]),
   session_status: z.enum(["active", "completed", "abandoned"]),
   question_count: z.number().int().positive(),
   answered_count: z.number().int().nonnegative(),

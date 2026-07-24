@@ -1,16 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import * as Linking from "expo-linking";
 import { Platform } from "react-native";
-import {
-  createContext,
-  type PropsWithChildren,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getSupabaseClient, startNativeAuthAutoRefresh } from "../../lib/supabase/client";
 import {
@@ -19,22 +10,8 @@ import {
   getSafeAuthMessage,
   signOut as requestSignOut,
 } from "../../services/authService";
+import { AuthContext, type AuthContextValue, type AuthStatus } from "./AuthContext";
 import type { AccessContext } from "./types";
-
-type AuthStatus = "configuration_missing" | "error" | "loading" | "signed_in" | "signed_out";
-
-type AuthContextValue = {
-  access: AccessContext | null;
-  completePasswordRecovery: () => void;
-  errorMessage: string | null;
-  passwordRecovery: boolean;
-  refreshAccess: () => Promise<void>;
-  session: Session | null;
-  signOut: () => Promise<void>;
-  status: AuthStatus;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
@@ -141,8 +118,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
         });
       }
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Supabase is not configured.");
-      setStatus("configuration_missing");
+      queueMicrotask(() => {
+        if (mounted) {
+          setErrorMessage(error instanceof Error ? error.message : "Supabase is not configured.");
+          setStatus("configuration_missing");
+        }
+      });
     }
 
     return () => {
@@ -188,10 +169,4 @@ export function AuthProvider({ children }: PropsWithChildren) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth(): AuthContextValue {
-  const value = useContext(AuthContext);
-  if (!value) {
-    throw new Error("useAuth must be used inside AuthProvider.");
-  }
-  return value;
-}
+export { useAuth, useOptionalAuth } from "./AuthContext";

@@ -469,3 +469,51 @@ Known limitations and owner decisions:
 Manual actions completed: the owner ran the linked database suite and reviewed the workspace while signed in as an administrator. No production database was initialized.
 
 Checkpoint 8 is complete. Stop here. Recommended next checkpoint after explicit owner authorization: Checkpoint 9, Achievements and Family Challenge.
+
+## Checkpoint 9 — Achievements and Family Challenge
+
+Status: implementation and linked pgTAP complete; owner web acceptance pending. Date: 2026-07-24.
+
+Completed:
+
+- Added seven evidence-backed achievement definitions for first-session, persistence, steady-effort, topic-mastery, comeback, improvement, and team completion recognition.
+- Added a private two-student challenge workflow for linked parents/coaches. The database snapshots one approved question set and copies identical question IDs, versions, and order into separately owned student sessions.
+- Added positive scoring that recognizes completion, accuracy, and improvement. Results contain no rank, winner, loser, or lowest-score display and stay hidden until both students finish.
+- Added five predefined encouragement reactions with no open-message field.
+- Added the student Challenge tab and parent Family Challenge screen, including creation, completion status, supportive results, reactions, and student achievements.
+- Added a shared role-aware workspace switcher after owner review found that admin/parent accounts had no convenient cross-workspace route. Wide screens use a left rail and narrow screens use a top row. Admin-only users see only Admin; multi-role users see only their authorized Student, Family, and/or Admin destinations.
+- The first web load of the switcher hit Expo Router's `Link asChild` style contract because the direct `Pressable` received an active-state style array. The switcher now passes a `StyleSheet.flatten` result at that boundary. TypeScript, targeted ESLint, 4/4 switcher/navigation tests, and the 1,581-module web export pass after the correction.
+- Reused the shared study-session component with active challenge feedback withheld until the student's set completes. Challenge attempts remain separate from normal mastery updates.
+
+Database changes:
+
+- Applied development-only migration `202607240025_challenge_session_mode.sql`, adding the explicit challenge session enum value.
+- Applied development-only migration `202607240026_achievements_family_challenges.sql`, adding seven RLS-enabled tables, indexes, policies, award/finalization triggers, and protected creation/read/reaction RPCs.
+- Added forward correction `202607240027_challenge_session_constraints.sql` after the first linked test exposed that the Checkpoint 7 practice configuration and selection-reason checks did not yet admit the new challenge mode. It permits only untimed/unpaused challenge sessions and the `challenge_shared` selection reason.
+- Added forward correction `202607240028_challenge_policy_helper_grants.sql` after the next linked run showed that authenticated RLS evaluation could not execute the otherwise-correct private challenge helper. Only the two boolean policy helpers receive authenticated execute permission; all mutation/award helpers remain revoked.
+- Regenerated checked-in database TypeScript types. Local and remote development histories match through migration 026; linked database lint reports no schema errors. No production database, service-role client key, Storage bucket, AI service, or new environment variable was added.
+
+Validation so far:
+
+- Direct TypeScript check: exit 0.
+- Direct ESLint check: exit 0 with no warnings or errors. CommonJS/Jest globals and generated-file exclusions are explicit in the flat configuration.
+- Targeted Prettier check across application, tests, configuration, types, and documentation: exit 0.
+- Jest with `--runInBand --forceExit`: exit 0 after the workspace-switcher refinement; 22 suites and 82/82 tests passed. The existing runner leaves an open handle after reporting and therefore needs `--forceExit`.
+- New focused suites: 3 suites and 8/8 tests passed.
+- `npm.cmd run validate:expo`: exit 0; SDK 57 public configuration resolved.
+- `npx.cmd expo-doctor`: exit 0; 20/20 checks passed.
+- Final `npm.cmd run export:web`: exit 0; 1,581 modules bundled to ignored `dist/web`.
+- Final `npm.cmd run export:android`: exit 0; 2,017 modules bundled and a 6.1 MB Hermes bytecode bundle was written to ignored `dist/android`.
+- `npx.cmd supabase migration list --linked`: exit 0; local and remote histories match through migration 028.
+- `npx.cmd supabase db lint --linked --level warning`: exit 0; no schema errors.
+- Final owner-linked pgTAP passed achievements/challenges 66/66, adaptive mastery 34/34, content import/review 50/50, content permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot package access 19/19, practice tests 56/56, progress/readiness 34/34, and study sessions 38/38: aggregate 356/356 passed.
+- The first owner-linked Checkpoint 9 run stopped when challenge creation reached the legacy `study_sessions_practice_configuration_check`. No challenge was persisted because the pgTAP file runs in a transaction. Migration 027 corrects both that constraint and the immediately downstream selection-reason constraint. It is applied to development; histories match and linked lint reports no schema errors. The pgTAP rerun is pending.
+- The next linked run reached challenge access checks and exposed the missing authenticated execute grant on `private.can_access_challenge`. Migration 028 adds the same narrow policy-helper grant pattern already used by identity, content, and study RLS. The test now asserts both challenge policy-helper grants explicitly. Migration 028 is applied; histories match and linked lint reports no schema errors.
+- The following linked run reached the final persistence-award fixture and correctly rejected its test-only `achievement_fixture` selection reason. The transaction rolled back. The fixture now uses the existing allowed `basic_ordered` value; no application schema, RLS, scoring, or challenge behavior changed.
+
+Known limitations and owner decisions:
+
+- Real challenge creation requires two existing linked students with `can_manage_challenges = true` and at least three approved active questions. Draft-only pilot content is not eligible.
+- The seven-day duration, supported counts, point weights, achievements, and reaction set are provisional pilot product choices.
+- There is no challenge cancellation UI, notification, public competition, free-form chat, assignment/goal system, or AI behavior in this checkpoint.
+- A parent-created challenge smoke test, both-student completion, delayed result reveal, and unrelated-user isolation remain to be owner-checked before this checkpoint is marked complete. Unrelated-user isolation is already covered automatically by the passing linked suite.

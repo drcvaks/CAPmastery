@@ -43,6 +43,13 @@ export default function StudentLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="challenge"
+          options={{
+            title: "Challenge",
+            tabBarIcon: ({ color, size }) => <Ionicons color={color} name="trophy" size={size} />,
+          }}
+        />
       </Tabs>
     </RequireRole>
   );

@@ -74,6 +74,16 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 - Every progress RPC authenticates the caller, validates the requested UUID and range, uses an empty `search_path`, and returns a student-safe projection. Direct mastery and attempt table policies remain unchanged.
 - Client route guards and student tabs improve navigation only; the database authorization helper is the security boundary.
 
+## Checkpoint 9 challenge and achievement access
+
+- Only a parent/coach may create a challenge, and both selected students must have active links to that creator with `can_manage_challenges = true`.
+- The database chooses approved active questions with protected answer keys, snapshots one set, and creates a separately owned session for each participant. A student cannot select the other participant's session or attempts.
+- The creator and two participants can read the private challenge summary. Unrelated students, reviewers, and administrators receive no implicit access.
+- Challenge result rows are RLS-hidden until the challenge is complete. The read projection also nulls scores until both students finish, preventing an early score leak.
+- Authenticated clients have no direct write grant on achievements, awards, challenges, participants, sets, results, or encouragements. Narrow security-definer functions use an empty `search_path` and explicit identity/link checks.
+- Encouragement accepts an enum value only and has no free-text field. Challenge results contain no rank, winner, loser, or public-lowest-score field.
+- Linked adults may read a child's achievement catalog only through the existing progress-view relationship. Awarding is idempotent and derived from server-owned sessions, attempts, mastery, and challenge results.
+
 ## Checkpoint 7 practice-test enforcement
 
 - Blueprint configuration is authenticated-read-only; clients cannot insert or alter blueprint rules.

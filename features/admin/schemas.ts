@@ -83,7 +83,7 @@ export type ReviewEditPayload = {
   source_page_start: string;
   source_page_end: string;
   estimated_time_seconds: string;
-  choices: Array<{ key: string; text: string; feedback: string }>;
+  choices: { key: string; text: string; feedback: string }[];
   correct_letter: string;
   explanation: string;
   remediation: string;
