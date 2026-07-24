@@ -86,6 +86,11 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 - Authenticated clients have no direct write grant on achievements, awards, challenges, participants, sets, results, or encouragements. Narrow security-definer functions use an empty `search_path` and explicit identity/link checks.
 - Encouragement accepts an enum value only and has no free-text field. Challenge results contain no rank, winner, loser, or public-lowest-score field.
 - Linked adults may read a child's achievement catalog only through the existing progress-view relationship. Awarding is idempotent and derived from server-owned sessions, attempts, mastery, and challenge results.
+- Learning-history resets are exceptional admin-only operations, not a parent or
+  student capability. The protected function requires explicit confirmation and a
+  10–240 character reason, rejects non-student targets, locks the target profile,
+  blocks any student participating in a shared challenge, and audits the counts
+  removed. It preserves identity, authorization, family links, and package access.
 
 ## Checkpoint 7 practice-test enforcement
 

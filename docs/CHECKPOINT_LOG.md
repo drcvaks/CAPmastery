@@ -522,3 +522,35 @@ Known limitations and owner decisions:
 - The seven-day duration, supported counts, point weights, achievements, and reaction set are provisional pilot product choices.
 - There is no challenge cancellation UI, notification, public competition, free-form chat, assignment/goal system, or AI behavior in this checkpoint.
 - A parent-created challenge smoke test, both-student completion, delayed result reveal, and unrelated-user isolation remain to be owner-checked before this checkpoint is marked complete. Unrelated-user isolation is already covered automatically by the passing linked suite.
+
+Additional owner-data protection:
+
+- Added migration `202607240032_admin_student_learning_reset.sql` for the owner's
+  requested pre-pilot cleanup of one student's test history. The operation previews
+  exact counts by default, requires explicit confirmation and an audit reason,
+  preserves the account/roles/family links/package access, and refuses to run while
+  the student belongs to a shared challenge.
+- Added `admin_learning_reset.test.sql` with 26 transaction-only assertions. The
+  expected complete linked aggregate is now 386 assertions. Applying migration 032,
+  running the linked suite, previewing Heshy's exact target, and explicitly
+  confirming the reset remain owner actions.
+- The first linked run passed the new reset suite 26/26. It exposed three legacy
+  content-permission assertions that counted the entire persistent approved bank
+  instead of their two transaction-only fixtures. Those assertions now filter the
+  synthetic question IDs; RLS and content delivery behavior are unchanged.
+- The next linked run passed the reset, import/review, and corrected content suites.
+  Three progress assertions similarly shared the real pilot exam, so persistent
+  approved questions and its catalog topic entered their totals. The progress suite
+  now creates and queries a transaction-only exam for deterministic isolation; no
+  progress function or application behavior changed.
+- Final owner-linked pgTAP passed achievements/challenges 67/67, adaptive mastery
+  34/34, admin learning reset 26/26, content import/review 53/53, content
+  permissions 32/32, identity/access RLS 15/15, learning support 12/12, pilot
+  package access 19/19, practice tests 56/56, progress/readiness 34/34, and study
+  sessions 38/38: aggregate 386/386 passed.
+- Owner preview found one active, unanswered two-student test challenge. Both
+  participant sessions contained zero answers and zero attempts, so the owner
+  discarded only that empty challenge/session shell and then confirmed the audited
+  reset. The reset removed 24 remaining sessions, 85 attempts, 30 question-state
+  rows, one topic-mastery row, and four achievement awards. Heshy's account,
+  profile, student role, family links, and pilot-package assignments were preserved.

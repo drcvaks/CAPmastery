@@ -161,3 +161,41 @@ To create a real family challenge, the existing adult account must have the glob
 The database password remains necessary only as process-scoped `CAP_MASTERY_DB_PASSWORD` for the owner-run linked pgTAP suite. Do not save it in `.env.local`, source files, Git, or chat.
 
 The provisional pilot decisions are: exactly two students, a seven-day duration, selectable sets of 3/5/10/15/20 approved questions, and positive points weighted as completion 40, accuracy up to 40, and improvement up to 20. The five reactions are Great effort, Keep going, Proud of you, Nice comeback, and Team spirit. The owner should approve or revise these product choices before broader deployment.
+
+### Resetting pre-pilot student learning history
+
+Migration `202607240032` provides a narrow reset for test history. It preserves the
+Auth account, profile, roles, guardian links, and pilot-package assignments. It
+deletes study/practice sessions and attempts, question state, topic mastery, and
+earned achievements. A shared challenge blocks the reset and must be resolved
+separately so another student's history is not affected.
+
+Run a preview first in the development Supabase SQL Editor, replacing both email
+placeholders with the real addresses:
+
+```sql
+begin;
+select set_config(
+  'request.jwt.claim.sub',
+  (
+    select id::text
+    from auth.users
+    where lower(email) = lower('ADMIN_EMAIL_HERE')
+  ),
+  true
+);
+select public.admin_reset_student_learning_progress(
+  (
+    select id
+    from auth.users
+    where lower(email) = lower('HESHY_EMAIL_HERE')
+  ),
+  'Remove pre-pilot testing history',
+  false
+);
+rollback;
+```
+
+Verify the returned `student_id` and counts. If `blocked` is `false`, repeat the
+same transaction with the final argument changed to `true` and replace `rollback`
+with `commit`. This deletion is not reversible from the application.

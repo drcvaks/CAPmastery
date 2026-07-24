@@ -49,10 +49,20 @@ insert into public.student_guardian_links (
   ('d1111111-1111-4111-8111-111111111111', 'd3333333-3333-4333-8333-333333333333', 'parent', 'active', true, false, false, 'd4444444-4444-4444-8444-444444444444'),
   ('d2222222-2222-4222-8222-222222222222', 'd3333333-3333-4333-8333-333333333333', 'parent', 'active', true, false, false, 'd4444444-4444-4444-8444-444444444444');
 
+insert into public.exams (id, program_id, code, title, status, sort_order)
+values (
+  'd4000000-0000-4000-8000-000000000001',
+  '10000000-0000-4000-8000-000000000001',
+  'PROGRESS_TEST',
+  'Progress transaction-only exam',
+  'active',
+  900
+);
+
 insert into public.topics (id, exam_id, code, title, status, sort_order)
 values
-  ('d5000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001', 'PROGRESS_WEAK', 'Progress weak topic', 'active', 200),
-  ('d5000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000001', 'PROGRESS_NEW', 'Progress new topic', 'active', 201);
+  ('d5000000-0000-4000-8000-000000000001', 'd4000000-0000-4000-8000-000000000001', 'PROGRESS_WEAK', 'Progress weak topic', 'active', 200),
+  ('d5000000-0000-4000-8000-000000000002', 'd4000000-0000-4000-8000-000000000001', 'PROGRESS_NEW', 'Progress new topic', 'active', 201);
 insert into public.pilot_package_assignments (student_id, import_package, assigned_by)
 values
   ('d1111111-1111-4111-8111-111111111111', 'PROGRESS_TEST', 'd4444444-4444-4444-8444-444444444444'),
@@ -71,7 +81,7 @@ begin
       id, exam_id, topic_id, source_reference, question_text, difficulty,
       cognitive_level, created_by, external_id, import_package, source_status
     ) values (
-      q_id, '20000000-0000-4000-8000-000000000001',
+      q_id, 'd4000000-0000-4000-8000-000000000001',
       case when i <= 15 then 'd5000000-0000-4000-8000-000000000001'::uuid
         else 'd5000000-0000-4000-8000-000000000002'::uuid end,
       'Progress fixture source', 'Progress fixture question ' || i || '?',
@@ -114,7 +124,7 @@ insert into public.study_sessions (
   answered_count, correct_count, started_at, completed_at
 ) values (
   'd7000000-0000-4000-8000-000000000001', 'd1111111-1111-4111-8111-111111111111',
-  '20000000-0000-4000-8000-000000000001', 'study', 'completed', 1, 1, 1, 1,
+  'd4000000-0000-4000-8000-000000000001', 'study', 'completed', 1, 1, 1, 1,
   now() - interval '1 hour', now() - interval '1 hour'
 );
 insert into public.study_session_questions (
@@ -137,36 +147,36 @@ from progress_questions where number = 1;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'd1111111-1111-4111-8111-111111111111', true);
 select is((select count(*)::integer from public.get_progress_students()), 1, 'student sees only self in progress selector');
-select is((select count(*)::integer from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 1, 'student reads personal dashboard');
-select is((select count(*)::integer from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', null)), 0, 'student cannot read another student dashboard');
-select is((select eligible_question_count from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 30, 'dashboard counts thirty eligible questions');
-select is((select attempted_question_count from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 5, 'dashboard counts five covered questions');
-select ok((select readiness_score <= 40 from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 'few-question readiness remains capped');
-select is((select readiness_label from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 'Developing', 'dashboard exposes supportive readiness label');
-select is((select weak_topic_count from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 1, 'weak topic is visible');
-select is((select recommended_topic_title from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 'Progress weak topic', 'recommended weak topic is visible');
-select is((select count(*)::integer from public.get_topic_progress('d1111111-1111-4111-8111-111111111111', '20000000-0000-4000-8000-000000000001')), 2, 'topic detail includes practiced and unstarted topics');
-select is((select count(*)::integer from public.get_progress_trends('d1111111-1111-4111-8111-111111111111', '20000000-0000-4000-8000-000000000001', 30)), 1, 'trend returns the recent activity day');
+select is((select count(*)::integer from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 1, 'student reads personal dashboard');
+select is((select count(*)::integer from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', 'd4000000-0000-4000-8000-000000000001')), 0, 'student cannot read another student dashboard');
+select is((select eligible_question_count from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 30, 'dashboard counts thirty eligible questions');
+select is((select attempted_question_count from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 5, 'dashboard counts five covered questions');
+select ok((select readiness_score <= 40 from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 'few-question readiness remains capped');
+select is((select readiness_label from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 'Developing', 'dashboard exposes supportive readiness label');
+select is((select weak_topic_count from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 1, 'weak topic is visible');
+select is((select recommended_topic_title from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 'Progress weak topic', 'recommended weak topic is visible');
+select is((select count(*)::integer from public.get_topic_progress('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 2, 'topic detail includes practiced and unstarted topics');
+select is((select count(*)::integer from public.get_progress_trends('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001', 30)), 1, 'trend returns the recent activity day');
 
 select set_config('request.jwt.claim.sub', 'd3333333-3333-4333-8333-333333333333', true);
 select is((select count(*)::integer from public.get_progress_students()), 2, 'linked parent sees both linked children');
-select is((select count(*)::integer from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 1, 'linked parent reads first child dashboard');
-select is((select count(*)::integer from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', null)), 1, 'linked parent reads second child dashboard');
-select is((select readiness_score from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', null)), 0::numeric, 'unpracticed child has zero readiness');
-select is((select readiness_label from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', null)), 'Not started', 'unpracticed child is labeled not started');
-select is((select count(*)::integer from public.get_topic_progress('d1111111-1111-4111-8111-111111111111', '20000000-0000-4000-8000-000000000001')), 2, 'linked parent reads authorized topic detail');
+select is((select count(*)::integer from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 1, 'linked parent reads first child dashboard');
+select is((select count(*)::integer from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', 'd4000000-0000-4000-8000-000000000001')), 1, 'linked parent reads second child dashboard');
+select is((select readiness_score from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', 'd4000000-0000-4000-8000-000000000001')), 0::numeric, 'unpracticed child has zero readiness');
+select is((select readiness_label from public.get_progress_dashboard('d2222222-2222-4222-8222-222222222222', 'd4000000-0000-4000-8000-000000000001')), 'Not started', 'unpracticed child is labeled not started');
+select is((select count(*)::integer from public.get_topic_progress('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 2, 'linked parent reads authorized topic detail');
 select is((select count(*)::integer from public.student_topic_mastery), 0, 'parent still cannot directly select private mastery rows');
 select throws_ok(
   $$select * from public.get_progress_trends(
     'd1111111-1111-4111-8111-111111111111',
-    '20000000-0000-4000-8000-000000000001', 2
+    'd4000000-0000-4000-8000-000000000001', 2
   )$$,
   '22023', 'Trend range must be between 7 and 180 days', 'trend range is bounded'
 );
 
 select set_config('request.jwt.claim.sub', 'd4444444-4444-4444-8444-444444444444', true);
 select is((select count(*)::integer from public.get_progress_students()), 0, 'unlinked reviewer sees no students');
-select is((select count(*)::integer from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', null)), 0, 'unlinked reviewer cannot read a student dashboard');
+select is((select count(*)::integer from public.get_progress_dashboard('d1111111-1111-4111-8111-111111111111', 'd4000000-0000-4000-8000-000000000001')), 0, 'unlinked reviewer cannot read a student dashboard');
 
 reset role;
 select * from finish();

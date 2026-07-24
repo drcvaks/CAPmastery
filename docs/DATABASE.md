@@ -111,6 +111,15 @@ Forward migrations `202607240029`–`202607240030` close the review-workflow gap
 
 Migration `202607240031` makes private challenge eligibility the intersection of the two selected students' access. A question is eligible when it has a protected answer key and is either approved/active or remains draft inside an `import_package` assigned to both students. A package assigned to only one participant cannot enter the shared set.
 
+Migration `202607240032` adds `admin_reset_student_learning_progress`. Its default
+`p_confirm = false` mode previews exact row counts. Confirmed resets delete only the
+selected student's sessions (and cascading session questions/attempts), question
+state, topic mastery, and achievement awards. The account, profile, roles, guardian
+links, and pilot-package assignments remain intact. Existing shared challenge
+participation blocks deletion because removing a participant session could damage
+the other student's shared history. Every confirmed reset records an administrative
+audit summary and reason.
+
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.
 3. Reset/replay migrations against a disposable database.

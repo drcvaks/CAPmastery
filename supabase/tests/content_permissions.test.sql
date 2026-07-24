@@ -194,20 +194,43 @@ select lives_ok(
 
 select set_config('request.jwt.claim.sub', '66666666-6666-4666-8666-666666666666', true);
 
-select is((select count(*)::integer from public.questions), 1, 'Student sees only approved active questions');
+select is(
+  (
+    select count(*)::integer
+    from public.questions
+    where id in (
+      '88888888-8888-4888-8888-888888888801',
+      '88888888-8888-4888-8888-888888888802'
+    )
+  ),
+  1,
+  'Student sees only the approved active fixture question'
+);
 select is(
   (select count(*)::integer from public.questions where id = '88888888-8888-4888-8888-888888888802'),
   0,
   'Draft question is hidden from student'
 );
-select is((select count(*)::integer from public.question_choices), 3, 'Student sees choices only for approved question');
+select is(
+  (
+    select count(*)::integer
+    from public.question_choices
+    where question_id in (
+      '88888888-8888-4888-8888-888888888801',
+      '88888888-8888-4888-8888-888888888802'
+    )
+  ),
+  3,
+  'Student sees choices only for the approved fixture question'
+);
 select is(
   (
     select count(*)::integer
     from public.get_approved_questions('20000000-0000-4000-8000-000000000001')
+    where id = '88888888-8888-4888-8888-888888888801'
   ),
   1,
-  'Safe retrieval function returns approved question'
+  'Safe retrieval function returns the approved fixture question'
 );
 select ok(
   (

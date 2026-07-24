@@ -70,4 +70,10 @@ The adaptive-bank file tests verify 30 unique draft rows, five batches of six, t
 
 Checkpoint 9 adds pure positive-scoring and challenge-projection tests plus shared-session component coverage for neutral active-challenge feedback. `achievements_challenges.test.sql` declares 67 transaction-only assertions covering all seven tables and RLS, narrow policy-helper execution, client write denial, linked-student discovery, exactly-two validation, approved-or-mutually-assigned-package selection, one-student package leak prevention, identical question/version/order snapshots, separate session ownership, unrelated-family denial, predefined reactions, delayed score reveal, capped positive points, absence of rank/winner fields, and automatic team, improvement, first-session, and 25-answer persistence awards.
 
+`admin_learning_reset.test.sql` declares 26 transaction-only assertions. It covers
+admin-only execution, preview counts, explicit confirmation, shared-challenge
+blocking, session/attempt/mastery/state/achievement deletion, preservation of
+another student's history, and preservation of the target's role, family link, and
+pilot-package assignment. It also verifies the reset audit record.
+
 The full Jest process currently needs `--forceExit` because an existing test handle remains open after all suites report. The result summary remains authoritative; diagnosing that handle is tracked as Checkpoint 10 test-harness hardening rather than changing application behavior in Checkpoint 9.
