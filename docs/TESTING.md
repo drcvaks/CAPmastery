@@ -68,6 +68,19 @@ Checkpoint 7 adds deterministic blueprint unit tests, active/completed practice-
 
 The adaptive-bank file tests verify 30 unique draft rows, five batches of six, the documented 11/14/5 difficulty distribution, all six supplied cognitive classifications, 20 intentionally blank optional support records, ten complete support records, safe recognition/analysis normalization, and exactly 22 out-of-bank reinforcement warnings.
 
+The Volume 2 Chapter 4 file tests verify the UTF-8 BOM/tab format, 75 unique draft
+rows, all four choices and aligned feedback, complete support metadata, 75 unique
+visual keys, preserved mode/style classifications, safe misconception mapping, and
+129 internal pipe-delimited reinforcement links. They also make the supplied
+58-of-75 B answer-key imbalance visible without altering content.
+
+The Volume 2 Chapter 5 file tests verify the UTF-8 BOM/tab format, 75 unique draft
+rows, four distinct choices with aligned feedback, complete support metadata, 75
+unique visual keys, supplied difficulty/cognitive/mode/style distributions,
+comma-delimited non-contiguous citations, exact visible source text, and all 20
+internal comma-delimited reinforcement links. They also record the supplied
+A/B/C/D answer distribution without changing it.
+
 Checkpoint 9 adds pure positive-scoring and challenge-projection tests plus shared-session component coverage for neutral active-challenge feedback. `achievements_challenges.test.sql` declares 67 transaction-only assertions covering all seven tables and RLS, narrow policy-helper execution, client write denial, linked-student discovery, exactly-two validation, approved-or-mutually-assigned-package selection, one-student package leak prevention, identical question/version/order snapshots, separate session ownership, unrelated-family denial, predefined reactions, delayed score reveal, capped positive points, absence of rank/winner fields, and automatic team, improvement, first-session, and 25-answer persistence awards.
 
 `admin_learning_reset.test.sql` declares 26 transaction-only assertions. It covers

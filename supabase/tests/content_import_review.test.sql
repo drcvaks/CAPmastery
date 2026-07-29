@@ -1,9 +1,11 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(53);
+select plan(55);
 
 select has_table('public', 'csv_import_jobs', 'CSV import jobs exist');
+select has_column('public', 'questions', 'question_mode', 'question delivery mode is preserved');
+select has_column('public', 'questions', 'question_style', 'question style is preserved');
 select is((select relrowsecurity from pg_class where oid = 'public.csv_import_jobs'::regclass), true, 'CSV import jobs have RLS');
 select is(has_table_privilege('authenticated', 'public.csv_import_jobs', 'insert'), false, 'clients cannot forge import jobs');
 select has_function('public', 'reviewer_check_import_duplicates', array['jsonb'], 'duplicate preview function exists');

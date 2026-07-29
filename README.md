@@ -53,6 +53,8 @@ npm run db:test
 npm run db:lint
 npm run content:import:pilot10
 npm run content:import:adaptive30
+npm run content:import:ltl2c4
+npm run content:import:ltl2c5
 npm run db:test:linked
 ```
 

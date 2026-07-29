@@ -4,10 +4,12 @@ const path = require("node:path");
 const { Client } = require("pg");
 const {
   decodeImportBuffer,
+  formatSourceReference,
   normalizeCognitiveLevel,
   parseImport,
   parseSourcePages,
   questionPurpose,
+  splitReinforcementIds,
   validateImport,
 } = require("./lib/pilot-import.cjs");
 
@@ -18,55 +20,130 @@ const defaultInput = path.join(
   "LTL_V1_Chapter_1_Pilot_10_Questions_Complete_Learning_Support.csv",
 );
 const poolerUrlPath = path.join(root, "supabase", ".temp", "pooler-url");
-const IMPORT_PACKAGE = "LTL1_C1_PILOT_10";
-const EXAM_ID = "20000000-0000-4000-8000-000000000001";
-const COURSE_ID = "30000000-0000-4000-8000-000000000001";
+const CHAPTER_1_CONFIG = {
+  expectedCount: 10,
+  importPackage: "LTL1_C1_PILOT_10",
+  examId: "20000000-0000-4000-8000-000000000001",
+  courseId: "30000000-0000-4000-8000-000000000001",
+  volumeCode: "LTL_V1",
+  volumeTitle: "Learn to Lead, Volume 1",
+  volumeSortOrder: 10,
+  chapterCode: "LTL_V1_C1",
+  chapterTitle: "Character and the Air Force Tradition",
+  chapterSortOrder: 10,
+  topicCode: "LTL1_C1",
+  topicTitle: "Learn to Lead, Volume 1, Chapter 1",
+  topicDescription: "Private Chapter 1 pilot content.",
+  topicSortOrder: 10,
+  sourceExternalReference: "CAP:LTL:V1:C1:PILOT",
+  sourceTitle: "Learn to Lead, Volume 1",
+};
+const CHAPTER_4_CONFIG = {
+  expectedCount: 75,
+  importPackage: "LTL2_C4_75",
+  examId: "20000000-0000-4000-8000-000000000001",
+  courseId: "30000000-0000-4000-8000-000000000001",
+  volumeCode: "LTL_V2",
+  volumeTitle: "Learn to Lead, Volume 2",
+  volumeSortOrder: 20,
+  chapterCode: "LTL_V2_C4",
+  chapterTitle: "The Cadet NCO & The Team",
+  chapterSortOrder: 40,
+  topicCode: "LTL2_C4",
+  topicTitle: "Learn to Lead, Volume 2, Chapter 4",
+  topicDescription: "Private Chapter 4 Billy Mitchell Leadership pilot content.",
+  topicSortOrder: 40,
+  sourceExternalReference: "CAP:LTL:V2:C4:PILOT",
+  sourceTitle: "Learn to Lead, Volume 2",
+};
+const CHAPTER_5_CONFIG = {
+  expectedCount: 75,
+  importPackage: "LTL2_C5_75",
+  examId: "20000000-0000-4000-8000-000000000001",
+  courseId: "30000000-0000-4000-8000-000000000001",
+  volumeCode: "LTL_V2",
+  volumeTitle: "Learn to Lead, Volume 2",
+  volumeSortOrder: 20,
+  chapterCode: "LTL_V2_C5",
+  chapterTitle: "Brainpower for Leadership",
+  chapterSortOrder: 50,
+  topicCode: "LTL2_C5",
+  topicTitle: "Learn to Lead, Volume 2, Chapter 5",
+  topicDescription: "Private Chapter 5 Billy Mitchell Leadership pilot content.",
+  topicSortOrder: 50,
+  sourceExternalReference: "CAP:LTL:V2:C5:PILOT",
+  sourceTitle: "Learn to Lead, Volume 2",
+};
+
+function importConfigForPath(inputPath) {
+  const filename = path.basename(inputPath);
+  if (filename === "LTL_V2_Chapter_5_75_Questions_Complete_Support.csv") {
+    return CHAPTER_5_CONFIG;
+  }
+  if (filename === "LTL_V2_Chapter_4_75_Questions_Complete_Support.csv") {
+    return CHAPTER_4_CONFIG;
+  }
+  return CHAPTER_1_CONFIG;
+}
 
 async function one(client, sql, values = []) {
   const result = await client.query(sql, values);
   return result.rows[0];
 }
 
-async function ensureHierarchy(client) {
+async function ensureHierarchy(client, config) {
   const volume = await one(
     client,
     `insert into public.volumes (course_id, code, title, description, sort_order, status)
-     values ($1, 'LTL_V1', 'Learn to Lead, Volume 1',
-       'Hierarchy created for the authorized Chapter 1 pilot import.', 10, 'active')
+     values ($1, $2, $3, $4, $5, 'active')
      on conflict (course_id, code) do update set title = excluded.title
      returning id`,
-    [COURSE_ID],
+    [
+      config.courseId,
+      config.volumeCode,
+      config.volumeTitle,
+      `Hierarchy created for the authorized ${config.topicTitle} import.`,
+      config.volumeSortOrder,
+    ],
   );
   const chapter = await one(
     client,
     `insert into public.chapters (course_id, volume_id, code, title, sort_order, status)
-     values ($1, $2, 'LTL_V1_C1', 'Character and the Air Force Tradition', 10, 'active')
+     values ($1, $2, $3, $4, $5, 'active')
      on conflict (course_id, volume_id, code) do update set title = excluded.title
      returning id`,
-    [COURSE_ID, volume.id],
+    [config.courseId, volume.id, config.chapterCode, config.chapterTitle, config.chapterSortOrder],
   );
   const topic = await one(
     client,
     `insert into public.topics (
        exam_id, course_id, volume_id, chapter_id, code, title, description, sort_order, status
      ) values (
-       $1, $2, $3, $4, 'LTL1_C1', 'Learn to Lead, Volume 1, Chapter 1',
-       'Private Chapter 1 pilot content.', 10, 'active'
+       $1, $2, $3, $4, $5, $6, $7, $8, 'active'
      )
      on conflict (exam_id, code) do update set
        course_id = excluded.course_id, volume_id = excluded.volume_id,
        chapter_id = excluded.chapter_id, title = excluded.title
      returning id`,
-    [EXAM_ID, COURSE_ID, volume.id, chapter.id],
+    [
+      config.examId,
+      config.courseId,
+      volume.id,
+      chapter.id,
+      config.topicCode,
+      config.topicTitle,
+      config.topicDescription,
+      config.topicSortOrder,
+    ],
   );
   return topic.id;
 }
 
-async function ensureSource(client, actorId) {
+async function ensureSource(client, actorId, config) {
   const existing = await one(
     client,
     `select id from public.source_documents where external_reference = $1 limit 1`,
-    ["CAP:LTL:V1:C1:PILOT"],
+    [config.sourceExternalReference],
   );
   if (existing) return existing.id;
   const source = await one(
@@ -74,14 +151,15 @@ async function ensureSource(client, actorId) {
     `insert into public.source_documents (
        title, document_type, external_reference, authorization_status, status, created_by
      ) values (
-       'Learn to Lead, Volume 1', 'training_manual', $1, 'approved', 'active', $2
+       $1, 'training_manual', $2, 'approved', 'active', $3
      ) returning id`,
-    ["CAP:LTL:V1:C1:PILOT", actorId],
+    [config.sourceTitle, config.sourceExternalReference, actorId],
   );
   return source.id;
 }
 
-async function ensureLearningMetadata(client, row, topicId, sourceId) {
+async function ensureLearningMetadata(client, row, topicId, sourceId, config) {
+  const sourceReference = formatSourceReference(row.source_reference_text, row.source_pages);
   const objective = await one(
     client,
     `insert into public.learning_objectives (topic_id, code, title, status)
@@ -99,7 +177,7 @@ async function ensureLearningMetadata(client, row, topicId, sourceId) {
        source_document_id = excluded.source_document_id,
        source_reference = excluded.source_reference
      returning id`,
-    [topicId, sourceId, row.concept_code, row.source_reference_text],
+    [topicId, sourceId, row.concept_code, sourceReference],
   );
   await client.query(
     `insert into public.concept_objectives (concept_id, learning_objective_id)
@@ -113,12 +191,12 @@ async function ensureLearningMetadata(client, row, topicId, sourceId) {
      values ($1, $2, $3, $2, 'draft')
      on conflict (exam_id, code) do update set source_code = excluded.source_code
      returning id`,
-    [EXAM_ID, canonicalFamilyCode, row.question_family_code],
+    [config.examId, canonicalFamilyCode, row.question_family_code],
   );
   return { objectiveId: objective.id, conceptId: concept.id, familyId: family.id };
 }
 
-async function importQuestion(client, row, actorId, topicId, sourceId, summary) {
+async function importQuestion(client, row, actorId, topicId, sourceId, config, summary) {
   const existing = await one(
     client,
     `select id, review_status from public.questions where external_id = $1`,
@@ -130,18 +208,18 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
     return existing.id;
   }
 
-  const metadata = await ensureLearningMetadata(client, row, topicId, sourceId);
+  const metadata = await ensureLearningMetadata(client, row, topicId, sourceId, config);
   const pages = parseSourcePages(row.source_pages);
   const cognitiveLevel = normalizeCognitiveLevel(row.cognitive_level);
   const purpose = questionPurpose(row.cognitive_level);
   const values = [
-    EXAM_ID,
+    config.examId,
     topicId,
     metadata.objectiveId,
     sourceId,
     pages.start,
     pages.end,
-    row.source_reference_text,
+    formatSourceReference(row.source_reference_text, row.source_pages),
     row.question_text,
     row.question_type,
     row.difficulty,
@@ -152,8 +230,10 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
     actorId,
     row.external_id,
     row.pilot_batch,
-    IMPORT_PACKAGE,
+    config.importPackage,
     row.source_status,
+    row.question_mode || null,
+    row.question_style || null,
   ];
   let question;
   if (existing) {
@@ -165,6 +245,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
          question_type=$9, difficulty=$10, cognitive_level=$11, purpose=$12,
          question_family_id=$13, estimated_time_seconds=$14, created_by=$15,
          pilot_batch=$17, import_package=$18, source_status=$19,
+         question_mode=$20, question_style=$21,
          review_status='draft', status='draft', approved_by=null, approved_at=null,
          version=version + 1
        where external_id=$16 returning id`,
@@ -179,9 +260,9 @@ async function importQuestion(client, row, actorId, topicId, sourceId, summary) 
          source_page_start, source_page_end, source_reference, question_text,
          question_type, difficulty, cognitive_level, purpose, question_family_id,
          estimated_time_seconds, created_by, external_id, pilot_batch, import_package,
-         source_status, review_status, status
+         source_status, question_mode, question_style, review_status, status
        ) values (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
          'draft','draft'
        ) returning id`,
       values,
@@ -295,10 +376,7 @@ async function importReinforcements(client, rows, summary) {
       row.external_id,
     ]);
     if (!source) continue;
-    for (const targetExternalId of row.reinforcement_question_ids
-      .split(";")
-      .map((value) => value.trim())
-      .filter(Boolean)) {
+    for (const targetExternalId of splitReinforcementIds(row.reinforcement_question_ids)) {
       const target = await one(client, `select id from public.questions where external_id=$1`, [
         targetExternalId,
       ]);
@@ -319,7 +397,8 @@ async function importReinforcements(client, rows, summary) {
 
 async function main() {
   const inputPath = process.argv[2] ? path.resolve(process.argv[2]) : defaultInput;
-  const expectedCount = process.argv[3] ? Number(process.argv[3]) : 10;
+  const config = importConfigForPath(inputPath);
+  const expectedCount = process.argv[3] ? Number(process.argv[3]) : config.expectedCount;
   if (!Number.isInteger(expectedCount) || expectedCount < 1) {
     throw new Error("Expected row count must be a positive integer.");
   }
@@ -347,7 +426,15 @@ async function main() {
     connectionString: connectionUrl.toString(),
     ssl: { rejectUnauthorized: false },
   });
-  const summary = { inserted: 0, updated: 0, skipped: 0, failed: 0, warnings: [] };
+  const summary = {
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    failed: 0,
+    warnings: validation.warnings.filter((warning) =>
+      warning.startsWith("Answer-key balance warning:"),
+    ),
+  };
   await client.connect();
   try {
     await client.query("begin");
@@ -361,10 +448,10 @@ async function main() {
        limit 1`,
     );
     if (!actor) throw new Error("Create an active admin or content reviewer before importing.");
-    const topicId = await ensureHierarchy(client);
-    const sourceId = await ensureSource(client, actor.id);
+    const topicId = await ensureHierarchy(client, config);
+    const sourceId = await ensureSource(client, actor.id, config);
     for (const row of rows) {
-      await importQuestion(client, row, actor.id, topicId, sourceId, summary);
+      await importQuestion(client, row, actor.id, topicId, sourceId, config, summary);
     }
     await importReinforcements(client, rows, summary);
     await warnForMissingVisualAssets(client, rows, summary);

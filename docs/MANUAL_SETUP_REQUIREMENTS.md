@@ -162,6 +162,43 @@ The database password remains necessary only as process-scoped `CAP_MASTERY_DB_P
 
 The provisional pilot decisions are: exactly two students, a seven-day duration, selectable sets of 3/5/10/15/20 approved questions, and positive points weighted as completion 40, accuracy up to 40, and improvement up to 20. The five reactions are Great effort, Keep going, Proud of you, Nice comeback, and Team spirit. The owner should approve or revise these product choices before broader deployment.
 
+### Volume 2 Chapter 4 private content package
+
+The supplied `LTL_V2_Chapter_4_75_Questions_Complete_Support.csv` is imported only
+to the linked development project with `npm.cmd run content:import:ltl2c4`.
+Migration `202607240033` must be applied first. The importer validates all 75 rows,
+upserts by `external_id`, skips approved records, and forces imported content to
+remain draft inside private package `LTL2_C4_75`.
+
+No new account, environment variable, service-role key, Storage bucket, production
+database, AI API, or image file is required. The existing database password remains
+process-only. All 75 visual metadata records should warn and remain hidden until
+separately approved assets exist.
+
+After import, an administrator must explicitly assign `LTL2_C4_75` only to the
+intended pilot students through `admin_set_pilot_package_assignment`. The owner
+must decide whether both Heshy and Avigail receive it. Before broader use, review
+the answer-position imbalance (A 10, B 58, C 7, D 0); the importer intentionally
+does not rewrite supplied answers or distractors.
+
+### Volume 2 Chapter 5 private content package
+
+The supplied `LTL_V2_Chapter_5_75_Questions_Complete_Support.csv` is imported only
+to the linked development project with `npm.cmd run content:import:ltl2c5`.
+Migration `202607240033` already supplies the required schema. The importer
+validates all 75 rows, upserts by `external_id`, skips approved records, and forces
+imported content to remain draft inside private package `LTL2_C5_75`.
+
+The existing database password is required only in the importing PowerShell
+process. No new account, environment variable, service-role key, Storage bucket,
+production database, AI API, or image file is required. All 75 visual controls
+remain hidden until independently approved assets are registered.
+
+After import, an administrator must explicitly assign `LTL2_C5_75` only to the
+intended pilot students through `admin_set_pilot_package_assignment`. Assignment
+to Heshy, Avigail, or both remains an owner decision. The supplied answer
+positions are A 21, B 30, C 20, and D 4; import preserves them unchanged.
+
 ### Resetting pre-pilot student learning history
 
 Migration `202607240032` provides a narrow reset for test history. It preserves the

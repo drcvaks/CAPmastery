@@ -120,6 +120,20 @@ participation blocks deletion because removing a participant session could damag
 the other student's shared history. Every confirmed reset records an administrative
 audit summary and reason.
 
+Migration `202607240033` adds nullable, format-constrained `question_mode` and
+`question_style` fields so source-bank delivery/style classifications are not
+discarded. These are content metadata only and do not change study or practice-test
+feedback rules. The Volume 2 Chapter 4 operator import creates its own Volume 2,
+Chapter 4, topic, objective, concept, family, and authorized-source metadata and
+stores all 75 rows as drafts in private package `LTL2_C4_75`.
+
+The same migration-backed fields support the Volume 2 Chapter 5 operator import;
+no additional schema migration is required. The importer creates the Chapter 5
+hierarchy and authorized-source metadata as needed and stores all 75 rows as
+drafts in private package `LTL2_C5_75`. Comma-separated citation pages are stored
+in the existing numeric bounds while their exact text is retained in the visible
+source reference.
+
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.
 3. Reset/replay migrations against a disposable database.

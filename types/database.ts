@@ -1492,6 +1492,8 @@ export type Database = {
           pilot_batch: string | null;
           purpose: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id: string | null;
+          question_mode: string | null;
+          question_style: string | null;
           question_text: string;
           question_type: Database["public"]["Enums"]["question_type"];
           review_status: Database["public"]["Enums"]["question_review_status"];
@@ -1522,6 +1524,8 @@ export type Database = {
           pilot_batch?: string | null;
           purpose?: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id?: string | null;
+          question_mode?: string | null;
+          question_style?: string | null;
           question_text: string;
           question_type?: Database["public"]["Enums"]["question_type"];
           review_status?: Database["public"]["Enums"]["question_review_status"];
@@ -1552,6 +1556,8 @@ export type Database = {
           pilot_batch?: string | null;
           purpose?: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id?: string | null;
+          question_mode?: string | null;
+          question_style?: string | null;
           question_text?: string;
           question_type?: Database["public"]["Enums"]["question_type"];
           review_status?: Database["public"]["Enums"]["question_review_status"];
@@ -2299,6 +2305,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_reset_student_learning_progress: {
+        Args: { p_confirm?: boolean; p_reason: string; p_student_id: string };
+        Returns: Json;
+      };
       admin_set_guardian_link: {
         Args: {
           p_can_assign_content?: boolean;

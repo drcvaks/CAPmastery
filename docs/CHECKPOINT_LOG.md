@@ -554,3 +554,65 @@ Additional owner-data protection:
   reset. The reset removed 24 remaining sessions, 85 attempts, 30 question-state
   rows, one topic-mastery row, and four achievement awards. Heshy's account,
   profile, student role, family links, and pilot-package assignments were preserved.
+
+Volume 2 Chapter 4 content extension:
+
+- Audited the supplied 75-row UTF-8 BOM/tab-delimited Chapter 4 complete-support
+  bank. It has 75 unique IDs, four populated choices and feedback records per row,
+  complete short/full/remediation/memory/visual metadata, and 129 reinforcement
+  edges whose targets all occur inside the file.
+- Added migration `202607240033_question_delivery_classification.sql` to preserve
+  the supplied `question_mode` and `question_style` fields. Added safe
+  `misconception` normalization and support for pipe- or semicolon-delimited
+  reinforcement IDs.
+- Added the draft-only `LTL2_C4_75` import configuration and
+  `npm.cmd run content:import:ltl2c4`. No question, choice, distractor, answer, or
+  explanation was rewritten.
+- Validation reports one content-quality warning: B is correct for 58 of 75 rows
+  and D for none. Human review/rebalancing is recommended before broader use.
+  Human review, package assignment, and student acceptance remain pending.
+- Local gates pass: TypeScript exit 0; Expo ESLint exit 0; Prettier and
+  `git diff --check` exit 0; Expo public-config validation exit 0; focused import
+  validation 16/16; and the final full Jest rerun 22 suites, 87/87 tests. The first
+  full Jest attempt had one navigation timeout during a slow run; that suite passed
+  2/2 alone and the unchanged full suite then passed. The no-password import dry
+  run validated all rows and stopped at the expected process-only credential guard.
+  Migration 033 raises `content_import_review.test.sql` to 55 assertions and the
+  expected linked aggregate to 388.
+- Owner applied migration 033 and ran linked pgTAP before import: 388/388 passed.
+  The persistent import inserted 75, updated/skipped/failed zero, and emitted the
+  expected 76 warnings: one answer-position warning and 75 missing visual assets.
+  No reinforcement target was missing. The post-import linked suite again passed
+  388/388. Local and linked migration histories match through 033, linked database
+  lint reports no errors, and checked-in database types were regenerated.
+- Owner assigned private package `LTL2_C4_75` to Heshy and Avigail through the
+  audited administrator function and verified both assignment rows. No other
+  student received access. Student study/practice acceptance and answer-position
+  review remain pending.
+
+Volume 2 Chapter 5 content extension:
+
+- Audited the supplied 75-row UTF-8 BOM/tab-delimited Chapter 5 complete-support
+  bank. It has 75 unique IDs, four distinct choices and aligned feedback per row,
+  complete short/full/remediation/memory/visual metadata, 75 unique visual keys,
+  and 20 reinforcement edges whose targets all occur inside the file.
+- Extended the importer for draft-only package `LTL2_C5_75` and added
+  `npm.cmd run content:import:ltl2c5`. The existing migration 033 schema is
+  sufficient; no database migration or environment variable was added.
+- Added support for comma-delimited reinforcement IDs and non-contiguous source
+  pages such as `40, 43`. Numeric page bounds remain queryable while the exact
+  supplied citation is retained in the visible source reference.
+- The supplied answer positions are A 21, B 30, C 20, and D 4. No dominant-answer
+  warning is triggered, and no question, choice, distractor, answer, explanation,
+  or support text was rewritten.
+- Focused actual-file validation passes 22/22 tests. The no-password import dry
+  run validated all rows and stopped at the expected process-only credential
+  guard. Persistent development import, package assignment, linked database
+  regression testing, and student acceptance remain pending owner actions.
+- Final local gates pass after Expo SDK 57's current compatible patch refresh:
+  TypeScript exit 0; Expo ESLint exit 0; Prettier and `git diff --check` exit 0;
+  22 Jest suites and 93/93 tests; Expo Doctor 20/20; public Expo configuration;
+  a 1,580-module web export; and a 2,017-module Android/Hermes export. Expo is
+  57.0.9, Expo Router 57.0.9, React Native 0.86.2, and their matching test/lint
+  packages are installed. The known npm audit report remains 44 transitive
+  findings; no unsafe forced audit rewrite was used.

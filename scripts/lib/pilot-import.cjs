@@ -143,11 +143,31 @@ function parseImport(text) {
 }
 
 function parseSourcePages(value) {
+  if (String(value).includes(",")) {
+    const ranges = String(value)
+      .split(",")
+      .map((segment) => parseSourcePages(segment.trim()));
+    if (ranges.length === 0 || ranges.some((range) => range === null)) return null;
+    return {
+      start: Math.min(...ranges.map((range) => range.start)),
+      end: Math.max(...ranges.map((range) => range.end)),
+    };
+  }
   const match = value.match(/^(\d+)(?:\s*[-–—]\s*(\d+))?$/u);
   if (!match) return null;
   const start = Number(match[1]);
   const end = Number(match[2] ?? match[1]);
   return start > 0 && end >= start ? { start, end } : null;
+}
+
+function formatSourceReference(reference, pages) {
+  const normalizedReference = String(reference).trim();
+  const normalizedPages = String(pages).trim();
+  if (!normalizedPages || /\b(?:printed\s+)?pages?\b/i.test(normalizedReference)) {
+    return normalizedReference;
+  }
+  const label = normalizedPages.includes(",") || /[-–—]/u.test(normalizedPages) ? "pages" : "page";
+  return `${normalizedReference}, ${label} ${normalizedPages}`;
 }
 
 function validateImport(rows, expectedCount = 10) {
@@ -162,6 +182,7 @@ function validateImport(rows, expectedCount = 10) {
       "understanding",
       "application",
       "analysis",
+      "misconception",
       "scenario",
     ]),
     question_type: new Set(["multiple_choice", "true_false"]),
@@ -199,6 +220,11 @@ function validateImport(rows, expectedCount = 10) {
     }
     if (!/^\d+$/.test(row.feedback_display_version) || Number(row.feedback_display_version) < 1) {
       errors.push(`${label}: feedback_display_version must be a positive integer.`);
+    }
+    for (const field of ["question_mode", "question_style"]) {
+      if (row[field] && !/^[a-z][a-z0-9_-]{1,79}$/.test(row[field])) {
+        errors.push(`${label}: invalid ${field} '${row[field]}'.`);
+      }
     }
 
     const optionalSupportFields = [
@@ -241,13 +267,25 @@ function validateImport(rows, expectedCount = 10) {
   });
 
   for (const row of rows) {
-    for (const target of row.reinforcement_question_ids
-      .split(";")
-      .map((value) => value.trim())
-      .filter(Boolean)) {
+    for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
       if (!externalIds.has(target)) {
         warnings.push(`${row.external_id}: reinforcement target ${target} is outside this file.`);
       }
+    }
+  }
+
+  if (rows.length >= 20) {
+    const correctLetterCounts = rows.reduce((counts, row) => {
+      counts.set(row.correct_letter, (counts.get(row.correct_letter) ?? 0) + 1);
+      return counts;
+    }, new Map());
+    const [dominantLetter, dominantCount] = [...correctLetterCounts.entries()].sort(
+      (left, right) => right[1] - left[1],
+    )[0] ?? ["", 0];
+    if (dominantCount / rows.length >= 0.7) {
+      warnings.push(
+        `Answer-key balance warning: ${dominantLetter} is correct for ${dominantCount} of ${rows.length} questions.`,
+      );
     }
   }
 
@@ -257,20 +295,32 @@ function validateImport(rows, expectedCount = 10) {
 function normalizeCognitiveLevel(value) {
   if (value === "recognition") return "recall";
   if (value === "analysis") return "application";
+  if (value === "misconception") return "understanding";
   return value;
 }
 
 function questionPurpose(value) {
-  return value === "scenario" ? "scenario_judgment" : value;
+  if (value === "scenario") return "scenario_judgment";
+  if (value === "misconception") return "misconception_check";
+  return value;
+}
+
+function splitReinforcementIds(value) {
+  return String(value ?? "")
+    .split(/[;,|]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 module.exports = {
   REQUIRED_FIELDS,
   decodeImportBuffer,
+  formatSourceReference,
   parseDelimited,
   parseImport,
   parseSourcePages,
   normalizeCognitiveLevel,
   questionPurpose,
+  splitReinforcementIds,
   validateImport,
 };
