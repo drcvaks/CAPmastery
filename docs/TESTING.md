@@ -87,6 +87,15 @@ unique visual keys, supplied difficulty/cognitive/mode/style distributions, and
 all 225 internal reinforcement links. They preserve the A 25/B 39/C 11/D 0 answer
 positions and require the missing-D quality warning.
 
+The Volume 2 Chapter 7 file tests verify the UTF-8 BOM/tab format, 75 unique draft
+rows, four distinct choices with aligned feedback, complete learning support, 75
+unique visual keys, supplied difficulty/cognitive/mode/style distributions, and
+all 150 internal reinforcement links. They preserve the A 46/B 25/C 3/D 1 answer
+positions and require the dominant-A quality warning.
+They also prove that comma-bearing Grid Theory identifiers and two family keys
+longer than 100 characters map to valid, deterministic, collision-free database
+keys while their supplied display values remain available.
+
 Checkpoint 9 adds pure positive-scoring and challenge-projection tests plus shared-session component coverage for neutral active-challenge feedback. `achievements_challenges.test.sql` declares 67 transaction-only assertions covering all seven tables and RLS, narrow policy-helper execution, client write denial, linked-student discovery, exactly-two validation, approved-or-mutually-assigned-package selection, one-student package leak prevention, identical question/version/order snapshots, separate session ownership, unrelated-family denial, predefined reactions, delayed score reveal, capped positive points, absence of rank/winner fields, and automatic team, improvement, first-session, and 25-answer persistence awards.
 
 `admin_learning_reset.test.sql` declares 26 transaction-only assertions. It covers

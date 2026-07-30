@@ -3,9 +3,11 @@ const path = require("node:path");
 
 const { Client } = require("pg");
 const {
+  canonicalQuestionFamilyCode,
   decodeImportBuffer,
   formatSourceReference,
   normalizeCognitiveLevel,
+  normalizeMetadataCode,
   parseImport,
   parseSourcePages,
   questionPurpose,
@@ -92,9 +94,30 @@ const CHAPTER_6_CONFIG = {
   sourceExternalReference: "CAP:LTL:V2:C6:PILOT",
   sourceTitle: "Learn to Lead, Volume 2",
 };
+const CHAPTER_7_CONFIG = {
+  expectedCount: 75,
+  importPackage: "LTL2_C7_75",
+  examId: "20000000-0000-4000-8000-000000000001",
+  courseId: "30000000-0000-4000-8000-000000000001",
+  volumeCode: "LTL_V2",
+  volumeTitle: "Learn to Lead, Volume 2",
+  volumeSortOrder: 20,
+  chapterCode: "LTL_V2_C7",
+  chapterTitle: "Leadership Schools of Thought",
+  chapterSortOrder: 70,
+  topicCode: "LTL2_C7",
+  topicTitle: "Learn to Lead, Volume 2, Chapter 7",
+  topicDescription: "Private Chapter 7 Billy Mitchell Leadership pilot content.",
+  topicSortOrder: 70,
+  sourceExternalReference: "CAP:LTL:V2:C7:PILOT",
+  sourceTitle: "Learn to Lead, Volume 2",
+};
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === "LTL_V2_Chapter_7_75_Questions_Complete_Support.csv") {
+    return CHAPTER_7_CONFIG;
+  }
   if (filename === "LTL_V2_Chapter_6_75_Questions_Complete_Support.csv") {
     return CHAPTER_6_CONFIG;
   }
@@ -181,38 +204,42 @@ async function ensureSource(client, actorId, config) {
 
 async function ensureLearningMetadata(client, row, topicId, sourceId, config) {
   const sourceReference = formatSourceReference(row.source_reference_text, row.source_pages);
+  const objectiveCode = normalizeMetadataCode(row.objective_code, 80);
+  const conceptCode = normalizeMetadataCode(row.concept_code);
+  const familySourceCode = normalizeMetadataCode(row.question_family_code);
   const objective = await one(
     client,
     `insert into public.learning_objectives (topic_id, code, title, status)
-     values ($1, $2, $2, 'draft')
-     on conflict (topic_id, code) do update set code = excluded.code
+     values ($1, $2, $3, 'draft')
+     on conflict (topic_id, code) do update set title = excluded.title
      returning id`,
-    [topicId, row.objective_code],
+    [topicId, objectiveCode, row.objective_code],
   );
   const concept = await one(
     client,
     `insert into public.concepts (
        topic_id, source_document_id, code, title, source_reference, status
-     ) values ($1, $2, $3, $3, $4, 'draft')
+     ) values ($1, $2, $3, $4, $5, 'draft')
      on conflict (topic_id, code) do update set
        source_document_id = excluded.source_document_id,
-       source_reference = excluded.source_reference
+       title = excluded.title, source_reference = excluded.source_reference
      returning id`,
-    [topicId, sourceId, row.concept_code, sourceReference],
+    [topicId, sourceId, conceptCode, row.concept_code, sourceReference],
   );
   await client.query(
     `insert into public.concept_objectives (concept_id, learning_objective_id)
      values ($1, $2) on conflict do nothing`,
     [concept.id, objective.id],
   );
-  const canonicalFamilyCode = `${row.objective_code}.${row.concept_code}.${row.question_family_code}`;
+  const canonicalFamilyCode = canonicalQuestionFamilyCode(row);
   const family = await one(
     client,
     `insert into public.question_families (exam_id, code, source_code, title, status)
-     values ($1, $2, $3, $2, 'draft')
-     on conflict (exam_id, code) do update set source_code = excluded.source_code
+     values ($1, $2, $3, $4, 'draft')
+     on conflict (exam_id, code) do update set
+       source_code = excluded.source_code, title = excluded.title
      returning id`,
-    [config.examId, canonicalFamilyCode, row.question_family_code],
+    [config.examId, canonicalFamilyCode, familySourceCode, row.question_family_code],
   );
   return { objectiveId: objective.id, conceptId: concept.id, familyId: family.id };
 }

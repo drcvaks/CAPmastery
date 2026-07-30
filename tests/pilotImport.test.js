@@ -2,9 +2,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const {
+  canonicalQuestionFamilyCode,
   decodeImportBuffer,
   formatSourceReference,
   normalizeCognitiveLevel,
+  normalizeMetadataCode,
   parseImport,
   parseSourcePages,
   questionPurpose,
@@ -47,6 +49,12 @@ const chapterSixInputPath = path.resolve(
   "..",
   "Content",
   "LTL_V2_Chapter_6_75_Questions_Complete_Support.csv",
+);
+const chapterSevenInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "LTL_V2_Chapter_7_75_Questions_Complete_Support.csv",
 );
 
 describe("Chapter 1 pilot import validation", () => {
@@ -429,6 +437,98 @@ describe("Learn to Lead Volume 2 Chapter 6 validation", () => {
     ).toEqual({ A: 25, B: 39, C: 11, D: 0 });
     expect(validation.warnings).toEqual([
       "Answer-key coverage warning: D is never correct in this 75-question bank.",
+    ]);
+  });
+});
+
+describe("Learn to Lead Volume 2 Chapter 7 validation", () => {
+  const inputBuffer = fs.readFileSync(chapterSevenInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer));
+
+  it("parses the UTF-8 BOM file as exactly 75 unique draft questions", () => {
+    const validation = validateImport(rows, 75);
+
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation.errors).toEqual([]);
+    expect(rows).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(75);
+    expect(rows.every((row) => row.review_status === "draft")).toBe(true);
+  });
+
+  it("preserves four unique choices and complete learning support for every question", () => {
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.visual_asset_key).not.toBe("");
+      expect(row.visual_alt_text).not.toBe("");
+    }
+    expect(new Set(rows.map((row) => row.visual_asset_key)).size).toBe(75);
+  });
+
+  it("retains the supplied difficulty, cognitive, mode, and style classifications", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+
+    expect(["easy", "medium", "hard"].map((value) => count("difficulty", value))).toEqual([
+      0, 47, 28,
+    ]);
+    expect(
+      ["analysis", "misconception", "recall", "recognition", "scenario", "understanding"].map(
+        (value) => count("cognitive_level", value),
+      ),
+    ).toEqual([6, 1, 2, 1, 6, 59]);
+    expect(rows.every((row) => row.question_mode === "both")).toBe(true);
+    expect(["cap_direct", "scenario"].map((value) => count("question_style", value))).toEqual([
+      69, 6,
+    ]);
+  });
+
+  it("resolves all reinforcement links within the supplied bank", () => {
+    const externalIds = new Set(rows.map((row) => row.external_id));
+    const reinforcementIds = rows.flatMap((row) =>
+      splitReinforcementIds(row.reinforcement_question_ids),
+    );
+
+    expect(reinforcementIds).toHaveLength(150);
+    expect(reinforcementIds.every((externalId) => externalIds.has(externalId))).toBe(true);
+  });
+
+  it("normalizes only database metadata keys while keeping them stable and unique", () => {
+    const rawFamilies = new Set(
+      rows.map((row) => [row.objective_code, row.concept_code, row.question_family_code].join(".")),
+    );
+    const canonicalFamilies = new Set(rows.map(canonicalQuestionFamilyCode));
+
+    expect(canonicalFamilies.size).toBe(rawFamilies.size);
+    expect(
+      [...canonicalFamilies].every(
+        (code) => code.length <= 100 && /^[A-Z0-9][A-Z0-9_.-]{0,99}$/.test(code),
+      ),
+    ).toBe(true);
+    expect(normalizeMetadataCode("LTL2-C7-GRID_9,1")).toBe("LTL2-C7-GRID_9_1");
+    expect(
+      canonicalQuestionFamilyCode(rows.find((row) => row.external_id === "LTL2-C7-PC-Q003")),
+    ).toHaveLength(100);
+  });
+
+  it("preserves supplied answers and reports the concentrated A position", () => {
+    const validation = validateImport(rows, 75);
+
+    expect(
+      Object.fromEntries(
+        ["A", "B", "C", "D"].map((letter) => [
+          letter,
+          rows.filter((row) => row.correct_letter === letter).length,
+        ]),
+      ),
+    ).toEqual({ A: 46, B: 25, C: 3, D: 1 });
+    expect(validation.warnings).toEqual([
+      "Answer-key balance warning: A is correct for 46 of 75 questions.",
     ]);
   });
 });

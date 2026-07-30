@@ -658,3 +658,43 @@ Volume 2 Chapter 6 content extension:
   progress/readiness 34/34, and study sessions 38/38: aggregate 388/388 passed.
   The owner then completed the guarded assignment of private package
   `LTL2_C6_75` to Heshy and Avigail. Student study-session acceptance remains.
+
+Volume 2 Chapter 7 content extension:
+
+- Audited the supplied 75-row UTF-8 BOM/tab-delimited Chapter 7 complete-support
+  bank. It has 75 unique IDs, four distinct choices and aligned feedback per row,
+  complete short/full/remediation/memory/visual metadata, 75 unique visual keys,
+  and 150 reinforcement edges whose targets all occur inside the file.
+- Extended the existing importer for draft-only package `LTL2_C7_75` and added
+  `npm.cmd run content:import:ltl2c7`. Migration 033 remains sufficient; no
+  database migration or environment variable was added.
+- The supplied bank contains 47 medium and 28 hard questions, with no easy rows.
+  Cognitive classifications cover analysis, misconception, recall, recognition,
+  scenario, and understanding. No supplied content was rewritten.
+- Supplied answer positions are A 46, B 25, C 3, and D 1. The general answer-key
+  concentration warning threshold is now 60%, so import reports the dominant A
+  position without changing any answer.
+- Focused actual-file validation initially passed 32/32 tests. The no-password import dry
+  run validated all rows and stopped at the expected process-only credential
+  guard. Persistent import, assignment to Heshy and Avigail, linked regression
+  testing, and student acceptance remain pending.
+- Final local gates pass: TypeScript exit 0; Expo ESLint exit 0; Prettier and
+  `git diff --check` exit 0; 22 Jest suites and 103/103 tests; Expo Doctor 20/20;
+  public Expo configuration; a 1,581-module web export; and a 2,017-module
+  Android/Hermes export.
+- The first owner import reached PostgreSQL and rolled back on
+  `question_families_code_check`. Two generated composite family keys were 101 and
+  103 characters, and three later Grid Theory concept/family identifiers contained
+  commas. The importer now creates deterministic constraint-safe database keys,
+  retains exact supplied identifiers as titles/source metadata, and does not
+  weaken any constraint. Focused validation now passes 33/33; linked pgTAP remained
+  green at 388/388 because the failed import transaction persisted no Chapter 7
+  rows. The post-fix full local gate passes TypeScript, ESLint, formatting, and 22
+  Jest suites with 104/104 tests. Owner import rerun remains pending.
+- The corrected owner rerun inserted all 75 Chapter 7 questions with zero
+  updates, skips, or failures. It emitted exactly 76 expected warnings: one
+  dominant-A answer-position warning and 75 unregistered visual-asset warnings;
+  no reinforcement target was missing. The post-import linked suite passed
+  388/388. The owner then completed and verified the guarded assignment of private
+  package `LTL2_C7_75` to Heshy and Avigail only. Student study-session acceptance
+  remains.

@@ -53,6 +53,16 @@ B 39, C 11, and D 0. Import does not reposition answers and emits a coverage
 warning because D is never correct; a reviewer should address that pattern before
 broader use.
 
+The supplied Volume 2 Chapter 7 bank contains 75 complete-support draft rows in
+private package `LTL2_C7_75`. All 150 reinforcement links remain internal and all
+learning-support metadata is preserved. It contains 47 medium and 28 hard
+questions with no easy rows. Supplied answer positions are A 46, B 25, C 3, and
+D 1; import preserves them and emits a dominant-A quality warning for review.
+Supplied objective, concept, and family identifiers remain visible as titles/source
+metadata. When an identifier exceeds the database key limit or contains punctuation
+outside the key alphabet, the importer derives a deterministic bounded key rather
+than editing the supplied display value or weakening database constraints.
+
 ## Workflow
 
 Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.

@@ -56,6 +56,7 @@ npm run content:import:adaptive30
 npm run content:import:ltl2c4
 npm run content:import:ltl2c5
 npm run content:import:ltl2c6
+npm run content:import:ltl2c7
 npm run db:test:linked
 ```
 

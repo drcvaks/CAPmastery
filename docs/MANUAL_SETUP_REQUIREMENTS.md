@@ -221,6 +221,23 @@ After import, an administrator must explicitly assign `LTL2_C6_75` through
 `admin_set_pilot_package_assignment`. The owner requested the same pilot access as
 Chapter 5: Heshy and Avigail only.
 
+### Volume 2 Chapter 7 private content package
+
+The supplied `LTL_V2_Chapter_7_75_Questions_Complete_Support.csv` is imported only
+to the linked development project with `npm.cmd run content:import:ltl2c7`.
+Migration `202607240033` already supplies the required schema. Import validates 75
+rows, upserts by `external_id`, skips approved records, and forces imported content
+to remain draft inside private package `LTL2_C7_75`.
+
+No new account, migration, environment variable, service-role key, Storage bucket,
+production database, AI API, or image file is required. The existing database
+password remains process-only. Expect 75 missing-visual warnings and one
+answer-key balance warning because A is correct for 46 of 75 supplied rows.
+
+After import, an administrator must explicitly assign `LTL2_C7_75` through
+`admin_set_pilot_package_assignment`. The owner requested the same pilot access as
+Chapter 6: Heshy and Avigail only.
+
 ### Resetting pre-pilot student learning history
 
 Migration `202607240032` provides a narrow reset for test history. It preserves the

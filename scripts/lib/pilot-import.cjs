@@ -1,3 +1,5 @@
+const { createHash } = require("node:crypto");
+
 const REQUIRED_FIELDS = [
   "external_id",
   "pilot_batch",
@@ -170,6 +172,27 @@ function formatSourceReference(reference, pages) {
   return `${normalizedReference}, ${label} ${normalizedPages}`;
 }
 
+function normalizeMetadataCode(value, maxLength = 100) {
+  const normalized = String(value)
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_.-]+/g, "_");
+  if (!normalized || !/^[A-Z0-9]/.test(normalized)) {
+    throw new Error(`Metadata code '${value}' cannot be normalized safely.`);
+  }
+  if (normalized.length <= maxLength) return normalized;
+
+  const hash = createHash("sha256").update(normalized).digest("hex").slice(0, 12).toUpperCase();
+  return `${normalized.slice(0, maxLength - hash.length - 1)}.${hash}`;
+}
+
+function canonicalQuestionFamilyCode(row) {
+  return normalizeMetadataCode(
+    [row.objective_code, row.concept_code, row.question_family_code].join("."),
+    100,
+  );
+}
+
 function validateImport(rows, expectedCount = 10) {
   const errors = [];
   const warnings = [];
@@ -282,7 +305,7 @@ function validateImport(rows, expectedCount = 10) {
     const [dominantLetter, dominantCount] = [...correctLetterCounts.entries()].sort(
       (left, right) => right[1] - left[1],
     )[0] ?? ["", 0];
-    if (dominantCount / rows.length >= 0.7) {
+    if (dominantCount / rows.length >= 0.6) {
       warnings.push(
         `Answer-key balance warning: ${dominantLetter} is correct for ${dominantCount} of ${rows.length} questions.`,
       );
@@ -324,12 +347,14 @@ function splitReinforcementIds(value) {
 
 module.exports = {
   REQUIRED_FIELDS,
+  canonicalQuestionFamilyCode,
   decodeImportBuffer,
   formatSourceReference,
   parseDelimited,
   parseImport,
   parseSourcePages,
   normalizeCognitiveLevel,
+  normalizeMetadataCode,
   questionPurpose,
   splitReinforcementIds,
   validateImport,

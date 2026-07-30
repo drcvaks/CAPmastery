@@ -138,6 +138,13 @@ Volume 2 Chapter 6 uses the same operator-import schema and requires no addition
 migration. The importer creates the Chapter 6 hierarchy and authorized-source
 metadata as needed and stores the 75 draft rows in private package `LTL2_C6_75`.
 
+Volume 2 Chapter 7 also uses the migration 033 operator-import schema. The importer
+creates its Chapter 7 hierarchy and source metadata as needed and stores the 75
+draft rows in private package `LTL2_C7_75`; no additional migration is required.
+Metadata database keys are normalized to the existing uppercase key alphabet and
+long composite family keys receive a deterministic hash suffix. The original
+author-supplied identifiers remain in titles/source metadata.
+
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.
 3. Reset/replay migrations against a disposable database.
