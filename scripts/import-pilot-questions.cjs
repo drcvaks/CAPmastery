@@ -112,9 +112,30 @@ const CHAPTER_7_CONFIG = {
   sourceExternalReference: "CAP:LTL:V2:C7:PILOT",
   sourceTitle: "Learn to Lead, Volume 2",
 };
+const CHAPTER_8_CONFIG = {
+  expectedCount: 75,
+  importPackage: "LTL2_C8_75",
+  examId: "20000000-0000-4000-8000-000000000001",
+  courseId: "30000000-0000-4000-8000-000000000001",
+  volumeCode: "LTL_V2",
+  volumeTitle: "Learn to Lead, Volume 2",
+  volumeSortOrder: 20,
+  chapterCode: "LTL_V2_C8",
+  chapterTitle: "Effective Communication",
+  chapterSortOrder: 80,
+  topicCode: "LTL2_C8",
+  topicTitle: "Learn to Lead, Volume 2, Chapter 8",
+  topicDescription: "Private Chapter 8 Billy Mitchell Leadership pilot content.",
+  topicSortOrder: 80,
+  sourceExternalReference: "CAP:LTL:V2:C8:PILOT",
+  sourceTitle: "Learn to Lead, Volume 2",
+};
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === "LTL_V2_Chapter_8_75_Questions_Complete_Support.csv") {
+    return CHAPTER_8_CONFIG;
+  }
   if (filename === "LTL_V2_Chapter_7_75_Questions_Complete_Support.csv") {
     return CHAPTER_7_CONFIG;
   }

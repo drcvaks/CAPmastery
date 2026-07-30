@@ -145,6 +145,10 @@ Metadata database keys are normalized to the existing uppercase key alphabet and
 long composite family keys receive a deterministic hash suffix. The original
 author-supplied identifiers remain in titles/source metadata.
 
+Volume 2 Chapter 8 uses the same migration 033 operator-import schema and requires
+no additional migration. The importer creates the Chapter 8 hierarchy and source
+metadata as needed and stores its 75 draft rows in private package `LTL2_C8_75`.
+
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.
 3. Reset/replay migrations against a disposable database.

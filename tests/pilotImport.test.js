@@ -56,6 +56,12 @@ const chapterSevenInputPath = path.resolve(
   "Content",
   "LTL_V2_Chapter_7_75_Questions_Complete_Support.csv",
 );
+const chapterEightInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "LTL_V2_Chapter_8_75_Questions_Complete_Support.csv",
+);
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -530,5 +536,85 @@ describe("Learn to Lead Volume 2 Chapter 7 validation", () => {
     expect(validation.warnings).toEqual([
       "Answer-key balance warning: A is correct for 46 of 75 questions.",
     ]);
+  });
+});
+
+describe("Learn to Lead Volume 2 Chapter 8 validation", () => {
+  const inputBuffer = fs.readFileSync(chapterEightInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer));
+
+  it("parses the UTF-8 BOM file as exactly 75 unique draft questions", () => {
+    const validation = validateImport(rows, 75);
+
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation.errors).toEqual([]);
+    expect(validation.warnings).toEqual([]);
+    expect(rows).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(75);
+    expect(rows.every((row) => row.review_status === "draft")).toBe(true);
+  });
+
+  it("preserves four unique choices and complete learning support for every question", () => {
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.visual_asset_key).not.toBe("");
+      expect(row.visual_alt_text).not.toBe("");
+    }
+    expect(new Set(rows.map((row) => row.visual_asset_key)).size).toBe(75);
+  });
+
+  it("retains the supplied difficulty, cognitive, mode, and style classifications", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+
+    expect(["easy", "medium", "hard"].map((value) => count("difficulty", value))).toEqual([
+      4, 47, 24,
+    ]);
+    expect(
+      ["analysis", "application", "recall", "recognition", "scenario", "understanding"].map(
+        (value) => count("cognitive_level", value),
+      ),
+    ).toEqual([9, 15, 14, 8, 3, 26]);
+    expect(rows.every((row) => row.question_mode === "both")).toBe(true);
+    expect(["cap_direct", "scenario"].map((value) => count("question_style", value))).toEqual([
+      72, 3,
+    ]);
+  });
+
+  it("resolves all reinforcement links and metadata keys within the supplied bank", () => {
+    const externalIds = new Set(rows.map((row) => row.external_id));
+    const reinforcementIds = rows.flatMap((row) =>
+      splitReinforcementIds(row.reinforcement_question_ids),
+    );
+    const rawFamilies = new Set(
+      rows.map((row) => [row.objective_code, row.concept_code, row.question_family_code].join(".")),
+    );
+    const canonicalFamilies = new Set(rows.map(canonicalQuestionFamilyCode));
+
+    expect(reinforcementIds).toHaveLength(150);
+    expect(reinforcementIds.every((externalId) => externalIds.has(externalId))).toBe(true);
+    expect(canonicalFamilies.size).toBe(rawFamilies.size);
+    expect(
+      [...canonicalFamilies].every(
+        (code) => code.length <= 100 && /^[A-Z0-9][A-Z0-9_.-]{0,99}$/.test(code),
+      ),
+    ).toBe(true);
+  });
+
+  it("preserves the supplied balanced answer positions", () => {
+    expect(
+      Object.fromEntries(
+        ["A", "B", "C", "D"].map((letter) => [
+          letter,
+          rows.filter((row) => row.correct_letter === letter).length,
+        ]),
+      ),
+    ).toEqual({ A: 20, B: 20, C: 17, D: 18 });
   });
 });

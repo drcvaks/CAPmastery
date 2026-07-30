@@ -63,6 +63,11 @@ metadata. When an identifier exceeds the database key limit or contains punctuat
 outside the key alphabet, the importer derives a deterministic bounded key rather
 than editing the supplied display value or weakening database constraints.
 
+The supplied Volume 2 Chapter 8 bank contains 75 complete-support draft rows in
+private package `LTL2_C8_75`. All 150 reinforcement links remain internal, all
+learning support is complete, and the supplied answer positions are balanced:
+A 20, B 20, C 17, and D 18. Import preserves every supplied content field.
+
 ## Workflow
 
 Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.

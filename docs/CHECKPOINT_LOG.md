@@ -698,3 +698,32 @@ Volume 2 Chapter 7 content extension:
   388/388. The owner then completed and verified the guarded assignment of private
   package `LTL2_C7_75` to Heshy and Avigail only. Student study-session acceptance
   remains.
+
+Volume 2 Chapter 8 content extension:
+
+- Audited the supplied 75-row UTF-8 BOM/tab-delimited Chapter 8 complete-support
+  bank. It has 75 unique IDs, four distinct choices and aligned feedback per row,
+  complete short/full/remediation/memory/visual metadata, 75 unique visual keys,
+  and 150 reinforcement edges whose targets all occur inside the file.
+- Extended the importer for draft-only package `LTL2_C8_75` and added
+  `npm.cmd run content:import:ltl2c8`. Migration 033 remains sufficient; no
+  database migration or environment variable was added.
+- The supplied bank contains 4 easy, 47 medium, and 24 hard questions. Cognitive
+  classifications cover analysis, application, recall, recognition, scenario, and
+  understanding. All canonical metadata keys are valid and collision-free.
+- Supplied answer positions are balanced at A 20, B 20, C 17, and D 18. No
+  answer-key warning is emitted and no supplied content was rewritten.
+- Focused actual-file validation passes 38/38 tests. The no-password import dry
+  run validated all rows and stopped at the expected process-only credential
+  guard. Persistent import, assignment to Heshy and Avigail, linked regression
+  testing, and student acceptance remain pending.
+- Final local gates pass: TypeScript exit 0; Expo ESLint exit 0; Prettier and
+  `git diff --check` exit 0; 22 Jest suites and 109/109 tests; Expo Doctor 20/20;
+  public Expo configuration; a 1,581-module web export; and a 2,017-module
+  Android/Hermes export.
+- The owner import inserted all 75 Chapter 8 questions with zero updates, skips,
+  or failures and emitted exactly 75 expected unregistered visual-asset warnings.
+  No answer-position or reinforcement warning occurred. The post-import linked
+  suite passed 388/388. The owner then completed and verified the guarded
+  assignment of private package `LTL2_C8_75` to Heshy and Avigail only. Student
+  study-session acceptance remains.
