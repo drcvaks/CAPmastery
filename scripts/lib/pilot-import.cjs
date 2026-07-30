@@ -287,6 +287,16 @@ function validateImport(rows, expectedCount = 10) {
         `Answer-key balance warning: ${dominantLetter} is correct for ${dominantCount} of ${rows.length} questions.`,
       );
     }
+    const missingLetters = ["A", "B", "C", "D"].filter(
+      (letter) => !correctLetterCounts.has(letter),
+    );
+    if (missingLetters.length > 0) {
+      warnings.push(
+        `Answer-key coverage warning: ${missingLetters.join(", ")} ${
+          missingLetters.length === 1 ? "is" : "are"
+        } never correct in this ${rows.length}-question bank.`,
+      );
+    }
   }
 
   return { errors, warnings };

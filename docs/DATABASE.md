@@ -134,6 +134,10 @@ drafts in private package `LTL2_C5_75`. Comma-separated citation pages are store
 in the existing numeric bounds while their exact text is retained in the visible
 source reference.
 
+Volume 2 Chapter 6 uses the same operator-import schema and requires no additional
+migration. The importer creates the Chapter 6 hierarchy and authorized-source
+metadata as needed and stores the 75 draft rows in private package `LTL2_C6_75`.
+
 1. Develop against a local Supabase stack when available or a dedicated nonproduction CAP Mastery project.
 2. Add ordered migration files and SQL tests in the same change.
 3. Reset/replay migrations against a disposable database.

@@ -42,6 +42,12 @@ const chapterFiveInputPath = path.resolve(
   "Content",
   "LTL_V2_Chapter_5_75_Questions_Complete_Support.csv",
 );
+const chapterSixInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "LTL_V2_Chapter_6_75_Questions_Complete_Support.csv",
+);
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -263,6 +269,7 @@ describe("Learn to Lead Volume 2 Chapter 4 validation", () => {
     expect(correctLetters).toEqual({ A: 10, B: 58, C: 7, D: 0 });
     expect(validation.warnings).toEqual([
       "Answer-key balance warning: B is correct for 58 of 75 questions.",
+      "Answer-key coverage warning: D is never correct in this 75-question bank.",
     ]);
   });
 });
@@ -347,5 +354,81 @@ describe("Learn to Lead Volume 2 Chapter 5 validation", () => {
         ]),
       ),
     ).toEqual({ A: 21, B: 30, C: 20, D: 4 });
+  });
+});
+
+describe("Learn to Lead Volume 2 Chapter 6 validation", () => {
+  const inputBuffer = fs.readFileSync(chapterSixInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer));
+
+  it("parses the UTF-8 BOM file as exactly 75 unique draft questions", () => {
+    const validation = validateImport(rows, 75);
+
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation.errors).toEqual([]);
+    expect(rows).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(75);
+    expect(rows.every((row) => row.review_status === "draft")).toBe(true);
+  });
+
+  it("preserves four unique choices and complete learning support for every question", () => {
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.visual_asset_key).not.toBe("");
+      expect(row.visual_alt_text).not.toBe("");
+    }
+    expect(new Set(rows.map((row) => row.visual_asset_key)).size).toBe(75);
+  });
+
+  it("retains the supplied difficulty, cognitive, mode, and style classifications", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+
+    expect(["easy", "medium", "hard"].map((value) => count("difficulty", value))).toEqual([
+      9, 36, 30,
+    ]);
+    expect(
+      ["analysis", "application", "misconception", "recall", "scenario", "understanding"].map(
+        (value) => count("cognitive_level", value),
+      ),
+    ).toEqual([14, 23, 4, 14, 8, 12]);
+    expect(rows.every((row) => row.question_mode === "study_and_test")).toBe(true);
+    expect(
+      ["analysis", "application", "cap_direct", "scenario"].map((value) =>
+        count("question_style", value),
+      ),
+    ).toEqual([2, 6, 44, 23]);
+  });
+
+  it("resolves all reinforcement links within the supplied bank", () => {
+    const externalIds = new Set(rows.map((row) => row.external_id));
+    const reinforcementIds = rows.flatMap((row) =>
+      splitReinforcementIds(row.reinforcement_question_ids),
+    );
+
+    expect(reinforcementIds).toHaveLength(225);
+    expect(reinforcementIds.every((externalId) => externalIds.has(externalId))).toBe(true);
+  });
+
+  it("preserves the supplied answer positions and reports the missing D position", () => {
+    const validation = validateImport(rows, 75);
+
+    expect(
+      Object.fromEntries(
+        ["A", "B", "C", "D"].map((letter) => [
+          letter,
+          rows.filter((row) => row.correct_letter === letter).length,
+        ]),
+      ),
+    ).toEqual({ A: 25, B: 39, C: 11, D: 0 });
+    expect(validation.warnings).toEqual([
+      "Answer-key coverage warning: D is never correct in this 75-question bank.",
+    ]);
   });
 });

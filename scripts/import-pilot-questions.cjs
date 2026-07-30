@@ -74,9 +74,30 @@ const CHAPTER_5_CONFIG = {
   sourceExternalReference: "CAP:LTL:V2:C5:PILOT",
   sourceTitle: "Learn to Lead, Volume 2",
 };
+const CHAPTER_6_CONFIG = {
+  expectedCount: 75,
+  importPackage: "LTL2_C6_75",
+  examId: "20000000-0000-4000-8000-000000000001",
+  courseId: "30000000-0000-4000-8000-000000000001",
+  volumeCode: "LTL_V2",
+  volumeTitle: "Learn to Lead, Volume 2",
+  volumeSortOrder: 20,
+  chapterCode: "LTL_V2_C6",
+  chapterTitle: "The Human Element",
+  chapterSortOrder: 60,
+  topicCode: "LTL2_C6",
+  topicTitle: "Learn to Lead, Volume 2, Chapter 6",
+  topicDescription: "Private Chapter 6 Billy Mitchell Leadership pilot content.",
+  topicSortOrder: 60,
+  sourceExternalReference: "CAP:LTL:V2:C6:PILOT",
+  sourceTitle: "Learn to Lead, Volume 2",
+};
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === "LTL_V2_Chapter_6_75_Questions_Complete_Support.csv") {
+    return CHAPTER_6_CONFIG;
+  }
   if (filename === "LTL_V2_Chapter_5_75_Questions_Complete_Support.csv") {
     return CHAPTER_5_CONFIG;
   }
@@ -431,9 +452,7 @@ async function main() {
     updated: 0,
     skipped: 0,
     failed: 0,
-    warnings: validation.warnings.filter((warning) =>
-      warning.startsWith("Answer-key balance warning:"),
-    ),
+    warnings: validation.warnings.filter((warning) => warning.startsWith("Answer-key ")),
   };
   await client.connect();
   try {

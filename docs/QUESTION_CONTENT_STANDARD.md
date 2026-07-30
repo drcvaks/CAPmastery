@@ -46,6 +46,13 @@ and all 20 internal reinforcement links. Its answer positions are A 21, B 30,
 C 20, and D 4; import reports no dominant-answer warning and does not reposition
 any answer.
 
+The supplied Volume 2 Chapter 6 bank contains 75 complete-support draft rows in
+private package `LTL2_C6_75`. All 225 reinforcement links remain internal and all
+learning-support metadata is preserved. Its supplied answer positions are A 25,
+B 39, C 11, and D 0. Import does not reposition answers and emits a coverage
+warning because D is never correct; a reviewer should address that pattern before
+broader use.
+
 ## Workflow
 
 Import validates and previews before writing. Accepted rows enter as drafts regardless of requested approval unless an explicitly authorized review workflow says otherwise. Reviewers correct, cite, rate, approve/reject, and version changes. Import jobs retain row counts and safe downloadable errors. Students receive only approved active content and never the answer key.

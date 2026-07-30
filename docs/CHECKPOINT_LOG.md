@@ -627,3 +627,34 @@ Volume 2 Chapter 5 content extension:
   Vercel `404 NOT_FOUND`. Added checked-in `vercel.json` with the established
   `dist/web` build configuration and an SPA fallback rewrite to `/`. A fresh
   Vercel deployment and direct nested-route refresh remain owner checks.
+
+Volume 2 Chapter 6 content extension:
+
+- Audited the supplied 75-row UTF-8 BOM/tab-delimited Chapter 6 complete-support
+  bank. It has 75 unique IDs, four distinct choices and aligned feedback per row,
+  complete short/full/remediation/memory/visual metadata, 75 unique visual keys,
+  and 225 reinforcement edges whose targets all occur inside the file.
+- Extended the existing importer for draft-only package `LTL2_C6_75` and added
+  `npm.cmd run content:import:ltl2c6`. Migration 033 remains sufficient; no
+  database migration or environment variable was added.
+- The supplied classifications are 9 easy/36 medium/30 hard and cover analysis,
+  application, misconception, recall, scenario, and understanding. No question,
+  choice, distractor, answer, explanation, or support text was rewritten.
+- Supplied answer positions are A 25, B 39, C 11, and D 0. The general importer
+  now warns when any A–D position is absent. Chapter 4 accordingly reports its
+  existing dominant-B warning plus a missing-D warning; content remains unchanged.
+- Focused actual-file validation passes 27/27 tests. The no-password import dry
+  run validated all rows and stopped at the expected process-only credential
+  guard. Persistent development import, assignment to Heshy and Avigail, linked
+  database regression testing, and student acceptance remain pending.
+- Final local gates pass: TypeScript exit 0; Expo ESLint exit 0; Prettier and
+  `git diff --check` exit 0; 22 Jest suites and 98/98 tests; Expo Doctor 20/20;
+  public Expo configuration; a 1,581-module web export; and a 2,017-module
+  Android/Hermes export.
+- Owner-linked pgTAP after the Chapter 6 import command passed achievements and
+  challenges 67/67, adaptive mastery 34/34, admin learning reset 26/26, content
+  import/review 55/55, content permissions 32/32, identity/access RLS 15/15,
+  learning support 12/12, pilot package access 19/19, practice tests 56/56,
+  progress/readiness 34/34, and study sessions 38/38: aggregate 388/388 passed.
+  The owner then completed the guarded assignment of private package
+  `LTL2_C6_75` to Heshy and Avigail. Student study-session acceptance remains.

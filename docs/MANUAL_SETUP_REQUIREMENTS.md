@@ -204,6 +204,23 @@ intended pilot students through `admin_set_pilot_package_assignment`. Assignment
 to Heshy, Avigail, or both remains an owner decision. The supplied answer
 positions are A 21, B 30, C 20, and D 4; import preserves them unchanged.
 
+### Volume 2 Chapter 6 private content package
+
+The supplied `LTL_V2_Chapter_6_75_Questions_Complete_Support.csv` is imported only
+to the linked development project with `npm.cmd run content:import:ltl2c6`.
+Migration `202607240033` already supplies the required schema. The importer
+validates all 75 rows, upserts by `external_id`, skips approved records, and forces
+imported content to remain draft inside private package `LTL2_C6_75`.
+
+No new account, migration, environment variable, service-role key, Storage bucket,
+production database, AI API, or image file is required. The existing database
+password remains process-only. Expect 75 missing-visual warnings plus one
+answer-key coverage warning because D is not correct for any supplied row.
+
+After import, an administrator must explicitly assign `LTL2_C6_75` through
+`admin_set_pilot_package_assignment`. The owner requested the same pilot access as
+Chapter 5: Heshy and Avigail only.
+
 ### Resetting pre-pilot student learning history
 
 Migration `202607240032` provides a narrow reset for test history. It preserves the
