@@ -616,3 +616,14 @@ Volume 2 Chapter 5 content extension:
   57.0.9, Expo Router 57.0.9, React Native 0.86.2, and their matching test/lint
   packages are installed. The known npm audit report remains 44 transitive
   findings; no unsafe forced audit rewrite was used.
+- Owner-linked pgTAP after the Chapter 5 import command passed achievements and
+  challenges 67/67, adaptive mastery 34/34, admin learning reset 26/26, content
+  import/review 55/55, content permissions 32/32, identity/access RLS 15/15,
+  learning support 12/12, pilot package access 19/19, practice tests 56/56,
+  progress/readiness 34/34, and study sessions 38/38: aggregate 388/388 passed.
+  The import summary and student package-assignment decision remain pending.
+- Owner production-web acceptance exposed a Vercel-only deep-link failure:
+  navigating inside Expo Router worked, but refreshing a nested route returned
+  Vercel `404 NOT_FOUND`. Added checked-in `vercel.json` with the established
+  `dist/web` build configuration and an SPA fallback rewrite to `/`. A fresh
+  Vercel deployment and direct nested-route refresh remain owner checks.

@@ -62,6 +62,11 @@ Add the separate CAP Mastery development project URL and publishable key to igno
 
 The physical Expo Go version currently available to the owner is incompatible with SDK 57. SDK 57 is intentionally retained; use web/production export checks for now and revisit Expo Go or a development build before physical-device testing.
 
+Vercel uses the checked-in `vercel.json` to build `dist/web` and rewrite every
+direct or refreshed application route to the single-page entry point. Keep the
+Supabase URL and publishable key in Vercel environment variables; never add a
+service-role key.
+
 ## Documentation
 
 Begin with [AGENTS.md](AGENTS.md), then read [the architecture](docs/ARCHITECTURE.md), [the mySCP reuse audit](docs/MYSCP_REUSE_REPORT.md), [security requirements](docs/SECURITY_AND_PERMISSIONS.md), and [the checkpoint log](docs/CHECKPOINT_LOG.md).

@@ -156,6 +156,11 @@ The ten-question, optional 15-minute, no-pause Chapter 1 configuration is a prov
 
 No new account, credential, environment variable, service-role key, Storage bucket, production database, AI provider, or content import is required.
 
+The Vercel project must redeploy after changes to the checked-in `vercel.json`.
+That configuration exports to `dist/web` and rewrites refreshed nested Expo Router
+paths to the single-page root. The existing Vercel Supabase URL and publishable
+key remain build-time environment variables.
+
 To create a real family challenge, the existing adult account must have the global `parent` or `coach` role. Both intended student accounts must have active `student_guardian_links` to that adult with `can_manage_challenges = true`. At least three questions in the chosen exam must either be reviewed as `approved`/`active` or belong to the exact private pilot package assigned to both selected students.
 
 The database password remains necessary only as process-scoped `CAP_MASTERY_DB_PASSWORD` for the owner-run linked pgTAP suite. Do not save it in `.env.local`, source files, Git, or chat.
