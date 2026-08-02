@@ -63,11 +63,14 @@ export async function saveReviewQuestion(
   payload: ReviewEditPayload,
   changeReason: string,
 ): Promise<number> {
-  const { data, error } = await getSupabaseClient().rpc("reviewer_save_question", {
-    p_question_id: questionId,
-    p_payload: payload,
-    p_change_reason: changeReason,
-  });
+  const { data, error } = await getSupabaseClient().rpc(
+    "reviewer_save_question_with_classification",
+    {
+      p_question_id: questionId,
+      p_payload: payload,
+      p_change_reason: changeReason,
+    },
+  );
   if (error) throw error;
   return z.number().int().positive().parse(data);
 }

@@ -50,6 +50,7 @@ const sessionQuestionRowSchema = z.object({
   visual_width: z.number().int().positive().nullable(),
   visual_height: z.number().int().positive().nullable(),
   visual_uri: z.url().nullable(),
+  flagged: z.boolean().default(false),
 });
 
 const submissionSchema = z.object({

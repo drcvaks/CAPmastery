@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
@@ -335,6 +335,57 @@ function QuestionEditor({ detail }: { detail: ReviewQuestion }) {
         onChangeText={(value) => set("estimated_time_seconds", value)}
         value={edit.estimated_time_seconds}
       />
+      <Text style={styles.heading}>Final-exam classification</Text>
+      <AppTextField
+        label="Chapter number"
+        keyboardType="number-pad"
+        onChangeText={(value) => set("chapter_number", value)}
+        value={edit.chapter_number}
+      />
+      <AppTextField
+        label="Exam likeness (high, medium, or low)"
+        onChangeText={(value) => set("exam_likeness", value as ReviewEditPayload["exam_likeness"])}
+        value={edit.exam_likeness}
+      />
+      <AppTextField
+        label="Distractor difficulty (basic, moderate, or close)"
+        onChangeText={(value) =>
+          set("distractor_difficulty", value as ReviewEditPayload["distractor_difficulty"])
+        }
+        value={edit.distractor_difficulty}
+      />
+      <View style={styles.switchRow}>
+        <View style={styles.switchCopy}>
+          <Text style={styles.switchTitle}>Eligible for final exam</Text>
+          <Text style={styles.body}>Study mode can still use this question when disabled.</Text>
+        </View>
+        <Switch
+          accessibilityLabel="Eligible for final exam"
+          onValueChange={(value) => set("eligible_for_final_exam", value)}
+          trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+          value={edit.eligible_for_final_exam}
+        />
+      </View>
+      <AppTextField
+        label="Final-exam selection weight"
+        keyboardType="decimal-pad"
+        onChangeText={(value) => set("final_exam_weight", value)}
+        value={edit.final_exam_weight}
+      />
+      <AppTextField
+        label="Content origin"
+        onChangeText={(value) =>
+          set("content_origin", value as ReviewEditPayload["content_origin"])
+        }
+        value={edit.content_origin}
+      />
+      <AppTextField
+        label="Style reference"
+        onChangeText={(value) =>
+          set("style_reference", value as ReviewEditPayload["style_reference"])
+        }
+        value={edit.style_reference}
+      />
       {detail.question.review_status === "approved" ? (
         <AppTextField
           label="Reason for revising approved content"
@@ -415,6 +466,13 @@ function toEdit(detail: ReviewQuestion): ReviewEditPayload {
     source_page_start: detail.question.source_page_start?.toString() ?? "",
     source_page_end: detail.question.source_page_end?.toString() ?? "",
     estimated_time_seconds: detail.question.estimated_time_seconds?.toString() ?? "",
+    chapter_number: detail.question.chapter_number?.toString() ?? "",
+    exam_likeness: detail.question.exam_likeness ?? "",
+    distractor_difficulty: detail.question.distractor_difficulty ?? "",
+    eligible_for_final_exam: detail.question.eligible_for_final_exam ?? false,
+    final_exam_weight: (detail.question.final_exam_weight ?? 0).toString(),
+    content_origin: detail.question.content_origin ?? "",
+    style_reference: detail.question.style_reference ?? "",
     choices: detail.choices.map((choice) => ({
       key: choice.key,
       text: choice.text,
@@ -489,6 +547,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
   stack: { gap: theme.spacing.lg },
   success: { color: theme.colors.success, fontSize: 14, fontWeight: "700" },
+  switchCopy: { flex: 1, gap: 2 },
+  switchRow: { alignItems: "center", flexDirection: "row", gap: theme.spacing.md },
+  switchTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
   tab: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,

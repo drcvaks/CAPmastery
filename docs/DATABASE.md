@@ -155,4 +155,20 @@ metadata as needed and stores its 75 draft rows in private package `LTL2_C8_75`.
 4. Generate types from the resulting schema.
 5. Apply to shared environments only after review and record the result in `CHECKPOINT_LOG.md`.
 
+## Mitchell full practice-exam extension
+
+Migration `202608020034` adds question classification fields for chapter, exam
+likeness, distractor difficulty, final-exam eligibility and weight, content origin,
+and style reference. It adds an indexed final-exam pool, a practice-blueprint
+selection strategy, and persistent review flags on session questions. Existing
+question UUIDs, attempts, mastery, version snapshots, and session links are not
+recreated.
+
+`create_mitchell_full_practice_exam` accepts only an active 50-question Mitchell
+blueprint and selects approved content or draft content from packages assigned to
+the authenticated student. The selected question IDs, versions, and order are
+frozen in `study_session_questions`. Weak-area results are completion-gated, flag
+functions recheck ownership, and classification edits use an audited reviewer-only
+wrapper around the existing versioned edit workflow.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

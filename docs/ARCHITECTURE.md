@@ -101,3 +101,20 @@ Private family challenges reuse the owned study-session infrastructure with an e
 `features/challenges/` owns schemas, pure positive scoring, TanStack Query hooks, and the shared parent/student workspace. Thin routes expose a student Challenge tab and a linked-parent Family Challenge screen. Challenge scoring recognizes completion, accuracy, and improvement without winner, rank, or lowest-score concepts. Achievements are derived from server evidence and include first steps, persistence, steady effort, topic mastery, comeback, improvement, and helping the team.
 
 Challenge visibility does not broaden ordinary study access. Participants still own only their own session and attempt history. The creator and two participants can see the challenge summary, while unrelated identities cannot. Predefined reactions replace open messaging. AI, public competition, assignments/goals, notifications, production deployment, and broader challenge formats remain outside this checkpoint.
+
+### Mitchell full practice-exam extension
+
+The full Mitchell Leadership practice exam reuses the protected `practice_test`
+session boundary. PostgreSQL selects and freezes 50 eligible questions from Learn
+to Lead Volume 2 Chapters 4–8 before the session is returned. The selector chooses
+a variable 9–11 questions per chapter (inside the documented 7–13 limit), favors
+the supplied weight, removes duplicate question families, interleaves chapters,
+and randomizes deterministically from the new session UUID. Refreshing therefore
+returns the same question IDs, versions, order, saved answers, and review flags.
+
+The client adds Back, Next, and a persistent Flag for review control. Answers are
+still graded and saved individually by the secure server function so a refresh
+cannot erase work, but correctness, keys, explanations, memory aids, visuals, and
+scores remain null until the test is submitted or completes. Post-test analysis
+adds chapter results and objective/concept review recommendations. No sample-exam
+question text or answer key is stored as a style reference.

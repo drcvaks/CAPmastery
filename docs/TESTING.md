@@ -111,3 +111,12 @@ another student's history, and preservation of the target's role, family link, a
 pilot-package assignment. It also verifies the reset audit record.
 
 The full Jest process currently needs `--forceExit` because an existing test handle remains open after all suites report. The result summary remains authoritative; diagnosing that handle is tracked as Checkpoint 10 test-harness hardening rather than changing application behavior in Checkpoint 9.
+
+The Mitchell 500-row actual-file tests verify the BOM/tab format, 500 unique IDs,
+100 rows and 60 eligible rows per chapter, 25 new textbook-grounded rows per
+chapter, complete choices/feedback/support/classification, and field-for-field
+preservation of the five earlier 75-question files. `mitchell_full_exam.test.sql`
+declares 29 transaction-only assertions covering the new columns/functions and
+grants, secure 50-question creation, variable chapter distribution within 7–13,
+unique families, objective spacing, frozen membership, owner-only persistent
+flags, completion, and objective-level weak-area results.

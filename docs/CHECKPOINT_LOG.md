@@ -727,3 +727,66 @@ Volume 2 Chapter 8 content extension:
   suite passed 388/388. The owner then completed and verified the guarded
   assignment of private package `LTL2_C8_75` to Heshy and Avigail only. Student
   study-session acceptance remains.
+
+Mitchell Chapters 4–8 final practice-exam extension:
+
+- Audited the supplied combined UTF-8 BOM/tab-delimited bank and its instructions.
+  It contains 500 unique external IDs, 100 questions per chapter, 60 final-exam
+  eligible rows per chapter, and 25 new textbook-grounded Q076–Q100 rows per
+  chapter. All 375 earlier rows match the five imported 75-question files
+  field-for-field; no existing question content was rewritten by Codex.
+- Added migration `202608020034_mitchell_full_practice_exam.sql`. It adds the seven
+  requested classification fields, an indexed eligible pool, blueprint selection
+  strategies, persistent practice review flags, an audited reviewer classification
+  edit path, a 50-question full-exam blueprint, protected selection/flag functions,
+  and completion-gated objective/concept analysis. Existing IDs and history are
+  preserved.
+- The full-exam selector freezes 50 unique accessible questions and versions,
+  chooses a variable 9–11 per chapter inside the required 7–13 boundary, favors
+  supplied weights, excludes repeated families, interleaves objectives, and
+  randomizes from the session UUID. Active-test answers remain server-graded but
+  correctness and learning support stay hidden until completion.
+- Extended the existing importer with `npm.cmd run content:import:mitchell500`.
+  It performs a pre-import duplicate check, routes each row through its stable
+  chapter package, upserts by external ID, preserves approved content while still
+  updating its classification, validates 100/60 post-import chapter counts, and
+  retains missing visual assets as warnings. The no-password dry run validated all
+  500 rows before stopping at the expected process-only credential guard.
+- Added a separate full-exam launcher, optional 50-minute timer, Back/Next controls,
+  persistent Flag for review, delayed result review, chapter breakdown, and the
+  lowest-scoring objective/concept recommendations. Admin review now exposes the
+  seven classification fields without granting students a write path.
+- Added three actual-file assertions to the import suite and a new 29-assertion
+  `mitchell_full_exam.test.sql` transaction suite. Linked migration application,
+  persistent import, type regeneration from the linked schema, linked lint/pgTAP,
+  and owner web acceptance remain pending because the database password is kept
+  process-only.
+- Final local gates pass: `npm.cmd run check` completed TypeScript, Expo ESLint,
+  22 Jest suites with 112/112 tests, and repository-wide Prettier; Expo public
+  configuration resolved; Expo Doctor passed 20/20; web export bundled 1,581
+  modules; and Android export bundled 2,017 modules with a 6.1 MB Hermes bundle.
+- The linked-development dry run identified only migration 034. Codex applied that
+  migration successfully; local and remote histories now match through 034, linked
+  lint reports no schema errors, and checked-in database types were regenerated
+  from the linked schema. The CLI emitted only a nonblocking Docker cache-catalog
+  warning after the remote migration had applied. Persistent content import and
+  linked pgTAP still require the owner's process-only database password.
+- The first owner import reached the first new row and PostgreSQL rejected the
+  supplied numeric weight `1.2` because `coalesce($26, 0)` inferred its parameter
+  as an integer. The transaction rolled back, so none of the 500 row updates or
+  inserts persisted. The insert now casts both values explicitly to `numeric`;
+  source validation still passes all 41 importer assertions, TypeScript passes,
+  and repository formatting is clean. The owner-run linked suite independently
+  passed the new Mitchell suite 29/29 and the full aggregate 417/417 before the
+  corrected persistent import.
+- The corrected owner rerun completed successfully: 125 new Q076–Q100 questions
+  were inserted, all 375 existing Chapter 4–8 questions received their supplied
+  final-exam classifications, and there were zero skips or failures. The 500
+  warnings were exclusively the expected unregistered visual-asset notices; no
+  reinforcement-link, answer-position, or other content warning occurred.
+- Post-import linked regression passed every suite: achievements/challenges
+  67/67, adaptive mastery 34/34, admin learning reset 26/26, content import/review
+  55/55, content permissions 32/32, identity/access RLS 15/15, learning support
+  12/12, Mitchell full exam 29/29, pilot package access 19/19, practice tests
+  56/56, progress/readiness 34/34, and study sessions 38/38—an aggregate
+  417/417. Owner web acceptance of the full 50-question workflow remains.

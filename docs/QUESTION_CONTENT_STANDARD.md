@@ -74,6 +74,20 @@ Import validates and previews before writing. Accepted rows enter as drafts rega
 
 Checkpoint 8 implements the canonical 37-column template as a pasteable comma- or tab-delimited workflow. Client validation reports missing columns, malformed rows, unsafe spreadsheet formulas, duplicate external IDs, normalized duplicate prompts, and inconsistent support metadata before import. The server repeats authoritative checks and rejects the whole question payload when any row is invalid. Objective, concept, and family codes must already exist; hierarchy creation is intentionally a separate governed decision. This checkpoint imports multiple-choice questions only.
 
+## Final-exam classification
+
+Chapter study may use every accessible question. Practice-exam selection uses only
+rows explicitly marked `eligible_for_final_exam=true` with a positive
+`final_exam_weight`. `exam_likeness`, `distractor_difficulty`, `content_origin`,
+and `style_reference` are reviewer-editable classifications; they do not constitute
+CAP approval or reproduce protected exam content.
+
+The combined Chapters 4–8 source must contain 500 unique stable external IDs, 100
+rows per chapter, and exactly 60 eligible rows per chapter. Existing Q001–Q075
+records are upserted by external ID without replacing their UUIDs; Q076–Q100 are
+new original textbook-grounded rows. Four choices and their four explanations must
+remain aligned, and missing visual files remain warnings rather than import errors.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

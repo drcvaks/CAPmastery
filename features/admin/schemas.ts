@@ -56,6 +56,15 @@ export const reviewQuestionSchema = z.object({
       source_page_start: z.number().int().positive().nullable(),
       source_page_end: z.number().int().positive().nullable(),
       estimated_time_seconds: z.number().int().positive().nullable(),
+      chapter_number: z.number().int().positive().nullable(),
+      exam_likeness: z.enum(["high", "medium", "low"]).nullable(),
+      distractor_difficulty: z.enum(["basic", "moderate", "close"]).nullable(),
+      eligible_for_final_exam: z.boolean(),
+      final_exam_weight: z.number().nonnegative(),
+      content_origin: z.enum(["existing_original_bank", "original_textbook_grounded"]).nullable(),
+      style_reference: z
+        .enum(["pre_sample_bank_review", "Mitchell_sample_style_analysis"])
+        .nullable(),
       review_status: z.enum(["draft", "in_review", "approved", "rejected", "archived"]),
       version: z.number().int().positive(),
     })
@@ -83,6 +92,13 @@ export type ReviewEditPayload = {
   source_page_start: string;
   source_page_end: string;
   estimated_time_seconds: string;
+  chapter_number: string;
+  exam_likeness: "" | "high" | "medium" | "low";
+  distractor_difficulty: "" | "basic" | "moderate" | "close";
+  eligible_for_final_exam: boolean;
+  final_exam_weight: string;
+  content_origin: "" | "existing_original_bank" | "original_textbook_grounded";
+  style_reference: "" | "pre_sample_bank_review" | "Mitchell_sample_style_analysis";
   choices: { key: string; text: string; feedback: string }[];
   correct_letter: string;
   explanation: string;

@@ -53,6 +53,16 @@ const OPTIONAL_VALUE_FIELDS = new Set([
   "visual_alt_text",
 ]);
 
+const FINAL_EXAM_FIELDS = [
+  "chapter_number",
+  "exam_likeness",
+  "distractor_difficulty",
+  "eligible_for_final_exam",
+  "final_exam_weight",
+  "content_origin",
+  "style_reference",
+];
+
 function decodeImportBuffer(buffer) {
   const utf8 = buffer.toString("utf8");
   if (!utf8.includes("\uFFFD")) return utf8;
@@ -244,6 +254,42 @@ function validateImport(rows, expectedCount = 10) {
     if (!/^\d+$/.test(row.feedback_display_version) || Number(row.feedback_display_version) < 1) {
       errors.push(`${label}: feedback_display_version must be a positive integer.`);
     }
+    const isFinalExamTagged = FINAL_EXAM_FIELDS.some((field) => row[field] !== undefined);
+    if (isFinalExamTagged) {
+      for (const field of FINAL_EXAM_FIELDS) {
+        if (!row[field]) errors.push(`${label}: ${field} is required for a final-exam import.`);
+      }
+      if (
+        !/^\d+$/.test(row.chapter_number) ||
+        ![4, 5, 6, 7, 8].includes(Number(row.chapter_number))
+      ) {
+        errors.push(`${label}: chapter_number must be an integer from 4 through 8.`);
+      }
+      if (!new Set(["high", "medium", "low"]).has(row.exam_likeness)) {
+        errors.push(`${label}: invalid exam_likeness '${row.exam_likeness}'.`);
+      }
+      if (!new Set(["basic", "moderate", "close"]).has(row.distractor_difficulty)) {
+        errors.push(`${label}: invalid distractor_difficulty '${row.distractor_difficulty}'.`);
+      }
+      if (!new Set(["true", "false"]).has(row.eligible_for_final_exam)) {
+        errors.push(`${label}: eligible_for_final_exam must be true or false.`);
+      }
+      if (!/^\d+(?:\.\d+)?$/.test(row.final_exam_weight) || Number(row.final_exam_weight) < 0) {
+        errors.push(`${label}: final_exam_weight must be a nonnegative number.`);
+      }
+      if (
+        !new Set(["existing_original_bank", "original_textbook_grounded"]).has(row.content_origin)
+      ) {
+        errors.push(`${label}: invalid content_origin '${row.content_origin}'.`);
+      }
+      if (
+        !new Set(["pre_sample_bank_review", "Mitchell_sample_style_analysis"]).has(
+          row.style_reference,
+        )
+      ) {
+        errors.push(`${label}: invalid style_reference '${row.style_reference}'.`);
+      }
+    }
     for (const field of ["question_mode", "question_style"]) {
       if (row[field] && !/^[a-z][a-z0-9_-]{1,79}$/.test(row[field])) {
         errors.push(`${label}: invalid ${field} '${row[field]}'.`);
@@ -288,6 +334,21 @@ function validateImport(rows, expectedCount = 10) {
       }
     }
   });
+
+  if (rows.length === 500 && rows.every((row) => row.chapter_number !== undefined)) {
+    for (const chapter of [4, 5, 6, 7, 8]) {
+      const chapterRows = rows.filter((row) => Number(row.chapter_number) === chapter);
+      const eligibleRows = chapterRows.filter((row) => row.eligible_for_final_exam === "true");
+      if (chapterRows.length !== 100) {
+        errors.push(`Chapter ${chapter} must contain 100 rows; found ${chapterRows.length}.`);
+      }
+      if (eligibleRows.length !== 60) {
+        errors.push(
+          `Chapter ${chapter} must contain 60 final-exam-eligible rows; found ${eligibleRows.length}.`,
+        );
+      }
+    }
+  }
 
   for (const row of rows) {
     for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
@@ -346,6 +407,7 @@ function splitReinforcementIds(value) {
 }
 
 module.exports = {
+  FINAL_EXAM_FIELDS,
   REQUIRED_FIELDS,
   canonicalQuestionFamilyCode,
   decodeImportBuffer,

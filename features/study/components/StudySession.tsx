@@ -8,9 +8,11 @@ import { theme } from "../../../lib/constants/theme";
 import {
   useCompletePracticeTest,
   usePracticeTestResults,
+  usePracticeTestWeakAreas,
+  useSetPracticeTestQuestionFlag,
   useSetPracticeTestPaused,
 } from "../../practice/hooks/usePracticeTest";
-import type { PracticeTopicResult } from "../../practice/schemas";
+import type { PracticeTopicResult, PracticeWeakArea } from "../../practice/schemas";
 import { getSafeStudyMessage } from "../errors";
 import { useStudySession, useSubmitStudyAnswer } from "../hooks/useStudySession";
 import { AnswerResultCard } from "./AnswerResultCard";
@@ -21,6 +23,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const submitAnswer = useSubmitStudyAnswer(sessionId);
   const completePractice = useCompletePracticeTest(sessionId);
   const setPaused = useSetPracticeTestPaused(sessionId);
+  const setFlag = useSetPracticeTestQuestionFlag(sessionId);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
@@ -35,6 +38,10 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     ? selectedChoices[currentQuestion.session_question_id]
     : undefined;
   const practiceResults = usePracticeTestResults(
+    sessionId,
+    session?.mode === "practice_test" && session.status === "completed",
+  );
+  const practiceWeakAreas = usePracticeTestWeakAreas(
     sessionId,
     session?.mode === "practice_test" && session.status === "completed",
   );
@@ -126,6 +133,8 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           answeredCount={session.answeredCount}
           results={practiceResults.data}
           error={practiceResults.isError}
+          weakAreas={practiceWeakAreas.data}
+          weakAreasError={practiceWeakAreas.isError}
         />
       );
     }
@@ -211,6 +220,15 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       return;
     }
     setCurrentIndex((index) => index + 1);
+  }
+
+  function goPrevious() {
+    setCurrentIndex((index) => Math.max(0, index - 1));
+  }
+
+  function goNext() {
+    if (!session) return;
+    setCurrentIndex((index) => Math.min(session.questions.length - 1, index + 1));
   }
 
   async function finishPracticeTest() {
@@ -310,6 +328,36 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           />
         ) : null}
 
+        {session.mode === "practice_test" && session.status === "active" ? (
+          <View style={styles.testNavigation}>
+            <AppButton
+              disabled={currentIndex === 0 || session.isPaused}
+              label="Back"
+              onPress={goPrevious}
+              variant="secondary"
+            />
+            <AppButton
+              label={currentQuestion.flagged ? "Remove review flag" : "Flag for review"}
+              loading={setFlag.isPending}
+              onPress={() =>
+                void setFlag
+                  .mutateAsync({
+                    sessionQuestionId: currentQuestion.session_question_id,
+                    flagged: !currentQuestion.flagged,
+                  })
+                  .catch(() => undefined)
+              }
+              variant="secondary"
+            />
+            <AppButton
+              disabled={currentIndex + 1 === session.questions.length || session.isPaused}
+              label="Next"
+              onPress={goNext}
+              variant="secondary"
+            />
+          </View>
+        ) : null}
+
         {submitAnswer.isError && !answered ? (
           <View accessibilityRole="alert" style={styles.errorBox}>
             <Text style={styles.error}>{getSafeStudyMessage(submitAnswer.error)}</Text>
@@ -362,10 +410,14 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               : "Correctness and explanations will be available when the practice test ends."
           }
         >
-          <AppButton
-            label={currentIndex + 1 === session.questions.length ? "View results" : "Next question"}
-            onPress={advance}
-          />
+          {session.mode === "challenge" ? (
+            <AppButton
+              label={
+                currentIndex + 1 === session.questions.length ? "View results" : "Next question"
+              }
+              onPress={advance}
+            />
+          ) : null}
         </AppCard>
       ) : null}
     </View>
@@ -382,6 +434,8 @@ function PracticeResults({
   onReview,
   questionCount,
   results,
+  weakAreas,
+  weakAreasError,
 }: {
   answeredCount: number;
   correctCount: number;
@@ -392,6 +446,8 @@ function PracticeResults({
   onReview: () => void;
   questionCount: number;
   results?: PracticeTopicResult[];
+  weakAreas?: PracticeWeakArea[];
+  weakAreasError: boolean;
 }) {
   const percentage = Math.round((correctCount / questionCount) * 100);
   return (
@@ -404,6 +460,33 @@ function PracticeResults({
         <Text style={styles.supportive}>
           Use this result to choose what to study next. One test does not define your readiness.
         </Text>
+      </AppCard>
+      <AppCard
+        title="Recommended review"
+        description="Objectives and concepts to revisit before the next full practice exam."
+      >
+        {weakAreasError ? (
+          <Text accessibilityRole="alert" style={styles.error}>
+            Detailed weak-area analysis could not be loaded.
+          </Text>
+        ) : null}
+        {weakAreas?.slice(0, 5).map((area) => (
+          <View key={area.objective_id} style={styles.topicResult}>
+            <Text style={styles.topicTitle}>
+              Chapter {area.chapter_number}: {area.objective_title}
+            </Text>
+            <Text style={styles.muted}>
+              {area.correct_count}/{area.question_count} · {Math.round(area.score_percent)}%
+              {area.concept_titles.length ? ` · ${area.concept_titles.join(", ")}` : ""}
+            </Text>
+          </View>
+        ))}
+        {weakAreas?.length ? (
+          <Text style={styles.supportive}>
+            Recommended next step: return to Study and choose the lowest-scoring chapter above for a
+            targeted adaptive session.
+          </Text>
+        ) : null}
       </AppCard>
       <AppCard title="Topic analysis" description="Strengths and review areas from this test only.">
         {loading ? <Text style={styles.muted}>Calculating topic results…</Text> : null}
@@ -473,6 +556,7 @@ const styles = StyleSheet.create({
   stack: { gap: theme.spacing.lg },
   supportive: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
   testStatus: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  testNavigation: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
   timer: { color: theme.colors.primary, fontSize: 28, fontWeight: "900" },
   topicResult: {
     borderTopColor: theme.colors.border,

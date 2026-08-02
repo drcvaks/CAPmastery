@@ -99,3 +99,18 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 - The server enforces blueprint balance, time expiry, and pause policy. Client countdowns and hidden controls are usability aids only.
 - Correctness, correct-choice IDs, explanations, remediation, memory support, and aggregate scores remain null during an active test, including immediately after answer submission.
 - Completion releases feedback only for answered questions. Practice attempts cannot write normal mastery state and are excluded from normal recent-accuracy/trend calculations.
+
+## Mitchell full-exam enforcement
+
+- Final-exam eligibility is a content classification, not an authorization grant.
+  Every candidate must still be approved/active or belong to an exact private
+  package assigned to the authenticated student.
+- The server selects and stores all 50 question IDs and versions. The client cannot
+  supply the pool, chapter allocation, family exclusions, answer keys, or score.
+- Back/Next navigation and flags do not reveal correctness. Flags are persisted by
+  owner-checked functions and are unreadable by another student.
+- Answers remain server-graded. Saving each answer protects work across refreshes,
+  while active-test responses and delivery rows continue to return null feedback.
+- Objective/concept analysis is available only after an owned practice test is
+  completed. Reviewer classification changes are validated, audited, and cannot
+  be written directly by a student.

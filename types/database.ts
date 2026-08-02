@@ -980,6 +980,7 @@ export type Database = {
           id: string;
           name: string;
           question_count: number;
+          selection_strategy: string;
           status: string;
           time_limit_seconds: number;
           updated_at: string;
@@ -994,6 +995,7 @@ export type Database = {
           id?: string;
           name: string;
           question_count: number;
+          selection_strategy?: string;
           status?: string;
           time_limit_seconds: number;
           updated_at?: string;
@@ -1008,6 +1010,7 @@ export type Database = {
           id?: string;
           name?: string;
           question_count?: number;
+          selection_strategy?: string;
           status?: string;
           time_limit_seconds?: number;
           updated_at?: string;
@@ -1478,13 +1481,19 @@ export type Database = {
         Row: {
           approved_at: string | null;
           approved_by: string | null;
+          chapter_number: number | null;
           cognitive_level: Database["public"]["Enums"]["cognitive_level"];
+          content_origin: string | null;
           created_at: string;
           created_by: string;
           difficulty: Database["public"]["Enums"]["question_difficulty"];
+          distractor_difficulty: string | null;
+          eligible_for_final_exam: boolean;
           estimated_time_seconds: number | null;
           exam_id: string;
+          exam_likeness: string | null;
           external_id: string | null;
+          final_exam_weight: number;
           id: string;
           import_package: string | null;
           is_exam_style: boolean;
@@ -1503,6 +1512,7 @@ export type Database = {
           source_reference: string | null;
           source_status: string | null;
           status: Database["public"]["Enums"]["content_status"];
+          style_reference: string | null;
           topic_id: string;
           updated_at: string;
           version: number;
@@ -1510,13 +1520,19 @@ export type Database = {
         Insert: {
           approved_at?: string | null;
           approved_by?: string | null;
+          chapter_number?: number | null;
           cognitive_level: Database["public"]["Enums"]["cognitive_level"];
+          content_origin?: string | null;
           created_at?: string;
           created_by: string;
           difficulty: Database["public"]["Enums"]["question_difficulty"];
+          distractor_difficulty?: string | null;
+          eligible_for_final_exam?: boolean;
           estimated_time_seconds?: number | null;
           exam_id: string;
+          exam_likeness?: string | null;
           external_id?: string | null;
+          final_exam_weight?: number;
           id?: string;
           import_package?: string | null;
           is_exam_style?: boolean;
@@ -1535,6 +1551,7 @@ export type Database = {
           source_reference?: string | null;
           source_status?: string | null;
           status?: Database["public"]["Enums"]["content_status"];
+          style_reference?: string | null;
           topic_id: string;
           updated_at?: string;
           version?: number;
@@ -1542,13 +1559,19 @@ export type Database = {
         Update: {
           approved_at?: string | null;
           approved_by?: string | null;
+          chapter_number?: number | null;
           cognitive_level?: Database["public"]["Enums"]["cognitive_level"];
+          content_origin?: string | null;
           created_at?: string;
           created_by?: string;
           difficulty?: Database["public"]["Enums"]["question_difficulty"];
+          distractor_difficulty?: string | null;
+          eligible_for_final_exam?: boolean;
           estimated_time_seconds?: number | null;
           exam_id?: string;
+          exam_likeness?: string | null;
           external_id?: string | null;
+          final_exam_weight?: number;
           id?: string;
           import_package?: string | null;
           is_exam_style?: boolean;
@@ -1567,6 +1590,7 @@ export type Database = {
           source_reference?: string | null;
           source_status?: string | null;
           status?: Database["public"]["Enums"]["content_status"];
+          style_reference?: string | null;
           topic_id?: string;
           updated_at?: string;
           version?: number;
@@ -1977,6 +2001,7 @@ export type Database = {
       study_session_questions: {
         Row: {
           created_at: string;
+          flagged_at: string | null;
           id: string;
           position: number;
           question_id: string;
@@ -1986,6 +2011,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
+          flagged_at?: string | null;
           id?: string;
           position: number;
           question_id: string;
@@ -1995,6 +2021,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          flagged_at?: string | null;
           id?: string;
           position?: number;
           question_id?: string;
@@ -2343,6 +2370,10 @@ export type Database = {
         Args: { p_session_id: string };
         Returns: undefined;
       };
+      create_mitchell_full_practice_exam: {
+        Args: { p_blueprint_id: string; p_timed?: boolean };
+        Returns: string;
+      };
       create_practice_test: {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;
@@ -2428,13 +2459,21 @@ export type Database = {
         Returns: {
           allow_pause: boolean;
           allow_untimed: boolean;
+          blueprint_code: string;
           blueprint_id: string;
           blueprint_name: string;
           description: string;
           exam_id: string;
           exam_title: string;
           question_count: number;
+          selection_strategy: string;
           time_limit_seconds: number;
+        }[];
+      };
+      get_practice_test_question_flags: {
+        Args: { p_session_id: string };
+        Returns: {
+          session_question_id: string;
         }[];
       };
       get_practice_test_results: {
@@ -2447,6 +2486,21 @@ export type Database = {
           score_percent: number;
           topic_id: string;
           topic_title: string;
+        }[];
+      };
+      get_practice_test_weak_areas: {
+        Args: { p_session_id: string };
+        Returns: {
+          answered_count: number;
+          chapter_number: number;
+          chapter_title: string;
+          concept_titles: string[];
+          correct_count: number;
+          objective_code: string;
+          objective_id: string;
+          objective_title: string;
+          question_count: number;
+          score_percent: number;
         }[];
       };
       get_private_challenges: {
@@ -2613,6 +2667,14 @@ export type Database = {
         };
         Returns: number;
       };
+      reviewer_save_question_with_classification: {
+        Args: {
+          p_change_reason: string;
+          p_payload: Json;
+          p_question_id: string;
+        };
+        Returns: number;
+      };
       reviewer_set_choice_feedback: {
         Args: { p_choice_id: string; p_feedback_text: string };
         Returns: undefined;
@@ -2648,6 +2710,10 @@ export type Database = {
       };
       set_practice_test_paused: {
         Args: { p_paused: boolean; p_session_id: string };
+        Returns: undefined;
+      };
+      set_practice_test_question_flag: {
+        Args: { p_flagged: boolean; p_session_question_id: string };
         Returns: undefined;
       };
       submit_answer: {

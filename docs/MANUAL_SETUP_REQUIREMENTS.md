@@ -292,3 +292,25 @@ rollback;
 Verify the returned `student_id` and counts. If `blocked` is `false`, repeat the
 same transaction with the final argument changed to `true` and replace `rollback`
 with `commit`. This deletion is not reversible from the application.
+
+### Chapters 4–8 combined final-exam bank
+
+No new account, API key, environment variable, Storage bucket, service-role key,
+AI service, or production database is required. Apply migration
+`202608020034_mitchell_full_practice_exam.sql` to the linked development project,
+then import the combined file once. Do not also import chapter-specific 100-row
+files containing the same records.
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+npm.cmd run content:import:mitchell500
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+The importer preserves the stable Chapter 4–8 package identifiers, so students
+already assigned all five chapter packages automatically receive the 25 added
+questions per chapter. Verify Heshy and Avigail each still have assignments for
+`LTL2_C4_75` through `LTL2_C8_75`; a missing chapter assignment causes final-exam
+creation to fail safely rather than leaking another package.

@@ -5,6 +5,8 @@ import {
   createPracticeTest,
   fetchPracticeTestOptions,
   fetchPracticeTestResults,
+  fetchPracticeTestWeakAreas,
+  setPracticeTestQuestionFlag,
   setPracticeTestPaused,
 } from "../../../services/practiceService";
 import { studyQueryKeys } from "../../study/hooks/useStudySession";
@@ -12,6 +14,7 @@ import { studyQueryKeys } from "../../study/hooks/useStudySession";
 export const practiceQueryKeys = {
   options: ["practice", "options"] as const,
   results: (sessionId: string) => ["practice", "results", sessionId] as const,
+  weakAreas: (sessionId: string) => ["practice", "weak-areas", sessionId] as const,
 };
 
 export function usePracticeTestOptions() {
@@ -20,8 +23,24 @@ export function usePracticeTestOptions() {
 
 export function useCreatePracticeTest() {
   return useMutation({
-    mutationFn: ({ blueprintId, timed }: { blueprintId: string; timed: boolean }) =>
-      createPracticeTest(blueprintId, timed),
+    mutationFn: ({
+      blueprintId,
+      timed,
+      strategy,
+    }: {
+      blueprintId: string;
+      timed: boolean;
+      strategy: "fixed_blueprint" | "mitchell_full_exam";
+    }) => createPracticeTest(blueprintId, timed, strategy),
+  });
+}
+
+export function useSetPracticeTestQuestionFlag(sessionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sessionQuestionId, flagged }: { sessionQuestionId: string; flagged: boolean }) =>
+      setPracticeTestQuestionFlag(sessionQuestionId, flagged),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: studyQueryKeys.session(sessionId) }),
   });
 }
 
@@ -41,9 +60,18 @@ export function useCompletePracticeTest(sessionId: string) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: studyQueryKeys.session(sessionId) }),
         queryClient.invalidateQueries({ queryKey: practiceQueryKeys.results(sessionId) }),
+        queryClient.invalidateQueries({ queryKey: practiceQueryKeys.weakAreas(sessionId) }),
         queryClient.invalidateQueries({ queryKey: ["progress"] }),
       ]);
     },
+  });
+}
+
+export function usePracticeTestWeakAreas(sessionId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: practiceQueryKeys.weakAreas(sessionId),
+    queryFn: () => fetchPracticeTestWeakAreas(sessionId),
+    enabled,
   });
 }
 

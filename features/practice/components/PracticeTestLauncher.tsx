@@ -7,25 +7,23 @@ import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
 import { getSafeStudyMessage } from "../../study/errors";
 import { useCreatePracticeTest, usePracticeTestOptions } from "../hooks/usePracticeTest";
+import type { PracticeTestOption } from "../schemas";
 
 export function PracticeTestLauncher({ examId }: { examId: string }) {
-  const router = useRouter();
   const options = usePracticeTestOptions();
-  const createTest = useCreatePracticeTest();
-  const [timed, setTimed] = useState(true);
-  const option = options.data?.find((item) => item.exam_id === examId);
+  const examOptions = options.data?.filter((item) => item.exam_id === examId) ?? [];
 
   if (options.isPending) {
-    return <AppCard title="Practice test" description="Loading the practice-test blueprint…" />;
+    return <AppCard title="Practice test" description="Loading the practice-test blueprints…" />;
   }
   if (options.isError) {
     return (
-      <AppCard title="Practice test unavailable" description="The blueprint could not be loaded.">
+      <AppCard title="Practice test unavailable" description="The blueprints could not be loaded.">
         <AppButton label="Try again" onPress={() => void options.refetch()} />
       </AppCard>
     );
   }
-  if (!option) {
+  if (!examOptions.length) {
     return (
       <AppCard
         title="Practice test not configured"
@@ -34,13 +32,36 @@ export function PracticeTestLauncher({ examId }: { examId: string }) {
     );
   }
 
+  return (
+    <View style={styles.stack}>
+      {examOptions.map((option) => (
+        <PracticeOptionCard key={option.blueprint_id} option={option} />
+      ))}
+    </View>
+  );
+}
+
+function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
+  const router = useRouter();
+  const createTest = useCreatePracticeTest();
+  const [timed, setTimed] = useState(true);
   const minutes = Math.ceil(option.time_limit_seconds / 60);
+  const isFullExam = option.selection_strategy === "mitchell_full_exam";
+
   return (
     <AppCard title={option.blueprint_name} description={option.description}>
       <Text style={styles.unofficial}>Unofficial study practice—not an official CAP exam.</Text>
       <Text style={styles.detail}>
-        {option.question_count} questions · Balanced fixed blueprint · Feedback after completion
+        {option.question_count} questions ·{" "}
+        {isFullExam ? "Chapters 4–8 exam pool" : "Balanced fixed blueprint"} · Feedback after
+        completion
       </Text>
+      {isFullExam ? (
+        <Text style={styles.muted}>
+          Every form uses 7–13 questions from each chapter, favors high exam-likeness questions, and
+          avoids duplicate question families.
+        </Text>
+      ) : null}
       {option.allow_untimed ? (
         <View style={styles.switchRow}>
           <View style={styles.switchCopy}>
@@ -67,7 +88,11 @@ export function PracticeTestLauncher({ examId }: { examId: string }) {
         loading={createTest.isPending}
         onPress={() => {
           void createTest
-            .mutateAsync({ blueprintId: option.blueprint_id, timed })
+            .mutateAsync({
+              blueprintId: option.blueprint_id,
+              timed,
+              strategy: option.selection_strategy,
+            })
             .then((sessionId) => router.push(`/study/session/${sessionId}` as Href))
             .catch(() => undefined);
         }}
@@ -85,6 +110,7 @@ const styles = StyleSheet.create({
   detail: { color: theme.colors.ink, fontSize: 14, lineHeight: 21 },
   error: { color: theme.colors.danger, fontSize: 15 },
   muted: { color: theme.colors.muted, fontSize: 13, lineHeight: 19 },
+  stack: { gap: theme.spacing.lg },
   switchCopy: { flex: 1, gap: 2 },
   switchRow: { alignItems: "center", flexDirection: "row", gap: theme.spacing.md },
   switchTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },

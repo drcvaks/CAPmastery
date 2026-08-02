@@ -62,6 +62,12 @@ const chapterEightInputPath = path.resolve(
   "Content",
   "LTL_V2_Chapter_8_75_Questions_Complete_Support.csv",
 );
+const mitchell500InputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "LTL_V2_Chapters_4_8_500_Questions_Final_Exam_Tagged.csv",
+);
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -124,6 +130,65 @@ describe("Chapter 1 pilot import validation", () => {
         expect.stringContaining("visual_alt_text is required when visual metadata exists"),
       ]),
     );
+  });
+});
+
+describe("Learn to Lead Volume 2 combined final-exam bank", () => {
+  const inputBuffer = fs.readFileSync(mitchell500InputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer));
+
+  it("validates 500 unique draft rows with the documented chapter and eligibility counts", () => {
+    const validation = validateImport(rows, 500);
+
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation.errors).toEqual([]);
+    expect(rows).toHaveLength(500);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(500);
+    for (const chapter of [4, 5, 6, 7, 8]) {
+      const chapterRows = rows.filter((row) => Number(row.chapter_number) === chapter);
+      expect(chapterRows).toHaveLength(100);
+      expect(chapterRows.filter((row) => row.eligible_for_final_exam === "true")).toHaveLength(60);
+      expect(
+        chapterRows.filter((row) => row.content_origin === "original_textbook_grounded"),
+      ).toHaveLength(25);
+    }
+  });
+
+  it("preserves every field of the existing 75-question chapter banks", () => {
+    const combinedById = new Map(rows.map((row) => [row.external_id, row]));
+    for (const oldPath of [
+      chapterFourInputPath,
+      chapterFiveInputPath,
+      chapterSixInputPath,
+      chapterSevenInputPath,
+      chapterEightInputPath,
+    ]) {
+      const oldRows = parseImport(decodeImportBuffer(fs.readFileSync(oldPath)));
+      for (const oldRow of oldRows) {
+        const combined = combinedById.get(oldRow.external_id);
+        expect(combined).toBeDefined();
+        for (const [field, value] of Object.entries(oldRow)) {
+          expect(combined[field]).toBe(value);
+        }
+      }
+    }
+  });
+
+  it("keeps all choices, explanations, support, and classification fields complete", () => {
+    for (const row of rows) {
+      expect(["A", "B", "C", "D"]).toContain(row.correct_letter);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}`]).not.toBe("");
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.explanation).not.toBe("");
+      expect(row.short_explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.source_pages).not.toBe("");
+      expect(["high", "medium", "low"]).toContain(row.exam_likeness);
+      expect(["basic", "moderate", "close"]).toContain(row.distractor_difficulty);
+    }
   });
 });
 

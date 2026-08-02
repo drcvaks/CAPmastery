@@ -130,9 +130,24 @@ const CHAPTER_8_CONFIG = {
   sourceExternalReference: "CAP:LTL:V2:C8:PILOT",
   sourceTitle: "Learn to Lead, Volume 2",
 };
+const CHAPTER_CONFIGS = new Map([
+  [4, CHAPTER_4_CONFIG],
+  [5, CHAPTER_5_CONFIG],
+  [6, CHAPTER_6_CONFIG],
+  [7, CHAPTER_7_CONFIG],
+  [8, CHAPTER_8_CONFIG],
+]);
+const MITCHELL_500_FILENAME = "LTL_V2_Chapters_4_8_500_Questions_Final_Exam_Tagged.csv";
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === MITCHELL_500_FILENAME) {
+    return {
+      expectedCount: 500,
+      finalExamTagged: true,
+      combinedChapters: true,
+    };
+  }
   if (filename === "LTL_V2_Chapter_8_75_Questions_Complete_Support.csv") {
     return CHAPTER_8_CONFIG;
   }
@@ -271,7 +286,52 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
     `select id, review_status from public.questions where external_id = $1`,
     [row.external_id],
   );
+  if (existing && config.finalExamTagged && row.content_origin === "existing_original_bank") {
+    await client.query(
+      `update public.questions set
+         chapter_number=$2, exam_likeness=$3, distractor_difficulty=$4,
+         eligible_for_final_exam=$5, final_exam_weight=$6,
+         content_origin=$7, style_reference=$8
+       where id=$1`,
+      [
+        existing.id,
+        Number(row.chapter_number),
+        row.exam_likeness,
+        row.distractor_difficulty,
+        row.eligible_for_final_exam === "true",
+        Number(row.final_exam_weight),
+        row.content_origin,
+        row.style_reference,
+      ],
+    );
+    summary.updated += 1;
+    return existing.id;
+  }
   if (existing?.review_status === "approved") {
+    if (config.finalExamTagged) {
+      await client.query(
+        `update public.questions set
+           chapter_number=$2, exam_likeness=$3, distractor_difficulty=$4,
+           eligible_for_final_exam=$5, final_exam_weight=$6,
+           content_origin=$7, style_reference=$8
+         where id=$1`,
+        [
+          existing.id,
+          Number(row.chapter_number),
+          row.exam_likeness,
+          row.distractor_difficulty,
+          row.eligible_for_final_exam === "true",
+          Number(row.final_exam_weight),
+          row.content_origin,
+          row.style_reference,
+        ],
+      );
+      summary.updated += 1;
+      summary.warnings.push(
+        `${row.external_id}: approved question content was preserved; final-exam classification was updated.`,
+      );
+      return existing.id;
+    }
     summary.skipped += 1;
     summary.warnings.push(`${row.external_id}: approved question was not overwritten.`);
     return existing.id;
@@ -303,6 +363,13 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
     row.source_status,
     row.question_mode || null,
     row.question_style || null,
+    config.finalExamTagged ? Number(row.chapter_number) : null,
+    config.finalExamTagged ? row.exam_likeness : null,
+    config.finalExamTagged ? row.distractor_difficulty : null,
+    config.finalExamTagged ? row.eligible_for_final_exam === "true" : null,
+    config.finalExamTagged ? Number(row.final_exam_weight) : null,
+    config.finalExamTagged ? row.content_origin : null,
+    config.finalExamTagged ? row.style_reference : null,
   ];
   let question;
   if (existing) {
@@ -315,6 +382,13 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
          question_family_id=$13, estimated_time_seconds=$14, created_by=$15,
          pilot_batch=$17, import_package=$18, source_status=$19,
          question_mode=$20, question_style=$21,
+         chapter_number=coalesce($22, chapter_number),
+         exam_likeness=coalesce($23, exam_likeness),
+         distractor_difficulty=coalesce($24, distractor_difficulty),
+         eligible_for_final_exam=coalesce($25, eligible_for_final_exam),
+         final_exam_weight=coalesce($26, final_exam_weight),
+         content_origin=coalesce($27, content_origin),
+         style_reference=coalesce($28, style_reference),
          review_status='draft', status='draft', approved_by=null, approved_at=null,
          version=version + 1
        where external_id=$16 returning id`,
@@ -329,10 +403,12 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
          source_page_start, source_page_end, source_reference, question_text,
          question_type, difficulty, cognitive_level, purpose, question_family_id,
          estimated_time_seconds, created_by, external_id, pilot_batch, import_package,
-         source_status, question_mode, question_style, review_status, status
+         source_status, question_mode, question_style, review_status, status,
+         chapter_number, exam_likeness, distractor_difficulty,
+         eligible_for_final_exam, final_exam_weight, content_origin, style_reference
        ) values (
          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-         'draft','draft'
+         'draft','draft',$22,$23,$24,coalesce($25,false),coalesce($26::numeric,0::numeric),$27,$28
        ) returning id`,
       values,
     );
@@ -515,13 +591,61 @@ async function main() {
        limit 1`,
     );
     if (!actor) throw new Error("Create an active admin or content reviewer before importing.");
-    const topicId = await ensureHierarchy(client, config);
-    const sourceId = await ensureSource(client, actor.id, config);
+    const duplicate = await one(
+      client,
+      `select external_id, count(*)::integer as count
+       from public.questions
+       where external_id is not null
+       group by external_id
+       having count(*) > 1
+       limit 1`,
+    );
+    if (duplicate) {
+      throw new Error(`Duplicate external_id ${duplicate.external_id} already exists in Supabase.`);
+    }
+    const contexts = new Map();
     for (const row of rows) {
-      await importQuestion(client, row, actor.id, topicId, sourceId, config, summary);
+      const rowConfig = config.combinedChapters
+        ? { ...CHAPTER_CONFIGS.get(Number(row.chapter_number)), finalExamTagged: true }
+        : config;
+      if (!rowConfig?.examId) throw new Error(`Unsupported chapter ${row.chapter_number}.`);
+      let context = contexts.get(rowConfig.chapterCode);
+      if (!context) {
+        const topicId = await ensureHierarchy(client, rowConfig);
+        const sourceId = await ensureSource(client, actor.id, rowConfig);
+        context = { topicId, sourceId };
+        contexts.set(rowConfig.chapterCode, context);
+      }
+      await importQuestion(
+        client,
+        row,
+        actor.id,
+        context.topicId,
+        context.sourceId,
+        rowConfig,
+        summary,
+      );
     }
     await importReinforcements(client, rows, summary);
     await warnForMissingVisualAssets(client, rows, summary);
+    if (config.combinedChapters) {
+      const chapterCounts = await client.query(
+        `select chapter_number, count(*)::integer as total,
+           count(*) filter (where eligible_for_final_exam)::integer as eligible
+         from public.questions
+         where chapter_number between 4 and 8
+         group by chapter_number
+         order by chapter_number`,
+      );
+      for (const chapter of [4, 5, 6, 7, 8]) {
+        const count = chapterCounts.rows.find((item) => item.chapter_number === chapter);
+        if (!count || count.total !== 100 || count.eligible !== 60) {
+          throw new Error(
+            `Post-import verification failed for Chapter ${chapter}: expected 100 total and 60 eligible.`,
+          );
+        }
+      }
+    }
     await client.query("commit");
   } catch (error) {
     summary.failed = rows.length;

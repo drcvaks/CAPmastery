@@ -22,13 +22,20 @@ export async function fetchStudySession(sessionId: string): Promise<StudySession
     p_session_id: sessionId,
   });
   if (error) throw error;
+  const practice = data[0]?.session_mode === "practice_test";
+  const { data: flagRows, error: flagError } = practice
+    ? await client.rpc("get_practice_test_question_flags", { p_session_id: sessionId })
+    : { data: [], error: null };
+  if (flagError) throw flagError;
+  const flaggedIds = new Set((flagRows ?? []).map((row) => row.session_question_id));
   const rows = await Promise.all(
     data.map(async (row) => {
-      if (!row.visual_storage_path) return { ...row, visual_uri: null };
+      const flagged = flaggedIds.has(row.session_question_id);
+      if (!row.visual_storage_path) return { ...row, visual_uri: null, flagged };
       const { data: signed } = await client.storage
         .from("learning-visuals")
         .createSignedUrl(row.visual_storage_path, 10 * 60);
-      return { ...row, visual_uri: signed?.signedUrl ?? null };
+      return { ...row, visual_uri: signed?.signedUrl ?? null, flagged };
     }),
   );
   return parseStudySessionRows(rows);

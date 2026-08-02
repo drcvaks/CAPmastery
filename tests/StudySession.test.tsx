@@ -5,6 +5,8 @@ import { useStudySession, useSubmitStudyAnswer } from "../features/study/hooks/u
 import {
   useCompletePracticeTest,
   usePracticeTestResults,
+  usePracticeTestWeakAreas,
+  useSetPracticeTestQuestionFlag,
   useSetPracticeTestPaused,
 } from "../features/practice/hooks/usePracticeTest";
 
@@ -16,6 +18,8 @@ jest.mock("../features/study/hooks/useStudySession", () => ({
 jest.mock("../features/practice/hooks/usePracticeTest", () => ({
   useCompletePracticeTest: jest.fn(),
   usePracticeTestResults: jest.fn(),
+  usePracticeTestWeakAreas: jest.fn(),
+  useSetPracticeTestQuestionFlag: jest.fn(),
   useSetPracticeTestPaused: jest.fn(),
 }));
 
@@ -63,6 +67,7 @@ const question = {
   visual_width: null,
   visual_height: null,
   visual_uri: null,
+  flagged: false,
 };
 
 const activeSession = {
@@ -91,9 +96,11 @@ beforeEach(() => {
   jest.mocked(useSubmitStudyAnswer).mockReturnValue({ isPending: false, isError: false } as never);
   jest.mocked(useCompletePracticeTest).mockReturnValue({ isPending: false } as never);
   jest.mocked(useSetPracticeTestPaused).mockReturnValue({ isPending: false } as never);
+  jest.mocked(useSetPracticeTestQuestionFlag).mockReturnValue({ isPending: false } as never);
   jest
     .mocked(usePracticeTestResults)
     .mockReturnValue({ isPending: false, isError: false } as never);
+  jest.mocked(usePracticeTestWeakAreas).mockReturnValue({ isError: false } as never);
 });
 
 describe("practice test session", () => {
