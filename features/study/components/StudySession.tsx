@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
@@ -8,11 +8,10 @@ import { theme } from "../../../lib/constants/theme";
 import {
   useCompletePracticeTest,
   usePracticeTestResults,
-  usePracticeTestWeakAreas,
   useSetPracticeTestQuestionFlag,
   useSetPracticeTestPaused,
 } from "../../practice/hooks/usePracticeTest";
-import type { PracticeTopicResult, PracticeWeakArea } from "../../practice/schemas";
+import type { PracticeTopicResult } from "../../practice/schemas";
 import { getSafeStudyMessage } from "../errors";
 import { useStudySession, useSubmitStudyAnswer } from "../hooks/useStudySession";
 import { AnswerResultCard } from "./AnswerResultCard";
@@ -38,10 +37,6 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     ? selectedChoices[currentQuestion.session_question_id]
     : undefined;
   const practiceResults = usePracticeTestResults(
-    sessionId,
-    session?.mode === "practice_test" && session.status === "completed",
-  );
-  const practiceWeakAreas = usePracticeTestWeakAreas(
     sessionId,
     session?.mode === "practice_test" && session.status === "completed",
   );
@@ -122,19 +117,23 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           onBack={() => router.replace("/study")}
           onRetry={() => void practiceResults.refetch()}
           onReview={() => {
-            const firstAttempted = session.questions.findIndex((question) => question.attempt_id);
-            if (firstAttempted >= 0) {
-              setCurrentIndex(firstAttempted);
+            const firstMissed = session.questions.findIndex(
+              (question) => question.attempt_id && question.is_correct === false,
+            );
+            if (firstMissed >= 0) {
+              setCurrentIndex(firstMissed);
               setShowResults(false);
             }
           }}
+          onStudyTopic={(topicId) =>
+            router.replace({ pathname: "/study", params: { topicId } } as Href)
+          }
           questionCount={session.questionCount}
           correctCount={session.correctCount}
           answeredCount={session.answeredCount}
           results={practiceResults.data}
           error={practiceResults.isError}
-          weakAreas={practiceWeakAreas.data}
-          weakAreasError={practiceWeakAreas.isError}
+          missedCount={session.questions.filter((question) => question.is_correct === false).length}
         />
       );
     }
@@ -196,7 +195,19 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         responseTimeMs: Date.now() - (questionStartedAt.current ?? Date.now()),
       });
       const refreshed = await sessionQuery.refetch();
-      if (refreshed.data?.status === "completed") setShowResults(true);
+      if (refreshed.data?.status === "completed") {
+        setShowResults(true);
+      } else if (refreshed.data?.mode === "practice_test") {
+        const questions = refreshed.data.questions;
+        const nextUnanswered = questions.findIndex(
+          (question, index) => index > currentIndex && !question.attempt_id,
+        );
+        const wrappedUnanswered = questions.findIndex(
+          (question, index) => index < currentIndex && !question.attempt_id,
+        );
+        const nextIndex = nextUnanswered >= 0 ? nextUnanswered : wrappedUnanswered;
+        if (nextIndex >= 0) setCurrentIndex(nextIndex);
+      }
     } catch {
       // The mutation retains its error for the retry state below.
     }
@@ -205,13 +216,14 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   function advance() {
     if (!session) return;
     if (session.mode === "practice_test" && session.status === "completed") {
-      const nextAttempted = session.questions.findIndex(
-        (question, index) => index > currentIndex && question.attempt_id,
+      const nextMissed = session.questions.findIndex(
+        (question, index) =>
+          index > currentIndex && question.attempt_id && question.is_correct === false,
       );
-      if (nextAttempted < 0) {
+      if (nextMissed < 0) {
         setShowResults(true);
       } else {
-        setCurrentIndex(nextAttempted);
+        setCurrentIndex(nextMissed);
       }
       return;
     }
@@ -274,6 +286,20 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         </AppCard>
       ) : null}
 
+      {currentQuestion.chapter_title || currentQuestion.topic_title ? (
+        <View
+          accessibilityLabel={`${chapterLabel(currentQuestion.chapter_number, currentQuestion.chapter_title)}. Topic: ${currentQuestion.topic_title ?? "General review"}`}
+          style={styles.sessionContext}
+        >
+          <Text style={styles.contextChapter}>
+            {chapterLabel(currentQuestion.chapter_number, currentQuestion.chapter_title)}
+          </Text>
+          <Text style={styles.contextTopic}>
+            Topic: {currentQuestion.topic_title ?? "General review"}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.progressRow}>
         <Text style={styles.progress}>
           Question {currentQuestion.question_position} of {session.questionCount}
@@ -282,6 +308,25 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       </View>
 
       <AppCard title={currentQuestion.question_text}>
+        {session.mode === "practice_test" && session.status === "active" ? (
+          <AppButton
+            disabled={session.isPaused}
+            label={
+              currentQuestion.flagged ? "Flagged for review — remove flag" : "Flag this question"
+            }
+            loading={setFlag.isPending}
+            onPress={() =>
+              void setFlag
+                .mutateAsync({
+                  sessionQuestionId: currentQuestion.session_question_id,
+                  flagged: !currentQuestion.flagged,
+                })
+                .catch(() => undefined)
+            }
+            variant={currentQuestion.flagged ? "primary" : "secondary"}
+          />
+        ) : null}
+
         {currentQuestion.choices.map((choice) => {
           const selected = choice.id === chosenChoiceId;
           const correct =
@@ -337,19 +382,6 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               variant="secondary"
             />
             <AppButton
-              label={currentQuestion.flagged ? "Remove review flag" : "Flag for review"}
-              loading={setFlag.isPending}
-              onPress={() =>
-                void setFlag
-                  .mutateAsync({
-                    sessionQuestionId: currentQuestion.session_question_id,
-                    flagged: !currentQuestion.flagged,
-                  })
-                  .catch(() => undefined)
-              }
-              variant="secondary"
-            />
-            <AppButton
               disabled={currentIndex + 1 === session.questions.length || session.isPaused}
               label="Next"
               onPress={goNext}
@@ -374,12 +406,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           isCorrect={Boolean(currentQuestion.is_correct)}
           key={currentQuestion.session_question_id}
           memoryAid={currentQuestion.memory_aid}
-          nextLabel={nextLabel(
-            session.mode,
-            session.status,
-            currentIndex,
-            session.questions.length,
-          )}
+          nextLabel={nextLabel(session.mode, session.status, currentIndex, session.questions)}
           onNext={advance}
           remediation={currentQuestion.remediation}
           selectedChoiceFeedback={currentQuestion.selected_choice_feedback}
@@ -420,6 +447,13 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           ) : null}
         </AppCard>
       ) : null}
+      {session.mode === "practice_test" && session.status === "completed" ? (
+        <AppButton
+          label="Back to study catalog"
+          onPress={() => router.replace("/study")}
+          variant="secondary"
+        />
+      ) : null}
     </View>
   );
 }
@@ -432,10 +466,10 @@ function PracticeResults({
   onBack,
   onRetry,
   onReview,
+  onStudyTopic,
   questionCount,
   results,
-  weakAreas,
-  weakAreasError,
+  missedCount,
 }: {
   answeredCount: number;
   correctCount: number;
@@ -444,10 +478,10 @@ function PracticeResults({
   onBack: () => void;
   onRetry: () => void;
   onReview: () => void;
+  onStudyTopic: (topicId: string) => void;
   questionCount: number;
   results?: PracticeTopicResult[];
-  weakAreas?: PracticeWeakArea[];
-  weakAreasError: boolean;
+  missedCount: number;
 }) {
   const percentage = Math.round((correctCount / questionCount) * 100);
   return (
@@ -461,33 +495,17 @@ function PracticeResults({
           Use this result to choose what to study next. One test does not define your readiness.
         </Text>
       </AppCard>
-      <AppCard
-        title="Recommended review"
-        description="Objectives and concepts to revisit before the next full practice exam."
-      >
-        {weakAreasError ? (
-          <Text accessibilityRole="alert" style={styles.error}>
-            Detailed weak-area analysis could not be loaded.
-          </Text>
-        ) : null}
-        {weakAreas?.slice(0, 5).map((area) => (
-          <View key={area.objective_id} style={styles.topicResult}>
-            <Text style={styles.topicTitle}>
-              Chapter {area.chapter_number}: {area.objective_title}
-            </Text>
-            <Text style={styles.muted}>
-              {area.correct_count}/{area.question_count} · {Math.round(area.score_percent)}%
-              {area.concept_titles.length ? ` · ${area.concept_titles.join(", ")}` : ""}
-            </Text>
-          </View>
-        ))}
-        {weakAreas?.length ? (
-          <Text style={styles.supportive}>
-            Recommended next step: return to Study and choose the lowest-scoring chapter above for a
-            targeted adaptive session.
-          </Text>
-        ) : null}
-      </AppCard>
+      {missedCount > 0 ? (
+        <AppButton
+          label={`Review ${missedCount} missed answers and explanations`}
+          onPress={onReview}
+        />
+      ) : (
+        <AppCard
+          title="No missed answers"
+          description="You answered every submitted question correctly."
+        />
+      )}
       <AppCard title="Topic analysis" description="Strengths and review areas from this test only.">
         {loading ? <Text style={styles.muted}>Calculating topic results…</Text> : null}
         {error ? (
@@ -499,18 +517,21 @@ function PracticeResults({
           </>
         ) : null}
         {results?.map((result) => (
-          <View key={result.topic_id} style={styles.topicResult}>
-            <Text style={styles.topicTitle}>{result.topic_title}</Text>
-            <Text style={styles.muted}>
-              {result.correct_count}/{result.question_count} · {Math.round(result.score_percent)}% ·{" "}
-              {result.performance_label}
-            </Text>
+          <View key={result.topic_id} style={styles.topicResultRow}>
+            <View style={styles.topicResultText}>
+              <Text style={styles.topicTitle}>{result.topic_title}</Text>
+              <Text style={styles.muted}>
+                {result.correct_count}/{result.question_count} · {Math.round(result.score_percent)}%
+                · {result.performance_label}
+              </Text>
+            </View>
+            <AppButton
+              label={studyLabel(result.topic_title)}
+              onPress={() => onStudyTopic(result.topic_id)}
+            />
           </View>
         ))}
       </AppCard>
-      {answeredCount > 0 ? (
-        <AppButton label="Review answers and explanations" onPress={onReview} />
-      ) : null}
       <AppButton label="Back to study catalog" onPress={onBack} variant="secondary" />
     </View>
   );
@@ -520,10 +541,27 @@ function nextLabel(
   mode: "study" | "practice_test" | "challenge",
   status: "active" | "completed" | "abandoned",
   currentIndex: number,
-  questionCount: number,
+  questions: Array<{ attempt_id: string | null; is_correct: boolean | null }>,
 ): string {
-  if (mode === "practice_test" && status === "completed") return "Next reviewed answer";
-  return currentIndex + 1 === questionCount ? "View results" : "Next question";
+  if (mode === "practice_test" && status === "completed") {
+    const hasAnotherMissed = questions.some(
+      (question, index) =>
+        index > currentIndex && question.attempt_id && question.is_correct === false,
+    );
+    return hasAnotherMissed ? "Next missed answer" : "Finish review";
+  }
+  return currentIndex + 1 === questions.length ? "View results" : "Next question";
+}
+
+function studyLabel(topicTitle: string): string {
+  const chapter = topicTitle.match(/Chapter\s+(\d+)/i)?.[1];
+  return chapter ? `Study Chapter ${chapter}` : "Study this topic";
+}
+
+function chapterLabel(chapterNumber: number | null, chapterTitle: string | null): string {
+  if (chapterNumber && chapterTitle) return `Chapter ${chapterNumber}: ${chapterTitle}`;
+  if (chapterNumber) return `Chapter ${chapterNumber}`;
+  return chapterTitle ?? "Study session";
 }
 
 function formatTimer(seconds: number): string {
@@ -548,11 +586,21 @@ const styles = StyleSheet.create({
   choiceKey: { color: theme.colors.accent, fontSize: 16, fontWeight: "900" },
   choiceSelected: { borderColor: theme.colors.primary, borderWidth: 2 },
   choiceText: { color: theme.colors.ink, flex: 1, fontSize: 16, lineHeight: 23 },
+  contextChapter: { color: theme.colors.primary, fontSize: 18, fontWeight: "900", lineHeight: 25 },
+  contextTopic: { color: theme.colors.muted, fontSize: 14, lineHeight: 20 },
   error: { color: theme.colors.danger, fontSize: 15, fontWeight: "700" },
   errorBox: { gap: theme.spacing.xs },
   muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
   progress: { color: theme.colors.muted, fontSize: 14, fontWeight: "700" },
   progressRow: { flexDirection: "row", justifyContent: "space-between" },
+  sessionContext: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.xs,
+    padding: theme.spacing.md,
+  },
   stack: { gap: theme.spacing.lg },
   supportive: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
   testStatus: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
@@ -563,6 +611,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     paddingTop: theme.spacing.sm,
   },
+  topicResultRow: {
+    alignItems: "center",
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.md,
+    justifyContent: "space-between",
+    paddingTop: theme.spacing.sm,
+  },
+  topicResultText: { flex: 1, minWidth: 220 },
   topicTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
   unofficial: { color: theme.colors.accent, fontSize: 14, fontWeight: "800", lineHeight: 20 },
 });

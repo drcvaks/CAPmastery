@@ -67,11 +67,25 @@ export const progressTrendSchema = z.object({
   accuracy_score: score,
 });
 
+export const latestPracticeTopicResultSchema = z.object({
+  session_id: z.uuid(),
+  completed_at: z.iso.datetime({ offset: true }),
+  topic_id: z.uuid(),
+  topic_title: z.string().min(1),
+  question_count: z.number().int().positive(),
+  answered_count: z.number().int().nonnegative(),
+  correct_count: z.number().int().nonnegative(),
+  score_percent: score,
+  performance_label: z.enum(["Strength", "Developing", "Review next", "Not attempted"]),
+});
+
 export type ProgressStudent = z.infer<typeof progressStudentSchema>;
 export type ProgressOverview = z.infer<typeof progressOverviewSchema>;
 export type TopicProgress = z.infer<typeof topicProgressSchema>;
 export type ProgressTrend = z.infer<typeof progressTrendSchema>;
+export type LatestPracticeTopicResult = z.infer<typeof latestPracticeTopicResultSchema>;
 export type ExamProgress = ProgressOverview & {
   topics: TopicProgress[];
   trends: ProgressTrend[];
+  latestPracticeTopics: LatestPracticeTopicResult[];
 };

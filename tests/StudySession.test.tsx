@@ -1,11 +1,10 @@
-import { render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen, userEvent } from "@testing-library/react-native";
 
 import { StudySessionView } from "../features/study/components/StudySession";
 import { useStudySession, useSubmitStudyAnswer } from "../features/study/hooks/useStudySession";
 import {
   useCompletePracticeTest,
   usePracticeTestResults,
-  usePracticeTestWeakAreas,
   useSetPracticeTestQuestionFlag,
   useSetPracticeTestPaused,
 } from "../features/practice/hooks/usePracticeTest";
@@ -18,7 +17,6 @@ jest.mock("../features/study/hooks/useStudySession", () => ({
 jest.mock("../features/practice/hooks/usePracticeTest", () => ({
   useCompletePracticeTest: jest.fn(),
   usePracticeTestResults: jest.fn(),
-  usePracticeTestWeakAreas: jest.fn(),
   useSetPracticeTestQuestionFlag: jest.fn(),
   useSetPracticeTestPaused: jest.fn(),
 }));
@@ -39,6 +37,9 @@ const question = {
   session_question_id: "20000000-0000-4000-8000-000000000001",
   question_position: 1,
   question_id: "30000000-0000-4000-8000-000000000001",
+  chapter_number: 5,
+  chapter_title: "Brainpower for Leadership",
+  topic_title: "Learn to Lead, Volume 2, Chapter 5",
   question_text: "A protected practice question?",
   question_type: "multiple_choice" as const,
   difficulty: "easy" as const,
@@ -100,13 +101,15 @@ beforeEach(() => {
   jest
     .mocked(usePracticeTestResults)
     .mockReturnValue({ isPending: false, isError: false } as never);
-  jest.mocked(usePracticeTestWeakAreas).mockReturnValue({ isError: false } as never);
 });
 
 describe("practice test session", () => {
   it("shows a neutral saved state without correctness or explanation while active", async () => {
     await render(<StudySessionView sessionId={activeSession.id} />);
 
+    expect(screen.getByRole("button", { name: "Flag this question" })).toBeVisible();
+    expect(screen.getByText("Chapter 5: Brainpower for Leadership")).toBeVisible();
+    expect(screen.getByText("Topic: Learn to Lead, Volume 2, Chapter 5")).toBeVisible();
     expect(screen.getByText("Answer saved")).toBeVisible();
     expect(
       screen.getByText(
@@ -115,6 +118,47 @@ describe("practice test session", () => {
     ).toBeVisible();
     expect(screen.queryByText("Correct.")).toBeNull();
     expect(screen.queryByText("Synthetic explanation")).toBeNull();
+  });
+
+  it("advances to the next unanswered practice question after submission", async () => {
+    const unansweredQuestion = { ...question, attempt_id: null, selected_choice_id: null };
+    const nextQuestion = {
+      ...unansweredQuestion,
+      session_question_id: "20000000-0000-4000-8000-000000000002",
+      question_id: "30000000-0000-4000-8000-000000000002",
+      question_position: 2,
+      question_text: "The next protected practice question?",
+    };
+    const initialSession = {
+      ...activeSession,
+      answeredCount: 0,
+      timed: false,
+      questions: [unansweredQuestion, nextQuestion],
+    };
+    const refreshedSession = {
+      ...initialSession,
+      answeredCount: 1,
+      questions: [{ ...unansweredQuestion, attempt_id: question.attempt_id }, nextQuestion],
+    };
+    const refetch = jest.fn().mockResolvedValue({ data: refreshedSession });
+    jest.mocked(useStudySession).mockReturnValue({
+      data: initialSession,
+      isPending: false,
+      isError: false,
+      refetch,
+    } as never);
+    jest.mocked(useSubmitStudyAnswer).mockReturnValue({
+      isPending: false,
+      isError: false,
+      mutateAsync: jest.fn().mockResolvedValue({}),
+    } as never);
+
+    await render(<StudySessionView sessionId={activeSession.id} />);
+    const user = userEvent.setup();
+    await user.press(screen.getByText("Choice A"));
+    await user.press(screen.getByRole("button", { name: "Submit answer" }));
+
+    expect(await screen.findByText("The next protected practice question?")).toBeVisible();
   });
 
   it("withholds challenge feedback until the student's set is complete", async () => {
@@ -144,7 +188,7 @@ describe("practice test session", () => {
         correctCount: 7,
         answeredCount: 10,
         feedbackReleased: true,
-        questions: [{ ...question, session_status: "completed" }],
+        questions: [{ ...question, session_status: "completed", is_correct: false }],
       },
       isPending: false,
       isError: false,
@@ -172,6 +216,60 @@ describe("practice test session", () => {
     expect(screen.getByText("Practice test complete")).toBeVisible();
     expect(screen.getByText("Topic analysis")).toBeVisible();
     expect(screen.getByText("Core Values")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Review 1 missed answers and explanations" }),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Study this topic" })).toBeVisible();
+    expect(screen.queryByText("Recommended review")).toBeNull();
     expect(screen.getByText("Unofficial study result—not an official CAP result.")).toBeVisible();
+  });
+
+  it("reviews only missed answers and finishes back at results", async () => {
+    const correctQuestion = {
+      ...question,
+      is_correct: true,
+      session_status: "completed" as const,
+      question_text: "Correct answer should be skipped",
+    };
+    const missedQuestion = {
+      ...question,
+      session_question_id: "20000000-0000-4000-8000-000000000002",
+      question_id: "30000000-0000-4000-8000-000000000002",
+      question_position: 2,
+      question_text: "Missed answer should be reviewed",
+      is_correct: false,
+      session_status: "completed" as const,
+      explanation: "Review this concept.",
+    };
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        status: "completed",
+        correctCount: 1,
+        answeredCount: 2,
+        feedbackReleased: true,
+        questions: [correctQuestion, missedQuestion],
+      },
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+    jest.mocked(usePracticeTestResults).mockReturnValue({
+      data: [],
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    await render(<StudySessionView sessionId={activeSession.id} />);
+    fireEvent.press(
+      screen.getByRole("button", { name: "Review 1 missed answers and explanations" }),
+    );
+
+    expect(await screen.findByText("Missed answer should be reviewed")).toBeVisible();
+    expect(screen.queryByText("Correct answer should be skipped")).toBeNull();
+    expect(screen.getByRole("button", { name: "Finish review" })).toBeVisible();
+    fireEvent.press(screen.getByRole("button", { name: "Finish review" }));
+    expect(await screen.findByText("Practice test complete")).toBeVisible();
   });
 });

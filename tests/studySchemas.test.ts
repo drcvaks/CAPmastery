@@ -17,6 +17,9 @@ const sessionRow = {
   session_question_id: "20000000-0000-4000-8000-000000000001",
   question_position: 1,
   question_id: "30000000-0000-4000-8000-000000000001",
+  chapter_number: 5,
+  chapter_title: "Brainpower for Leadership",
+  topic_title: "Learn to Lead, Volume 2, Chapter 5",
   question_text: "Synthetic question?",
   question_type: "multiple_choice",
   difficulty: "easy",
@@ -62,6 +65,10 @@ describe("study schemas", () => {
     const session = parseStudySessionRows([sessionRow]);
     expect(session.questionCount).toBe(10);
     expect(session.questions[0]?.correct_choice_id).toBeNull();
+    expect(session.questions[0]?.chapter_title).toBe("Brainpower for Leadership");
+    expect(session.questions[0]?.topic_title).toBe("Learn to Lead, Volume 2, Chapter 5");
+    expect(session.questions[0]?.chapter_title).toBe("Brainpower for Leadership");
+    expect(session.questions[0]?.topic_title).toBe("Learn to Lead, Volume 2, Chapter 5");
   });
 
   it("rejects a correctness field smuggled into a delivered choice", () => {

@@ -1,11 +1,20 @@
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, userEvent } from "@testing-library/react-native";
 
 import { ProgressDashboard } from "../features/progress/components/ProgressDashboard";
 import { useProgressDashboard, useProgressStudents } from "../features/progress/hooks/useProgress";
+import { useCreateStudySession } from "../features/study/hooks/useStudySession";
 
 jest.mock("../features/progress/hooks/useProgress", () => ({
   useProgressDashboard: jest.fn(),
   useProgressStudents: jest.fn(),
+}));
+jest.mock("../features/study/hooks/useStudySession", () => ({
+  useCreateStudySession: jest.fn(),
+}));
+const mockPush = jest.fn();
+jest.mock("expo-router", () => ({
+  ...jest.requireActual("expo-router"),
+  useRouter: () => ({ push: mockPush }),
 }));
 jest.mock("../features/auth/components/SignOutButton", () => ({
   SignOutButton: () => null,
@@ -13,6 +22,8 @@ jest.mock("../features/auth/components/SignOutButton", () => ({
 
 const mockedStudents = jest.mocked(useProgressStudents);
 const mockedDashboard = jest.mocked(useProgressDashboard);
+const mockedCreateStudySession = jest.mocked(useCreateStudySession);
+const mutateAsync = jest.fn().mockResolvedValue("a6666666-6666-4666-8666-666666666666");
 
 const exam = {
   student_id: "a1111111-1111-4111-8111-111111111111",
@@ -61,9 +72,28 @@ const exam = {
       accuracy_score: 60,
     },
   ],
+  latestPracticeTopics: [
+    {
+      session_id: "a5555555-5555-4555-8555-555555555555",
+      completed_at: "2026-08-02T12:00:00.000Z",
+      topic_id: "a3333333-3333-4333-8333-333333333333",
+      topic_title: "Learn to Lead, Volume 2, Chapter 4",
+      question_count: 10,
+      answered_count: 10,
+      correct_count: 6,
+      score_percent: 60,
+      performance_label: "Developing" as const,
+    },
+  ],
 };
 
 beforeEach(() => {
+  mockPush.mockClear();
+  mutateAsync.mockClear();
+  mockedCreateStudySession.mockReturnValue({
+    mutateAsync,
+    isError: false,
+  } as never);
   mockedStudents.mockReturnValue({
     data: [
       { student_id: exam.student_id, display_name: "Student One" },
@@ -111,8 +141,23 @@ describe("ProgressDashboard", () => {
     expect(screen.getByText("Developing")).toBeVisible();
     expect(screen.getByText("Review 2 questions due now.")).toBeVisible();
     expect(screen.getByText("Core Values")).toBeVisible();
+    expect(screen.getByText("Latest full practice test")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Start Chapter 4 study" })).toBeVisible();
     expect(screen.getByText("30-day trend")).toBeVisible();
     expect(screen.getByText("This is a study estimate, not an official CAP result.")).toBeVisible();
+  });
+
+  it("starts the selected chapter session directly from latest test analysis", async () => {
+    await render(<ProgressDashboard audience="student" />);
+    const user = userEvent.setup();
+
+    await user.press(screen.getByRole("button", { name: "Start Chapter 4 study" }));
+
+    expect(mutateAsync).toHaveBeenCalledWith({
+      examId: exam.exam_id,
+      topicId: exam.latestPracticeTopics[0]!.topic_id,
+    });
+    expect(mockPush).toHaveBeenCalledWith("/study/session/a6666666-6666-4666-8666-666666666666");
   });
 
   it("shows every authorized linked student in the guardian selector", async () => {

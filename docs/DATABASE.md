@@ -171,4 +171,18 @@ frozen in `study_session_questions`. Weak-area results are completion-gated, fla
 functions recheck ownership, and classification edits use an audited reviewer-only
 wrapper around the existing versioned edit workflow.
 
+Migration `202608020035` adds
+`get_latest_practice_test_topic_results(student, exam)`. It selects only the most
+recent completed `mitchell_full_exam` session, groups its frozen questions and
+attempts by topic/chapter, and returns score labels plus completion time. A later
+completed full test automatically replaces the prior Progress snapshot. Practice
+attempts remain separate from ordinary mastery and adaptive-selection state.
+
+Migration `202608020036` adds `get_study_session_question_context(session)`, a
+narrow student-owned projection of session-question IDs and their chapter/topic
+labels. It is separate from public content reads so an assigned draft can retain
+its private-content boundary while the session UI still identifies what the
+student is studying. The projection returns no prompt, choice, answer, feedback,
+score, or classification field.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

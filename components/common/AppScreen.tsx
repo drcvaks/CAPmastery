@@ -2,6 +2,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useOptionalAuth } from "../../features/auth/AuthContext";
 import { WorkspaceSwitcher } from "../../features/auth/components/WorkspaceSwitcher";
 import { theme } from "../../lib/constants/theme";
 
@@ -13,8 +14,12 @@ type AppScreenProps = PropsWithChildren<{
 }>;
 
 export function AppScreen({ eyebrow, title, description, actions, children }: AppScreenProps) {
+  const auth = useOptionalAuth();
   const { width } = useWindowDimensions();
   const wide = width >= 768;
+  const profile = auth?.status === "signed_in" ? auth.access?.profile : null;
+  const firstName =
+    profile?.first_name?.trim() || profile?.display_name?.trim().split(/\s+/)[0] || null;
 
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
@@ -26,6 +31,7 @@ export function AppScreen({ eyebrow, title, description, actions, children }: Ap
           style={styles.scroller}
         >
           <View style={styles.header}>
+            {firstName ? <Text style={styles.identity}>Hello, {firstName}</Text> : null}
             {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
             <Text accessibilityRole="header" style={[styles.title, wide && styles.titleWide]}>
               {title}
@@ -59,6 +65,11 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: theme.spacing.sm,
+  },
+  identity: {
+    color: theme.colors.primary,
+    fontSize: 16,
+    fontWeight: "900",
   },
   shell: { flex: 1 },
   shellWide: { flexDirection: "row" },

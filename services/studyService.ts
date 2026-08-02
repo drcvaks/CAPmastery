@@ -22,6 +22,14 @@ export async function fetchStudySession(sessionId: string): Promise<StudySession
     p_session_id: sessionId,
   });
   if (error) throw error;
+  const { data: contextRows, error: contextError } = await client.rpc(
+    "get_study_session_question_context",
+    { p_session_id: sessionId },
+  );
+  if (contextError) throw contextError;
+  const contextBySessionQuestionId = new Map(
+    contextRows.map((row) => [row.session_question_id, row] as const),
+  );
   const practice = data[0]?.session_mode === "practice_test";
   const { data: flagRows, error: flagError } = practice
     ? await client.rpc("get_practice_test_question_flags", { p_session_id: sessionId })
@@ -31,11 +39,18 @@ export async function fetchStudySession(sessionId: string): Promise<StudySession
   const rows = await Promise.all(
     data.map(async (row) => {
       const flagged = flaggedIds.has(row.session_question_id);
-      if (!row.visual_storage_path) return { ...row, visual_uri: null, flagged };
+      const context = contextBySessionQuestionId.get(row.session_question_id) ?? {
+        chapter_number: null,
+        chapter_title: null,
+        topic_title: null,
+      };
+      if (!row.visual_storage_path) {
+        return { ...row, ...context, visual_uri: null, flagged };
+      }
       const { data: signed } = await client.storage
         .from("learning-visuals")
         .createSignedUrl(row.visual_storage_path, 10 * 60);
-      return { ...row, visual_uri: signed?.signedUrl ?? null, flagged };
+      return { ...row, ...context, visual_uri: signed?.signedUrl ?? null, flagged };
     }),
   );
   return parseStudySessionRows(rows);

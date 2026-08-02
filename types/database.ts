@@ -2503,6 +2503,20 @@ export type Database = {
           score_percent: number;
         }[];
       };
+      get_latest_practice_test_topic_results: {
+        Args: { p_exam_id: string; p_student_id: string };
+        Returns: {
+          answered_count: number;
+          completed_at: string;
+          correct_count: number;
+          performance_label: string;
+          question_count: number;
+          score_percent: number;
+          session_id: string;
+          topic_id: string;
+          topic_title: string;
+        }[];
+      };
       get_private_challenges: {
         Args: never;
         Returns: {
@@ -2621,6 +2635,15 @@ export type Database = {
           visual_mime_type: string;
           visual_storage_path: string;
           visual_width: number;
+        }[];
+      };
+      get_study_session_question_context: {
+        Args: { p_session_id: string };
+        Returns: {
+          chapter_number: number | null;
+          chapter_title: string | null;
+          session_question_id: string;
+          topic_title: string;
         }[];
       };
       get_topic_progress: {

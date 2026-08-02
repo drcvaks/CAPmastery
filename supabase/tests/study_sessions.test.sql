@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(38);
+select plan(42);
 
 select has_table('public', 'study_sessions', 'study sessions exist');
 select has_table('public', 'study_session_questions', 'session questions exist');
@@ -199,6 +199,29 @@ select is(
   10,
   'Owner receives ten safe session questions'
 );
+select has_function(
+  'public',
+  'get_study_session_question_context',
+  array['uuid'],
+  'Safe session curriculum context function exists'
+);
+select ok(
+  has_function_privilege(
+    'authenticated',
+    'public.get_study_session_question_context(uuid)',
+    'execute'
+  ),
+  'Authenticated students can request owned session curriculum context'
+);
+select is(
+  (
+    select count(*)::integer
+    from public.get_study_session_question_context((select id from study_test_session))
+    where topic_title is not null
+  ),
+  10,
+  'Owner receives topic context for every session question'
+);
 select is(
   (
     select count(*)::integer
@@ -225,6 +248,10 @@ select is((select count(*)::integer from public.question_attempts), 0, 'Other st
 select throws_ok(
   $$select * from public.get_study_session_questions((select id from study_test_session))$$,
   'P0002', 'Study session not found', 'Other student cannot call session delivery'
+);
+select throws_ok(
+  $$select * from public.get_study_session_question_context((select id from study_test_session))$$,
+  'P0002', 'Study session not found', 'Other student cannot read session curriculum context'
 );
 select throws_ok(
   $$select * from public.submit_answer(

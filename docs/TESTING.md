@@ -116,7 +116,17 @@ The Mitchell 500-row actual-file tests verify the BOM/tab format, 500 unique IDs
 100 rows and 60 eligible rows per chapter, 25 new textbook-grounded rows per
 chapter, complete choices/feedback/support/classification, and field-for-field
 preservation of the five earlier 75-question files. `mitchell_full_exam.test.sql`
-declares 29 transaction-only assertions covering the new columns/functions and
+declares 34 transaction-only assertions covering the new columns/functions and
 grants, secure 50-question creation, variable chapter distribution within 7–13,
 unique families, objective spacing, frozen membership, owner-only persistent
-flags, completion, and objective-level weak-area results.
+flags, completion, objective-level weak-area results, and latest-test chapter
+analysis access for the student, an authorized parent, and an unrelated student.
+Shared-session component tests also cover prominent flag visibility, automatic
+advance after answer save, results ordering, chapter study actions, wrong-only
+review, and the Finish review exit. Progress component coverage verifies the
+latest full-test card and chapter action while keeping compact home output small.
+
+`study_sessions.test.sql` also verifies the narrow session-context function exists,
+is executable by authenticated users, returns a topic label for every question to
+the owning student, and rejects another student. Component coverage confirms the
+chapter/title/topic banner and the signed-in student's page-header greeting.

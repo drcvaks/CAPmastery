@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { type Href, useRouter } from "expo-router";
+import { type Href, useLocalSearchParams, useRouter } from "expo-router";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
@@ -12,11 +12,17 @@ import { useApprovedQuestionPreviews, useContentCatalog } from "../hooks/useCont
 
 export function ContentBrowser() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ topicId?: string }>();
   const catalog = useContentCatalog();
   const createSession = useCreateStudySession();
   const [selectedExamId, setSelectedExamId] = useState<string>();
-  const [selectedTopicId, setSelectedTopicId] = useState<string>();
-  const activeExamId = selectedExamId ?? catalog.data?.[0]?.id;
+  const [selectedTopicId, setSelectedTopicId] = useState<string | undefined>(
+    typeof params.topicId === "string" ? params.topicId : undefined,
+  );
+  const routedExamId = catalog.data?.find((exam) =>
+    exam.topics.some((topic) => topic.id === selectedTopicId),
+  )?.id;
+  const activeExamId = selectedExamId ?? routedExamId ?? catalog.data?.[0]?.id;
   const activeExam = catalog.data?.find(({ id }) => id === activeExamId);
   const questions = useApprovedQuestionPreviews(activeExamId, selectedTopicId);
 

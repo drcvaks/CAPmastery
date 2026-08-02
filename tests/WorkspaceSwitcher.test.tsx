@@ -14,7 +14,8 @@ jest.mock("../features/auth/AuthContext", () => ({
 const access = {
   profile: {
     id: "10000000-0000-4000-8000-000000000001",
-    displayName: "Multi-role user",
+    display_name: "Multi-role user",
+    first_name: "Chaim",
     status: "active",
   },
   roles: ["admin", "parent"],

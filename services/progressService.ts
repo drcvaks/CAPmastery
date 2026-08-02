@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "../lib/supabase/client";
 import {
+  latestPracticeTopicResultSchema,
   progressOverviewSchema,
   progressStudentSchema,
   progressTrendSchema,
@@ -25,7 +26,7 @@ export async function fetchProgressDashboard(studentId: string): Promise<ExamPro
 
   return Promise.all(
     overviews.map(async (overview) => {
-      const [topicsResult, trendsResult] = await Promise.all([
+      const [topicsResult, trendsResult, latestPracticeResult] = await Promise.all([
         client.rpc("get_topic_progress", {
           p_student_id: studentId,
           p_exam_id: overview.exam_id,
@@ -35,13 +36,21 @@ export async function fetchProgressDashboard(studentId: string): Promise<ExamPro
           p_exam_id: overview.exam_id,
           p_days: 30,
         }),
+        client.rpc("get_latest_practice_test_topic_results", {
+          p_student_id: studentId,
+          p_exam_id: overview.exam_id,
+        }),
       ]);
       if (topicsResult.error) throw topicsResult.error;
       if (trendsResult.error) throw trendsResult.error;
+      if (latestPracticeResult.error) throw latestPracticeResult.error;
       return {
         ...overview,
         topics: z.array(topicProgressSchema).parse(topicsResult.data),
         trends: z.array(progressTrendSchema).parse(trendsResult.data),
+        latestPracticeTopics: z
+          .array(latestPracticeTopicResultSchema)
+          .parse(latestPracticeResult.data),
       };
     }),
   );

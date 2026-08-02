@@ -53,13 +53,19 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
       <Text style={styles.unofficial}>Unofficial study practice—not an official CAP exam.</Text>
       <Text style={styles.detail}>
         {option.question_count} questions ·{" "}
-        {isFullExam ? "Chapters 4–8 exam pool" : "Balanced fixed blueprint"} · Feedback after
-        completion
+        {isFullExam ? "Chapters 4–8 exam pool" : "Chapter 1 legacy pilot blueprint"} · Feedback
+        after completion
       </Text>
       {isFullExam ? (
         <Text style={styles.muted}>
           Every form uses 7–13 questions from each chapter, favors high exam-likeness questions, and
           avoids duplicate question families.
+        </Text>
+      ) : null}
+      {!isFullExam ? (
+        <Text style={styles.muted}>
+          This is the original Chapter 1 pilot. Chapters 4–8 are currently covered by the separate
+          50-question Mitchell practice test.
         </Text>
       ) : null}
       {option.allow_untimed ? (

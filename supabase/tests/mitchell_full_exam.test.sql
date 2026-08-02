@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(29);
+select plan(34);
 
 select has_column('public', 'questions', 'chapter_number', 'questions store chapter number');
 select has_column('public', 'questions', 'exam_likeness', 'questions store exam likeness');
@@ -15,6 +15,8 @@ select has_function('public', 'create_mitchell_full_practice_exam', array['uuid'
 select has_function('public', 'set_practice_test_question_flag', array['uuid', 'boolean'], 'review-flag function exists');
 select has_function('public', 'get_practice_test_question_flags', array['uuid'], 'review-flag read function exists');
 select has_function('public', 'get_practice_test_weak_areas', array['uuid'], 'weak-area function exists');
+select has_function('public', 'get_latest_practice_test_topic_results', array['uuid', 'uuid'], 'latest full-test progress function exists');
+select is(has_function_privilege('authenticated', 'public.get_latest_practice_test_topic_results(uuid, uuid)', 'execute'), true, 'authenticated users can execute protected latest-test analysis');
 select has_function('public', 'reviewer_save_question_with_classification', array['uuid', 'jsonb', 'text'], 'reviewer classification edit function exists');
 select is(has_function_privilege('authenticated', 'public.create_mitchell_full_practice_exam(uuid, boolean)', 'execute'), true, 'students can execute protected full-exam creation');
 select is(has_function_privilege('anon', 'public.create_mitchell_full_practice_exam(uuid, boolean)', 'execute'), false, 'anonymous users cannot create full exams');
@@ -23,12 +25,23 @@ insert into auth.users (id, email, raw_user_meta_data, raw_app_meta_data, aud, r
 values
   ('f1111111-1111-4111-8111-111111111111', 'mitchell-one@example.test', '{"display_name":"Mitchell One"}', '{}', 'authenticated', 'authenticated'),
   ('f2222222-2222-4222-8222-222222222222', 'mitchell-two@example.test', '{"display_name":"Mitchell Two"}', '{}', 'authenticated', 'authenticated'),
-  ('f3333333-3333-4333-8333-333333333333', 'mitchell-admin@example.test', '{"display_name":"Mitchell Admin"}', '{}', 'authenticated', 'authenticated');
+  ('f3333333-3333-4333-8333-333333333333', 'mitchell-admin@example.test', '{"display_name":"Mitchell Admin"}', '{}', 'authenticated', 'authenticated'),
+  ('f4444444-4444-4444-8444-444444444444', 'mitchell-parent@example.test', '{"display_name":"Mitchell Parent"}', '{}', 'authenticated', 'authenticated');
 insert into public.user_roles (user_id, role, created_by)
 values
   ('f1111111-1111-4111-8111-111111111111', 'student', 'f3333333-3333-4333-8333-333333333333'),
   ('f2222222-2222-4222-8222-222222222222', 'student', 'f3333333-3333-4333-8333-333333333333'),
-  ('f3333333-3333-4333-8333-333333333333', 'admin', 'f3333333-3333-4333-8333-333333333333');
+  ('f3333333-3333-4333-8333-333333333333', 'admin', 'f3333333-3333-4333-8333-333333333333'),
+  ('f4444444-4444-4444-8444-444444444444', 'parent', 'f3333333-3333-4333-8333-333333333333');
+insert into public.student_guardian_links (
+  student_id, guardian_id, relationship_type, status,
+  can_view_progress, can_assign_content, can_manage_challenges, created_by
+) values (
+  'f1111111-1111-4111-8111-111111111111',
+  'f4444444-4444-4444-8444-444444444444',
+  'parent', 'active', true, false, false,
+  'f3333333-3333-4333-8333-333333333333'
+);
 insert into public.pilot_package_assignments (student_id, import_package, assigned_by)
 values ('f1111111-1111-4111-8111-111111111111', 'MITCHELL_TEST', 'f3333333-3333-4333-8333-333333333333');
 
@@ -221,6 +234,34 @@ select is(
   (select count(*)::integer from public.get_practice_test_weak_areas((select id from mitchell_sessions))),
   5,
   'completed exam reports objective-level weak areas across five chapters'
+);
+select is(
+  (select count(*)::integer from public.get_latest_practice_test_topic_results(
+    'f1111111-1111-4111-8111-111111111111',
+    '20000000-0000-4000-8000-000000000002'
+  )),
+  5,
+  'student progress includes all five chapters from the latest full test'
+);
+
+select set_config('request.jwt.claim.sub', 'f2222222-2222-4222-8222-222222222222', true);
+select throws_ok(
+  $$select * from public.get_latest_practice_test_topic_results(
+    'f1111111-1111-4111-8111-111111111111',
+    '20000000-0000-4000-8000-000000000002'
+  )$$,
+  '42501', 'Progress access denied',
+  'unlinked student cannot read another student latest-test analysis'
+);
+
+select set_config('request.jwt.claim.sub', 'f4444444-4444-4444-8444-444444444444', true);
+select is(
+  (select count(*)::integer from public.get_latest_practice_test_topic_results(
+    'f1111111-1111-4111-8111-111111111111',
+    '20000000-0000-4000-8000-000000000002'
+  )),
+  5,
+  'linked parent reads the latest full-test chapter analysis'
 );
 
 select * from finish();

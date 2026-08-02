@@ -114,3 +114,13 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 - Objective/concept analysis is available only after an owned practice test is
   completed. Reviewer classification changes are validated, audited, and cannot
   be written directly by a student.
+- Latest full-test chapter analysis rechecks the same self-or-active-linked-
+  guardian progress permission for the requested student. An unlinked student,
+  reviewer, or administrator receives no implicit access, and the projection
+  returns no question text, choices, answer keys, or individual responses.
+- Study-session curriculum context is available only through
+  `get_study_session_question_context` after the security-definer function proves
+  the authenticated user owns the requested session. This permits labels for an
+  assigned private draft without widening the student's direct `questions` read
+  policy. Another student receives the same not-found response as a nonexistent
+  session, and no protected assessment or feedback field is returned.

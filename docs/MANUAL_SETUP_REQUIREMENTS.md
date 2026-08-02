@@ -309,8 +309,36 @@ npm.cmd run db:test:linked
 Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
 ```
 
+### Study-session chapter and topic labels
+
+Migration `202608020036_study_session_question_context.sql` was applied to the
+linked development project and the linked suite passed 426/426. No further setup
+is required before checking the chapter/title/topic banner for assigned draft
+questions. It added no account, secret, environment variable, table, Storage
+resource, or production dependency.
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
 The importer preserves the stable Chapter 4–8 package identifiers, so students
 already assigned all five chapter packages automatically receive the 25 added
 questions per chapter. Verify Heshy and Avigail each still have assignments for
 `LTL2_C4_75` through `LTL2_C8_75`; a missing chapter assignment causes final-exam
 creation to fail safely rather than leaking another package.
+
+### Final-test review and Progress follow-up
+
+Apply migration `202608020035_latest_practice_topic_progress.sql` before checking
+the revised results or Progress page. It adds no account, secret, environment
+variable, table, or production dependency.
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```

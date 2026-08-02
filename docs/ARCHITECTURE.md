@@ -118,3 +118,25 @@ cannot erase work, but correctness, keys, explanations, memory aids, visuals, an
 scores remain null until the test is submitted or completes. Post-test analysis
 adds chapter results and objective/concept review recommendations. No sample-exam
 question text or answer key is stored as a style reference.
+
+The final-test interaction keeps the review flag as a prominent question-level
+control and advances to the next unanswered item after a successful save. Results
+lead with missed-answer review, omit the separate objective recommendation block,
+and provide a direct study action beside each chapter result. Review mode traverses
+only incorrect submitted answers and ends with an explicit Finish review action.
+
+Progress reads a separate protected projection of the latest completed Mitchell
+full test. This keeps the chapter snapshot current when another full test is
+completed without mixing practice attempts into ordinary adaptive mastery. Each
+student chapter row starts the existing secure 10-question adaptive session with
+that chapter topic as its filter and opens the new session immediately; linked
+guardians may read the analysis but do not receive a student study action.
+
+Owned session delivery enriches each returned question with student-safe chapter
+and topic labels through a narrow owner-checked projection. This deliberate server
+boundary supports assigned private drafts without granting the student direct read
+access to draft content metadata, and it adds no answer or scoring fields. The
+shared session view keeps that context above the current question, including when
+Back/Next changes chapters in a full practice test. The authenticated profile's
+first name is displayed in every shared page header so students can verify whose
+account is active even when the workspace rail is not rendered.

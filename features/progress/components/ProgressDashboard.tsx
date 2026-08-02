@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { type Href, useRouter } from "expo-router";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
@@ -7,8 +8,10 @@ import { AppLinkButton } from "../../../components/common/AppLinkButton";
 import { AppScreen } from "../../../components/common/AppScreen";
 import { theme } from "../../../lib/constants/theme";
 import { SignOutButton } from "../../auth/components/SignOutButton";
+import { getSafeStudyMessage } from "../../study/errors";
+import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { READINESS_DISCLAIMER } from "../readiness";
-import type { ExamProgress, TopicProgress } from "../schemas";
+import type { ExamProgress, LatestPracticeTopicResult, TopicProgress } from "../schemas";
 import { useProgressDashboard, useProgressStudents } from "../hooks/useProgress";
 
 type ProgressDashboardProps = {
@@ -17,7 +20,10 @@ type ProgressDashboardProps = {
 };
 
 export function ProgressDashboard({ audience, compact = false }: ProgressDashboardProps) {
+  const router = useRouter();
+  const createStudySession = useCreateStudySession();
   const students = useProgressStudents();
+  const [creatingTopicId, setCreatingTopicId] = useState<string>();
   const [selectedStudentOverride, setSelectedStudentId] = useState<string>();
   const selectedStudentId = selectedStudentOverride ?? students.data?.[0]?.student_id;
   const dashboard = useProgressDashboard(selectedStudentId);
@@ -101,7 +107,25 @@ export function ProgressDashboard({ audience, compact = false }: ProgressDashboa
             />
           ) : (
             dashboard.data.map((exam) => (
-              <ExamProgressSection compact={compact} exam={exam} key={exam.exam_id} />
+              <ExamProgressSection
+                compact={compact}
+                exam={exam}
+                key={exam.exam_id}
+                onStudyTopic={
+                  audience === "student"
+                    ? (topicId) => {
+                        setCreatingTopicId(topicId);
+                        void createStudySession
+                          .mutateAsync({ examId: exam.exam_id, topicId })
+                          .then((sessionId) => router.push(`/study/session/${sessionId}` as Href))
+                          .catch(() => undefined)
+                          .finally(() => setCreatingTopicId(undefined));
+                      }
+                    : undefined
+                }
+                startingTopicId={creatingTopicId}
+                studyError={createStudySession.isError ? createStudySession.error : undefined}
+              />
             ))
           )}
         </>
@@ -110,7 +134,19 @@ export function ProgressDashboard({ audience, compact = false }: ProgressDashboa
   );
 }
 
-function ExamProgressSection({ compact, exam }: { compact: boolean; exam: ExamProgress }) {
+function ExamProgressSection({
+  compact,
+  exam,
+  onStudyTopic,
+  startingTopicId,
+  studyError,
+}: {
+  compact: boolean;
+  exam: ExamProgress;
+  onStudyTopic?: (topicId: string) => void;
+  startingTopicId?: string;
+  studyError?: unknown;
+}) {
   return (
     <View style={styles.section}>
       <AppCard title={exam.exam_title} description={READINESS_DISCLAIMER}>
@@ -152,11 +188,66 @@ function ExamProgressSection({ compact, exam }: { compact: boolean; exam: ExamPr
 
       {!compact ? (
         <>
+          <LatestPracticeAnalysis
+            onStudyTopic={onStudyTopic}
+            startingTopicId={startingTopicId}
+            studyError={studyError}
+            topics={exam.latestPracticeTopics}
+          />
           <TopicProgressList topics={exam.topics} />
           <TrendCard trends={exam.trends} />
         </>
       ) : null}
     </View>
+  );
+}
+
+function LatestPracticeAnalysis({
+  onStudyTopic,
+  startingTopicId,
+  studyError,
+  topics,
+}: {
+  onStudyTopic?: (topicId: string) => void;
+  startingTopicId?: string;
+  studyError?: unknown;
+  topics: LatestPracticeTopicResult[];
+}) {
+  if (!topics.length) return null;
+  const completedAt = topics[0]?.completed_at;
+  return (
+    <AppCard
+      title="Latest full practice test"
+      description={
+        completedAt
+          ? `Chapter analysis from ${new Date(completedAt).toLocaleDateString()}. It updates after each completed full test.`
+          : "Chapter analysis from the latest completed full test."
+      }
+    >
+      {topics.map((topic) => (
+        <View key={topic.topic_id} style={styles.practiceTopicRow}>
+          <View style={styles.practiceTopicText}>
+            <Text style={styles.topicTitle}>{topic.topic_title}</Text>
+            <Text style={styles.muted}>
+              {topic.correct_count}/{topic.question_count} · {Math.round(topic.score_percent)}% ·{" "}
+              {topic.performance_label}
+            </Text>
+          </View>
+          {onStudyTopic ? (
+            <AppButton
+              label={studyLabel(topic.topic_title)}
+              loading={startingTopicId === topic.topic_id}
+              onPress={() => onStudyTopic(topic.topic_id)}
+            />
+          ) : null}
+        </View>
+      ))}
+      {studyError ? (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {getSafeStudyMessage(studyError)}
+        </Text>
+      ) : null}
+    </AppCard>
   );
 }
 
@@ -277,6 +368,11 @@ function formatShortDate(value: string): string {
   });
 }
 
+function studyLabel(topicTitle: string): string {
+  const chapter = topicTitle.match(/Chapter\s+(\d+)/i)?.[1];
+  return chapter ? `Start Chapter ${chapter} study` : "Start topic study";
+}
+
 const styles = StyleSheet.create({
   action: { color: theme.colors.ink, fontSize: 18, fontWeight: "800", lineHeight: 26 },
   bar: { backgroundColor: theme.colors.accent, borderRadius: 999, height: 10 },
@@ -293,12 +389,24 @@ const styles = StyleSheet.create({
   },
   disclaimerText: { color: theme.colors.primary, fontSize: 13, lineHeight: 19 },
   due: { color: theme.colors.accent, fontSize: 14, fontWeight: "800" },
+  error: { color: theme.colors.danger, fontSize: 15, lineHeight: 22 },
   loading: { alignItems: "center", flexDirection: "row", gap: theme.spacing.sm },
   metric: { minWidth: 110 },
   metricLabel: { color: theme.colors.muted, fontSize: 12 },
   metrics: { flex: 1, flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.md },
   metricValue: { color: theme.colors.ink, fontSize: 18, fontWeight: "900" },
   muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
+  practiceTopicRow: {
+    alignItems: "center",
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.md,
+    justifyContent: "space-between",
+    paddingTop: theme.spacing.sm,
+  },
+  practiceTopicText: { flex: 1, minWidth: 220 },
   readinessLabel: { color: theme.colors.accent, fontSize: 15, fontWeight: "800" },
   readinessRow: {
     alignItems: "center",

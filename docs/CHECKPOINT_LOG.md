@@ -790,3 +790,56 @@ Mitchell Chapters 4–8 final practice-exam extension:
   12/12, Mitchell full exam 29/29, pilot package access 19/19, practice tests
   56/56, progress/readiness 34/34, and study sessions 38/38—an aggregate
   417/417. Owner web acceptance of the full 50-question workflow remains.
+
+Mitchell full-test usability follow-up:
+
+- Made the per-question review flag a prominent full-width control and preserved
+  its server-backed state. A successfully saved practice answer now advances to
+  the next unanswered question, wrapping to an earlier unanswered item when
+  needed; Back and Next remain available for deliberate navigation.
+- Simplified completed-test results: missed-answer review is the first action,
+  the separate Recommended review block is removed, each topic/chapter result has
+  a highlighted Study action, and Back to study catalog remains below the topic
+  analysis. Completed review traverses only incorrect submitted answers, labels
+  its last action Finish review, and also exposes a direct catalog exit.
+- Added migration `202608020035_latest_practice_topic_progress.sql`. Progress now
+  obtains the latest completed Mitchell full-test chapter snapshot through a
+  self-or-linked-guardian protected function. A newer completed full test replaces
+  the displayed snapshot without mixing practice attempts into normal mastery.
+  Student chapter actions start the selected chapter's secure 10-question session;
+  guardian views remain read-only.
+- Local quality gates pass: TypeScript, Expo ESLint, repository formatting, and
+  all 22 Jest suites with 114/114 tests. Focused shared-session tests explicitly
+  pass automatic advance and wrong-only review. Expo Doctor passes 20/20 and the
+  web export bundles 1,581 modules successfully.
+- The owner applied migration 035 successfully to the linked development project.
+  The CLI's subsequent Docker cache-catalog warning was nonblocking and occurred
+  after `Finished supabase db push`; no local Docker runtime is required for the
+  already-completed remote push. The expanded Mitchell suite passed 34/34 and all
+  linked pgTAP suites passed 422/422. Owner web acceptance remains pending.
+- Follow-up acceptance found that the Progress chapter action only opened the
+  catalog. It now creates the existing secure 10-question study session with the
+  selected chapter topic and opens that session directly, including row-specific
+  loading and safe error feedback. A component test verifies the exact exam/topic
+  request and resulting session navigation. The Study launcher now labels the
+  Chapter 1 option as the original legacy pilot and explains that Chapters 4–8
+  currently use the separate combined 50-question Mitchell practice test. The
+  full local gate passes TypeScript, Expo ESLint, all 22 Jest suites with 115/115
+  tests, and repository formatting. No additional database migration is required.
+- Added a persistent `Hello, {first name}` identity cue to the shared page header
+  so Heshy and Avigail can distinguish signed-in sessions even when the workspace
+  rail is hidden. The fallback uses the profile display name when no first name is
+  stored. Study sessions show the current chapter number/title and topic above
+  every question, updating as mixed-chapter navigation changes questions.
+- Owner acceptance after an Expo restart exposed that assigned draft questions
+  could not obtain labels through direct public-content reads under RLS. Migration
+  `202608020036_study_session_question_context.sql` fixes that gap with a narrow,
+  owner-checked projection containing only session-question ID and curriculum
+  labels; it does not expose prompts, choices, answers, feedback, or scores. SQL
+  coverage now checks owner access and another-student denial. The complete local
+  gate passes TypeScript, Expo ESLint, repository formatting, all 23 Jest suites
+  with 116/116 tests, Expo Doctor 20/20, and a 1,581-module web export. The owner
+  applied migration 036 successfully to the linked development project. The
+  post-push linked suite passed study sessions 42/42 and all suites 426/426. The
+  Docker cache-catalog warning occurred only after `Finished supabase db push`
+  and is nonblocking; local Docker is not required for the completed remote push.
