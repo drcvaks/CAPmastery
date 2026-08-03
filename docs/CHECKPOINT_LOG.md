@@ -860,3 +860,15 @@ Mitchell full-test usability follow-up:
   credential and the owner must choose the initial password. After creation, the
   existing audited role and package-assignment functions can grant the student
   role and Chapter 4â€“8 packages without a new schema change.
+- Enabled bathroom/break pauses for newly created Mitchell 50-question tests through
+  migration `202608030038_mitchell_full_exam_pause.sql`. It changes only the
+  blueprint setting; existing sessions retain their immutable pause snapshot. The
+  shared session already uses owner-checked pause/resume RPCs, excludes paused time
+  from the clock, disables answering/navigation while paused, and displays Resume
+  test until the student continues. The Mitchell SQL suite now declares 36
+  assertions, and component coverage confirms the full test exposes Pause test.
+  The complete local gate passes TypeScript, Expo ESLint, repository formatting,
+  all 23 Jest suites with 118/118 tests, and a 1,581-module web export. The owner
+  applied migration 038 successfully to the linked development project. The
+  Mitchell suite passed 36/36 and all linked pgTAP suites passed 428/428. The
+  post-push Docker cache-catalog warning was nonblocking.

@@ -125,6 +125,7 @@ describe("practice test session", () => {
       data: {
         ...activeSession,
         questionCount: 50,
+        allowPause: true,
         remainingSeconds: 3600,
         questions: [{ ...question, question_count: 50 }],
       },
@@ -136,14 +137,15 @@ describe("practice test session", () => {
     await render(<StudySessionView sessionId={activeSession.id} />);
 
     expect(screen.getByText("Time remaining: 60:00")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Pause test" })).toBeVisible();
     expect(screen.queryByText("Chapter 5: Brainpower for Leadership")).toBeNull();
     expect(screen.queryByText("Topic: Learn to Lead, Volume 2, Chapter 5")).toBeNull();
     expect(screen.queryByRole("button", { name: "Finish test and review answers" })).toBeNull();
 
     const navigation = screen.getAllByRole("button");
-    expect(navigation[0]).toHaveTextContent("Back");
-    expect(navigation[1]).toHaveTextContent("Flag question");
-    expect(navigation[2]).toHaveTextContent("Next");
+    expect(navigation[1]).toHaveTextContent("Back");
+    expect(navigation[2]).toHaveTextContent("Flag question");
+    expect(navigation[3]).toHaveTextContent("Next");
   });
 
   it("offers finishing only on the last full-exam question", async () => {

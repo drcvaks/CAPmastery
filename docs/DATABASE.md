@@ -190,4 +190,9 @@ default timer from 3,000 to 3,600 seconds. The value is copied into each new
 session, so an already-started session retains its immutable timer snapshot while
 new tests receive 60 minutes.
 
+Migration `202608030038` enables the blueprint's existing `allow_pause` setting.
+The setting is copied into each new session, preserving an already-started
+session's configuration. Existing owner-checked pause/resume functions and pause
+duration accounting remain authoritative.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

@@ -341,6 +341,14 @@ the initial password without exposing it to source code or Codex. Include
 the global student role and only the five Chapter 4â€“8 packages required for the
 Mitchell test. Keep the real email and password out of tracked files.
 
+### Mitchell pause control
+
+Migration `202608030038_mitchell_full_exam_pause.sql` was applied to the linked
+development project, and all linked tests passed 428/428. The Pause test control
+appears only in a newly created 50-question session because the pause permission
+is intentionally snapshotted at session creation. An older active test remains
+unpausable.
+
 The importer preserves the stable Chapter 4–8 package identifiers, so students
 already assigned all five chapter packages automatically receive the 25 added
 questions per chapter. Verify Heshy and Avigail each still have assignments for

@@ -132,6 +132,7 @@ the owning student, and rejects another student. Component coverage confirms the
 chapter/title/topic banner and the signed-in student's page-header greeting.
 
 Mitchell full-exam SQL coverage verifies the active 50-question blueprint uses a
-3,600-second timer. Shared-session component coverage verifies the active exam's
-visible timer, hidden chapter cue, Backâ€“Flagâ€“Next ordering, question-50-only
-completion action, and restored chapter label during review.
+3,600-second timer and permits pausing. Shared-session component coverage verifies
+the active exam's visible timer and Pause control, hidden chapter cue,
+Backâ€“Flagâ€“Next ordering, question-50-only completion action, and restored chapter
+label during review.

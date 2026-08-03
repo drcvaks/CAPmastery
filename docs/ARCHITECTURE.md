@@ -127,6 +127,9 @@ content cue, while missed-answer review restores them. Results lead with
 missed-answer review, omit the separate objective recommendation block, and
 provide a direct study action beside each chapter result. Review mode traverses
 only incorrect submitted answers and ends with an explicit Finish review action.
+New full-test sessions permit a server-authoritative pause: answering and navigation
+are disabled while paused, elapsed pause time is excluded, and refresh/resume uses
+the database timer snapshot rather than trusting the client clock.
 
 Progress reads a separate protected projection of the latest completed Mitchell
 full test. This keeps the chapter snapshot current when another full test is
