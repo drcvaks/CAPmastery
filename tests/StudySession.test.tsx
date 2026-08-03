@@ -107,7 +107,7 @@ describe("practice test session", () => {
   it("shows a neutral saved state without correctness or explanation while active", async () => {
     await render(<StudySessionView sessionId={activeSession.id} />);
 
-    expect(screen.getByRole("button", { name: "Flag this question" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Flag question" })).toBeVisible();
     expect(screen.getByText("Chapter 5: Brainpower for Leadership")).toBeVisible();
     expect(screen.getByText("Topic: Learn to Lead, Volume 2, Chapter 5")).toBeVisible();
     expect(screen.getByText("Answer saved")).toBeVisible();
@@ -118,6 +118,51 @@ describe("practice test session", () => {
     ).toBeVisible();
     expect(screen.queryByText("Correct.")).toBeNull();
     expect(screen.queryByText("Synthetic explanation")).toBeNull();
+  });
+
+  it("keeps full-exam navigation and timer visible without revealing the chapter", async () => {
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        questionCount: 50,
+        remainingSeconds: 3600,
+        questions: [{ ...question, question_count: 50 }],
+      },
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    await render(<StudySessionView sessionId={activeSession.id} />);
+
+    expect(screen.getByText("Time remaining: 60:00")).toBeVisible();
+    expect(screen.queryByText("Chapter 5: Brainpower for Leadership")).toBeNull();
+    expect(screen.queryByText("Topic: Learn to Lead, Volume 2, Chapter 5")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Finish test and review answers" })).toBeNull();
+
+    const navigation = screen.getAllByRole("button");
+    expect(navigation[0]).toHaveTextContent("Back");
+    expect(navigation[1]).toHaveTextContent("Flag question");
+    expect(navigation[2]).toHaveTextContent("Next");
+  });
+
+  it("offers finishing only on the last full-exam question", async () => {
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        questionCount: 50,
+        answeredCount: 49,
+        remainingSeconds: 120,
+        questions: [{ ...question, question_count: 50, question_position: 50 }],
+      },
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    await render(<StudySessionView sessionId={activeSession.id} />);
+
+    expect(screen.getByRole("button", { name: "Finish test and review answers" })).toBeVisible();
   });
 
   it("advances to the next unanswered practice question after submission", async () => {
@@ -184,6 +229,7 @@ describe("practice test session", () => {
     jest.mocked(useStudySession).mockReturnValue({
       data: {
         ...activeSession,
+        questionCount: 50,
         status: "completed",
         correctCount: 7,
         answeredCount: 10,
@@ -244,6 +290,7 @@ describe("practice test session", () => {
     jest.mocked(useStudySession).mockReturnValue({
       data: {
         ...activeSession,
+        questionCount: 50,
         status: "completed",
         correctCount: 1,
         answeredCount: 2,
@@ -267,6 +314,7 @@ describe("practice test session", () => {
     );
 
     expect(await screen.findByText("Missed answer should be reviewed")).toBeVisible();
+    expect(screen.getByText("Chapter 5: Brainpower for Leadership")).toBeVisible();
     expect(screen.queryByText("Correct answer should be skipped")).toBeNull();
     expect(screen.getByRole("button", { name: "Finish review" })).toBeVisible();
     fireEvent.press(screen.getByRole("button", { name: "Finish review" }));

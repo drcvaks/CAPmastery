@@ -324,6 +324,23 @@ npm.cmd run db:test:linked
 Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
 ```
 
+### Mitchell 60-minute timer
+
+Migration `202608020037_mitchell_full_exam_sixty_minutes.sql` was applied to the
+linked development project, and all linked tests passed 427/427. New 50-question
+tests now receive 60 minutes. Existing active tests intentionally retain their
+original timer snapshot; abandon or complete one before verifying a new 60-minute
+session. No new account, secret, environment variable, or service is required.
+
+### Additional test cadet
+
+Create and confirm the Auth user manually in Supabase Dashboard so the owner sets
+the initial password without exposing it to source code or Codex. Include
+`first_name` and `display_name` user metadata when practical. Then use the audited
+`admin_set_user_role` and `admin_set_pilot_package_assignment` functions to grant
+the global student role and only the five Chapter 4â€“8 packages required for the
+Mitchell test. Keep the real email and password out of tracked files.
+
 The importer preserves the stable Chapter 4–8 package identifiers, so students
 already assigned all five chapter packages automatically receive the 25 added
 questions per chapter. Verify Heshy and Avigail each still have assignments for

@@ -843,3 +843,20 @@ Mitchell full-test usability follow-up:
   post-push linked suite passed study sessions 42/42 and all suites 426/426. The
   Docker cache-catalog warning occurred only after `Finished supabase db push`
   and is nonblocking; local Docker is not required for the completed remote push.
+- Revised the active Mitchell 50-question experience after owner review: the
+  timer is now a prominent per-question badge; Back, Flag, and Next share one
+  ordered row; chapter/topic cues are hidden during the test and restored during
+  review; and Finish test and review answers appears only on question 50.
+  Migration `202608020037_mitchell_full_exam_sixty_minutes.sql` changes new
+  full-test timer snapshots from 50 to 60 minutes without mutating sessions already
+  in progress. The complete local gate passes TypeScript, Expo ESLint, repository
+  formatting, all 23 Jest suites with 118/118 tests, Expo Doctor 20/20, and a
+  1,581-module web export. The owner applied migration 037 successfully to the
+  linked development project. The expanded Mitchell suite passed 35/35 and all
+  linked pgTAP suites passed 427/427. The Docker cache-catalog warning occurred
+  after `Finished supabase db push` and did not affect the remote migration.
+- A third test cadet was requested for acceptance. Auth creation remains a manual
+  Supabase Dashboard action because the repository holds no administrative Auth
+  credential and the owner must choose the initial password. After creation, the
+  existing audited role and package-assignment functions can grant the student
+  role and Chapter 4â€“8 packages without a new schema change.

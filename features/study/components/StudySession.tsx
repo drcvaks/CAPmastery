@@ -185,6 +185,8 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const delayedFeedbackActive =
     (session.mode === "practice_test" || session.mode === "challenge") &&
     session.status === "active";
+  const isFullPracticeExam = session.mode === "practice_test" && session.questionCount === 50;
+  const isLastQuestion = currentQuestion.question_position === session.questionCount;
 
   async function handleSubmit() {
     if (!selectedChoiceId || !currentQuestion) return;
@@ -260,14 +262,6 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           title="Unofficial practice test"
           description="Answers are saved securely. Scores and explanations stay hidden until the test ends."
         >
-          <View style={styles.testStatus}>
-            <Text style={styles.timer}>
-              {session.timed ? formatTimer(remainingSeconds ?? 0) : "Untimed"}
-            </Text>
-            <Text style={styles.muted}>
-              {session.isPaused ? "Paused" : `${session.answeredCount} answered`}
-            </Text>
-          </View>
           {session.allowPause ? (
             <AppButton
               label={session.isPaused ? "Resume test" : "Pause test"}
@@ -277,16 +271,11 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           ) : (
             <Text style={styles.muted}>Pausing is not available for this blueprint.</Text>
           )}
-          <AppButton
-            label="Finish test and view results"
-            loading={completePractice.isPending}
-            onPress={() => void finishPracticeTest()}
-            variant="secondary"
-          />
         </AppCard>
       ) : null}
 
-      {currentQuestion.chapter_title || currentQuestion.topic_title ? (
+      {(currentQuestion.chapter_title || currentQuestion.topic_title) &&
+      !(isFullPracticeExam && session.status === "active") ? (
         <View
           accessibilityLabel={`${chapterLabel(currentQuestion.chapter_number, currentQuestion.chapter_title)}. Topic: ${currentQuestion.topic_title ?? "General review"}`}
           style={styles.sessionContext}
@@ -304,29 +293,24 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         <Text style={styles.progress}>
           Question {currentQuestion.question_position} of {session.questionCount}
         </Text>
+        {session.mode === "practice_test" ? (
+          <View style={styles.timerBadge}>
+            <Text
+              accessibilityLabel={
+                session.timed
+                  ? `Time remaining ${formatTimer(remainingSeconds ?? 0)}`
+                  : "Untimed practice test"
+              }
+              style={styles.timer}
+            >
+              {session.timed ? `Time remaining: ${formatTimer(remainingSeconds ?? 0)}` : "Untimed"}
+            </Text>
+          </View>
+        ) : null}
         <Text style={styles.progress}>{session.answeredCount} answered</Text>
       </View>
 
       <AppCard title={currentQuestion.question_text}>
-        {session.mode === "practice_test" && session.status === "active" ? (
-          <AppButton
-            disabled={session.isPaused}
-            label={
-              currentQuestion.flagged ? "Flagged for review — remove flag" : "Flag this question"
-            }
-            loading={setFlag.isPending}
-            onPress={() =>
-              void setFlag
-                .mutateAsync({
-                  sessionQuestionId: currentQuestion.session_question_id,
-                  flagged: !currentQuestion.flagged,
-                })
-                .catch(() => undefined)
-            }
-            variant={currentQuestion.flagged ? "primary" : "secondary"}
-          />
-        ) : null}
-
         {currentQuestion.choices.map((choice) => {
           const selected = choice.id === chosenChoiceId;
           const correct =
@@ -375,19 +359,47 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
 
         {session.mode === "practice_test" && session.status === "active" ? (
           <View style={styles.testNavigation}>
-            <AppButton
-              disabled={currentIndex === 0 || session.isPaused}
-              label="Back"
-              onPress={goPrevious}
-              variant="secondary"
-            />
-            <AppButton
-              disabled={currentIndex + 1 === session.questions.length || session.isPaused}
-              label="Next"
-              onPress={goNext}
-              variant="secondary"
-            />
+            <View style={styles.navigationControl}>
+              <AppButton
+                disabled={currentIndex === 0 || session.isPaused}
+                label="Back"
+                onPress={goPrevious}
+                variant="secondary"
+              />
+            </View>
+            <View style={styles.navigationControl}>
+              <AppButton
+                disabled={session.isPaused}
+                label={currentQuestion.flagged ? "Remove flag" : "Flag question"}
+                loading={setFlag.isPending}
+                onPress={() =>
+                  void setFlag
+                    .mutateAsync({
+                      sessionQuestionId: currentQuestion.session_question_id,
+                      flagged: !currentQuestion.flagged,
+                    })
+                    .catch(() => undefined)
+                }
+                variant={currentQuestion.flagged ? "primary" : "secondary"}
+              />
+            </View>
+            <View style={styles.navigationControl}>
+              <AppButton
+                disabled={currentIndex + 1 === session.questions.length || session.isPaused}
+                label="Next"
+                onPress={goNext}
+                variant="secondary"
+              />
+            </View>
           </View>
+        ) : null}
+
+        {session.mode === "practice_test" && session.status === "active" && isLastQuestion ? (
+          <AppButton
+            label="Finish test and review answers"
+            loading={completePractice.isPending}
+            onPress={() => void finishPracticeTest()}
+          />
         ) : null}
 
         {submitAnswer.isError && !answered ? (
@@ -592,7 +604,14 @@ const styles = StyleSheet.create({
   errorBox: { gap: theme.spacing.xs },
   muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
   progress: { color: theme.colors.muted, fontSize: 14, fontWeight: "700" },
-  progressRow: { flexDirection: "row", justifyContent: "space-between" },
+  navigationControl: { flex: 1, minWidth: 145 },
+  progressRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.sm,
+    justifyContent: "space-between",
+  },
   sessionContext: {
     backgroundColor: theme.colors.primarySoft,
     borderColor: theme.colors.border,
@@ -603,9 +622,14 @@ const styles = StyleSheet.create({
   },
   stack: { gap: theme.spacing.lg },
   supportive: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
-  testStatus: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   testNavigation: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
-  timer: { color: theme.colors.primary, fontSize: 28, fontWeight: "900" },
+  timer: { color: theme.colors.surface, fontSize: 18, fontWeight: "900" },
+  timerBadge: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
   topicResult: {
     borderTopColor: theme.colors.border,
     borderTopWidth: 1,

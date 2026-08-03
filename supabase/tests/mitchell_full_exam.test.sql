@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(34);
+select plan(35);
 
 select has_column('public', 'questions', 'chapter_number', 'questions store chapter number');
 select has_column('public', 'questions', 'exam_likeness', 'questions store exam likeness');
@@ -11,6 +11,15 @@ select has_column('public', 'questions', 'final_exam_weight', 'questions store f
 select has_column('public', 'questions', 'content_origin', 'questions store content origin');
 select has_column('public', 'questions', 'style_reference', 'questions store style reference');
 select has_column('public', 'study_session_questions', 'flagged_at', 'practice questions store review flags');
+select is(
+  (
+    select time_limit_seconds
+    from public.practice_test_blueprints
+    where code = 'MITCHELL_LEADERSHIP_FULL_50'
+  ),
+  3600,
+  'Mitchell fifty-question blueprint uses a sixty-minute timer'
+);
 select has_function('public', 'create_mitchell_full_practice_exam', array['uuid', 'boolean'], 'full-exam creation function exists');
 select has_function('public', 'set_practice_test_question_flag', array['uuid', 'boolean'], 'review-flag function exists');
 select has_function('public', 'get_practice_test_question_flags', array['uuid'], 'review-flag read function exists');

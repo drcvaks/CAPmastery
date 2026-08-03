@@ -130,3 +130,8 @@ latest full-test card and chapter action while keeping compact home output small
 is executable by authenticated users, returns a topic label for every question to
 the owning student, and rejects another student. Component coverage confirms the
 chapter/title/topic banner and the signed-in student's page-header greeting.
+
+Mitchell full-exam SQL coverage verifies the active 50-question blueprint uses a
+3,600-second timer. Shared-session component coverage verifies the active exam's
+visible timer, hidden chapter cue, Backâ€“Flagâ€“Next ordering, question-50-only
+completion action, and restored chapter label during review.

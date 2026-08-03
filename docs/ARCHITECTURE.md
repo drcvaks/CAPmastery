@@ -119,10 +119,13 @@ scores remain null until the test is submitted or completes. Post-test analysis
 adds chapter results and objective/concept review recommendations. No sample-exam
 question text or answer key is stored as a style reference.
 
-The final-test interaction keeps the review flag as a prominent question-level
-control and advances to the next unanswered item after a successful save. Results
-lead with missed-answer review, omit the separate objective recommendation block,
-and provide a direct study action beside each chapter result. Review mode traverses
+The final-test interaction advances to the next unanswered item after a successful
+save. Its visible question controls are ordered Back, Flag, Next; the timer remains
+prominent in the per-question status row, and the completion action appears only
+on question 50. Active testing withholds chapter/topic labels to avoid giving a
+content cue, while missed-answer review restores them. Results lead with
+missed-answer review, omit the separate objective recommendation block, and
+provide a direct study action beside each chapter result. Review mode traverses
 only incorrect submitted answers and ends with an explicit Finish review action.
 
 Progress reads a separate protected projection of the latest completed Mitchell
