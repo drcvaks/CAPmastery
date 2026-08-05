@@ -8,6 +8,11 @@ import { theme } from "../../../lib/constants/theme";
 import { PracticeTestLauncher } from "../../practice/components/PracticeTestLauncher";
 import { getSafeStudyMessage } from "../../study/errors";
 import { useCreateStudySession } from "../../study/hooks/useStudySession";
+import {
+  chapterButtonLabel,
+  groupTopicsByModule,
+  moduleButtonLabel,
+} from "../catalog";
 import { useApprovedQuestionPreviews, useContentCatalog } from "../hooks/useContentCatalog";
 
 export function ContentBrowser() {
@@ -16,6 +21,7 @@ export function ContentBrowser() {
   const catalog = useContentCatalog();
   const createSession = useCreateStudySession();
   const [selectedExamId, setSelectedExamId] = useState<string>();
+  const [expandedModuleId, setExpandedModuleId] = useState<string>();
   const [selectedTopicId, setSelectedTopicId] = useState<string | undefined>(
     typeof params.topicId === "string" ? params.topicId : undefined,
   );
@@ -24,6 +30,12 @@ export function ContentBrowser() {
   )?.id;
   const activeExamId = selectedExamId ?? routedExamId ?? catalog.data?.[0]?.id;
   const activeExam = catalog.data?.find(({ id }) => id === activeExamId);
+  const aerospaceModules =
+    activeExam?.code === "MITCHELL_AEROSPACE" ? groupTopicsByModule(activeExam.topics) : [];
+  const selectedModuleId = aerospaceModules.find((module) =>
+    module.topics.some((topic) => topic.id === selectedTopicId),
+  )?.id;
+  const openModuleId = selectedModuleId ?? expandedModuleId;
   const questions = useApprovedQuestionPreviews(activeExamId, selectedTopicId);
 
   if (catalog.isPending) {
@@ -71,6 +83,7 @@ export function ContentBrowser() {
               onPress={() => {
                 setSelectedExamId(exam.id);
                 setSelectedTopicId(undefined);
+                setExpandedModuleId(undefined);
               }}
               style={[styles.pill, selected && styles.pillSelected]}
             >
@@ -83,39 +96,96 @@ export function ContentBrowser() {
       </View>
 
       {activeExam ? (
-        <><AppCard title={activeExam.title} description={activeExam.description ?? undefined}>
-          <Text style={styles.sectionLabel}>Browse by topic</Text>
-          <View style={styles.pills}>
-            <TopicButton
-              label="All approved questions"
-              onPress={() => setSelectedTopicId(undefined)}
-              selected={!selectedTopicId}
+        <>
+          <AppCard title={activeExam.title} description={activeExam.description ?? undefined}>
+            {activeExam.code === "MITCHELL_AEROSPACE" ? (
+              <View style={styles.moduleStack}>
+                <Text style={styles.sectionLabel}>Browse by module and chapter</Text>
+                <TopicButton
+                  label="All Aerospace questions"
+                  onPress={() => {
+                    setSelectedTopicId(undefined);
+                    setExpandedModuleId(undefined);
+                  }}
+                  selected={!selectedTopicId}
+                />
+                {aerospaceModules.map((module) => {
+                  const expanded = module.id === openModuleId;
+                  return (
+                    <View key={module.id} style={styles.moduleGroup}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded }}
+                        onPress={() =>
+                          setExpandedModuleId((current) =>
+                            current === module.id ? undefined : module.id,
+                          )
+                        }
+                        style={[styles.moduleButton, expanded && styles.moduleButtonExpanded]}
+                      >
+                        <Text style={styles.moduleButtonLabel}>{moduleButtonLabel(module)}</Text>
+                        <Text accessibilityElementsHidden style={styles.moduleButtonSymbol}>
+                          {expanded ? "Hide" : "Show"}
+                        </Text>
+                      </Pressable>
+                      {expanded ? (
+                        <View style={styles.moduleTopics}>
+                          <Text style={styles.moduleTitle}>{module.title}</Text>
+                          {module.topics.map((topic) => (
+                            <TopicButton
+                              key={topic.id}
+                              label={chapterButtonLabel(topic)}
+                              onPress={() => {
+                                setExpandedModuleId(module.id);
+                                setSelectedTopicId(topic.id);
+                              }}
+                              selected={topic.id === selectedTopicId}
+                            />
+                          ))}
+                        </View>
+                      ) : null}
+                    </View>
+                  );
+                })}
+              </View>
+            ) : (
+              <>
+                <Text style={styles.sectionLabel}>Browse by topic</Text>
+                <View style={styles.pills}>
+                  <TopicButton
+                    label="All approved questions"
+                    onPress={() => setSelectedTopicId(undefined)}
+                    selected={!selectedTopicId}
+                  />
+                  {activeExam.topics.map((topic) => (
+                    <TopicButton
+                      key={topic.id}
+                      label={topic.title}
+                      onPress={() => setSelectedTopicId(topic.id)}
+                      selected={topic.id === selectedTopicId}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
+            <AppButton
+              label="Start 10-question study session"
+              loading={createSession.isPending}
+              onPress={() => {
+                void createSession
+                  .mutateAsync({ examId: activeExam.id, topicId: selectedTopicId })
+                  .then((sessionId) => router.push(`/study/session/${sessionId}` as Href))
+                  .catch(() => undefined);
+              }}
             />
-            {activeExam.topics.map((topic) => (
-              <TopicButton
-                key={topic.id}
-                label={topic.title}
-                onPress={() => setSelectedTopicId(topic.id)}
-                selected={topic.id === selectedTopicId}
-              />
-            ))}
-          </View>
-          <AppButton
-            label="Start 10-question study session"
-            loading={createSession.isPending}
-            onPress={() => {
-              void createSession
-                .mutateAsync({ examId: activeExam.id, topicId: selectedTopicId })
-                .then((sessionId) => router.push(`/study/session/${sessionId}` as Href))
-                .catch(() => undefined);
-            }}
-          />
-          {createSession.isError ? (
-            <Text accessibilityRole="alert" style={styles.error}>
-              {getSafeStudyMessage(createSession.error)}
-            </Text>
-          ) : null}
-        </AppCard><PracticeTestLauncher examId={activeExam.id} /></>
+            {createSession.isError ? (
+              <Text accessibilityRole="alert" style={styles.error}>
+                {getSafeStudyMessage(createSession.error)}
+              </Text>
+            ) : null}
+          </AppCard>
+          <PracticeTestLauncher examId={activeExam.id} />
+        </>
       ) : null}
 
       <AppCard
@@ -178,6 +248,29 @@ const styles = StyleSheet.create({
   error: { color: theme.colors.danger, fontSize: 15 },
   loading: { alignItems: "center", gap: theme.spacing.sm, padding: theme.spacing.xl },
   muted: { color: theme.colors.muted, fontSize: 15, lineHeight: 22 },
+  moduleButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.md,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+  },
+  moduleButtonExpanded: { backgroundColor: theme.colors.accent },
+  moduleButtonLabel: { color: theme.colors.surface, fontSize: 16, fontWeight: "800" },
+  moduleButtonSymbol: { color: theme.colors.surface, fontSize: 22, fontWeight: "800" },
+  moduleGroup: { gap: theme.spacing.sm },
+  moduleStack: { gap: theme.spacing.md },
+  moduleTitle: { color: theme.colors.primary, fontSize: 14, fontWeight: "700" },
+  moduleTopics: {
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
   pill: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,

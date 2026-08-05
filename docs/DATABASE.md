@@ -164,6 +164,11 @@ sample-style analysis. Chapter names remain normalized in `chapters`; they are n
 duplicated on question records. No answer-key or client permission boundary is
 changed.
 
+Migration `202608050040` archives the original Leadership and Aerospace
+`*_CATALOG_PENDING` topics. Their rows remain available for historical foreign
+keys and transaction-only fixtures, while active catalog reads no longer display
+obsolete coming-soon controls.
+
 ## Mitchell full practice-exam extension
 
 Migration `202608020034` adds question classification fields for chapter, exam

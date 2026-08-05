@@ -1,11 +1,21 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(58);
+select plan(59);
 
 select has_table('public', 'csv_import_jobs', 'CSV import jobs exist');
 select has_column('public', 'questions', 'question_mode', 'question delivery mode is preserved');
 select has_column('public', 'questions', 'question_style', 'question style is preserved');
+select is(
+  (
+    select count(*)::integer
+    from public.topics
+    where code in ('LEADERSHIP_CATALOG_PENDING', 'AEROSPACE_CATALOG_PENDING')
+      and status <> 'archived'
+  ),
+  0,
+  'obsolete catalog placeholder topics are archived'
+);
 select has_column('public', 'questions', 'module_number', 'question module number is preserved');
 select is(
   (

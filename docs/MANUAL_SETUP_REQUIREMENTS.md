@@ -380,6 +380,11 @@ existing audited `admin_set_pilot_package_assignment` function. The only deferre
 manual product decision is the future Module 1 practice-test question count and
 time limit; adaptive 10-question study sessions do not require that decision.
 
+Apply `202608050040_archive_catalog_placeholders.sql` before accepting the revised
+Study catalog. It archives only the two obsolete coming-soon topics; it does not
+delete content or require a new account, credential, or environment variable.
+The owner applied it to development and the corrected linked suite passed 432/432.
+
 ### Final-test review and Progress follow-up
 
 Apply migration `202608020035_latest_practice_topic_progress.sql` before checking

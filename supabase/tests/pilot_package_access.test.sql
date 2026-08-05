@@ -3,6 +3,12 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(19);
 
+-- This synthetic suite intentionally reuses the stable seed topic ID. Production
+-- archives the obsolete catalog label, so the transaction owns its active fixture.
+update public.topics
+set status = 'active'
+where id = '40000000-0000-4000-8000-000000000001';
+
 select has_column('public', 'questions', 'external_id', 'questions have stable external IDs');
 select has_column('public', 'questions', 'pilot_batch', 'questions preserve pilot batch');
 select has_column('public', 'questions', 'import_package', 'questions preserve import package');

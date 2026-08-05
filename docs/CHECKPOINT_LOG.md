@@ -882,6 +882,19 @@ Mitchell full-test usability follow-up:
   The owner reran the import successfully: inserted 100, updated/skipped/failed
   zero. Its 100 warnings report only absent registered visual assets; the metadata
   committed and student visual controls remain safely hidden.
+  The Study catalog follow-up removes both obsolete coming-soon entries and groups
+  Billy Mitchell Aerospace by expandable normalized modules with ordered chapter
+  controls. Migration `202608050040_archive_catalog_placeholders.sql` archives the
+  placeholder rows without deleting them. Pure unit coverage protects seven-module
+  ordering behavior, and the expanded linked content-import plan is 59 assertions.
+  The complete local gate passes strict TypeScript, Expo ESLint, formatting, all
+  25 Jest suites with 128/128 tests, Expo Doctor 20/20, and a 1,582-module web
+  export. The owner applied migration 040 to development.
+  The first linked rerun reached the pilot-package suite and exposed its dependency
+  on the now-archived seed topic. Pilot-package and study-session fixtures now
+  activate that stable topic only inside their rollback transactions; production
+  catalog status remains archived and no additional migration is required. The
+  corrected owner-linked rerun passed all suites at 432/432.
 - Enabled bathroom/break pauses for newly created Mitchell 50-question tests through
   migration `202608030038_mitchell_full_exam_pause.sql`. It changes only the
   blueprint setting; existing sessions retain their immutable pause snapshot. The

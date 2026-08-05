@@ -134,8 +134,18 @@ groups, all 100 internal sibling links, and supplied A 27/B 19/C 23/D 31 answer
 positions. It also verifies that `medium_hard` normalizes to the supported `hard`
 database enum without changing the richer classification fields. The content
 import/review SQL suite adds schema and constraint assertions for module number
-and Aerospace provenance. The completed local gate passed all 23 Jest suites and
-125/125 tests; linked SQL assertions remain pending migration 039 on development.
+and Aerospace provenance. The Module 1 import gate passed all 23 Jest suites and
+125/125 tests, and the owner-linked SQL suite passed 431/431 after migration 039.
+
+Aerospace catalog unit coverage verifies module ordering, chapter ordering,
+human-readable Module/Chapter labels, and recognition of both obsolete catalog
+placeholder codes. The content import/review SQL suite also verifies migration
+040 archives both placeholder rows.
+The catalog follow-up passes 25 Jest suites and 128/128 tests; migration 040 adds
+one linked SQL assertion, and the owner-linked post-push aggregate passed 432/432.
+The pilot-package and study-session SQL suites explicitly activate their reused
+seed topic inside their rolled-back transactions. This keeps fixtures independent
+of the production catalog status while leaving the obsolete labels archived.
 
 `study_sessions.test.sql` also verifies the narrow session-context function exists,
 is executable by authenticated users, returns a topic label for every question to

@@ -145,6 +145,13 @@ intentionally deferred until the owner chooses its question count and time limit
 the source's eligibility tags are preserved now so that later selector can be
 added without changing or reimporting the question schema.
 
+The Study catalog renders Aerospace volumes as expandable module controls and
+orders their chapter topics by normalized hierarchy sort values. Only modules
+with active content appear, so Modules 2 through 7 join the same structure as
+they are imported. Leadership retains its existing topic browser. The two
+catalog-seed placeholder topics are filtered from clients and archived once real
+content exists.
+
 Progress reads a separate protected projection of the latest completed Mitchell
 full test. This keeps the chapter snapshot current when another full test is
 completed without mixing practice attempts into ordinary adaptive mastery. Each
