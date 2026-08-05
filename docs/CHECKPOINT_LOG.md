@@ -860,6 +860,28 @@ Mitchell full-test usability follow-up:
   credential and the owner must choose the initial password. After creation, the
   existing audited role and package-assignment functions can grant the student
   role and Chapter 4â€“8 packages without a new schema change.
+- Prepared the owner-supplied Aerospace Dimensions Module 1 bank as a scoped
+  post-Checkpoint-9 content extension. The specialized importer validates all 100
+  tab-delimited rows, supplies controlled package/source defaults, routes the
+  60/24/16 chapter distribution into a normalized Aerospace hierarchy, preserves
+  75 final-exam tags and all learning support, and maps `medium_hard` to the
+  supported `hard` enum. Migration `202608040039_aerospace_module_content.sql`
+  adds nullable constrained module classification without changing Leadership
+  rows or security boundaries. The owner applied migration 039 and the expanded
+  linked pgTAP suite passed 431/431. Package assignments remain pending. A dedicated
+  Module 1 practice test remains deferred until its size and time limit are chosen.
+  Local validation passes strict TypeScript, Expo ESLint, repository formatting,
+  all 23 Jest suites with 125/125 tests, Expo Doctor 20/20, and a 1,581-module web
+  export. The source-only import reaches the expected process-scoped database
+  password guard after validation. Expo, Constants, Linking, and Router were
+  aligned to their SDK 57 patch requirements while resolving the Doctor gate.
+  The first linked import then exposed uppercase `AD1` visual asset keys against
+  the established lowercase private-asset constraint. The transaction rolled back
+  safely. Import now lowercases those keys at the trust boundary, verifies the
+  normalized form, and preserves all 100 distinct keys without a schema change.
+  The owner reran the import successfully: inserted 100, updated/skipped/failed
+  zero. Its 100 warnings report only absent registered visual assets; the metadata
+  committed and student visual controls remain safely hidden.
 - Enabled bathroom/break pauses for newly created Mitchell 50-question tests through
   migration `202608030038_mitchell_full_exam_pause.sql`. It changes only the
   blueprint setting; existing sessions retain their immutable pause snapshot. The

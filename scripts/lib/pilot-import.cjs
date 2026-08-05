@@ -42,6 +42,7 @@ const REQUIRED_FIELDS = [
 
 const OPTIONAL_VALUE_FIELDS = new Set([
   "reinforcement_question_ids",
+  "common_mistake",
   "short_explanation",
   "memory_aid",
   "visual_priority",
@@ -138,11 +139,13 @@ function parseDelimited(text, delimiter = "\t") {
   return rows.filter((values) => values.some((value) => value.length > 0));
 }
 
-function parseImport(text) {
+function parseImport(text, defaults = {}) {
   const matrix = parseDelimited(text.replace(/^\uFEFF/, ""));
   if (matrix.length < 2) throw new Error("The import file has no data rows.");
   const headers = matrix[0];
-  const missingHeaders = REQUIRED_FIELDS.filter((field) => !headers.includes(field));
+  const missingHeaders = REQUIRED_FIELDS.filter(
+    (field) => !headers.includes(field) && defaults[field] === undefined,
+  );
   if (missingHeaders.length > 0) {
     throw new Error(`Missing required columns: ${missingHeaders.join(", ")}`);
   }
@@ -150,7 +153,12 @@ function parseImport(text) {
     if (values.length !== headers.length) {
       throw new Error(`Row ${index + 2} has ${values.length} fields; expected ${headers.length}.`);
     }
-    return Object.fromEntries(headers.map((header, column) => [header, values[column].trim()]));
+    return {
+      ...Object.fromEntries(
+        Object.entries(defaults).map(([field, value]) => [field, String(value).trim()]),
+      ),
+      ...Object.fromEntries(headers.map((header, column) => [header, values[column].trim()])),
+    };
   });
 }
 
@@ -208,7 +216,7 @@ function validateImport(rows, expectedCount = 10) {
   const warnings = [];
   const externalIds = new Set();
   const allowed = {
-    difficulty: new Set(["easy", "medium", "hard"]),
+    difficulty: new Set(["easy", "medium", "medium_hard", "hard"]),
     cognitive_level: new Set([
       "recall",
       "recognition",
@@ -261,9 +269,10 @@ function validateImport(rows, expectedCount = 10) {
       }
       if (
         !/^\d+$/.test(row.chapter_number) ||
-        ![4, 5, 6, 7, 8].includes(Number(row.chapter_number))
+        Number(row.chapter_number) < 1 ||
+        Number(row.chapter_number) > 99
       ) {
-        errors.push(`${label}: chapter_number must be an integer from 4 through 8.`);
+        errors.push(`${label}: chapter_number must be an integer from 1 through 99.`);
       }
       if (!new Set(["high", "medium", "low"]).has(row.exam_likeness)) {
         errors.push(`${label}: invalid exam_likeness '${row.exam_likeness}'.`);
@@ -283,12 +292,22 @@ function validateImport(rows, expectedCount = 10) {
         errors.push(`${label}: invalid content_origin '${row.content_origin}'.`);
       }
       if (
-        !new Set(["pre_sample_bank_review", "Mitchell_sample_style_analysis"]).has(
-          row.style_reference,
-        )
+        !new Set([
+          "pre_sample_bank_review",
+          "Mitchell_sample_style_analysis",
+          "Mitchell_Aerospace_sample_style_analysis",
+        ]).has(row.style_reference)
       ) {
         errors.push(`${label}: invalid style_reference '${row.style_reference}'.`);
       }
+    }
+    if (
+      row.module_number !== undefined &&
+      (!/^\d+$/.test(row.module_number) ||
+        Number(row.module_number) < 1 ||
+        Number(row.module_number) > 99)
+    ) {
+      errors.push(`${label}: module_number must be an integer from 1 through 99.`);
     }
     for (const field of ["question_mode", "question_style"]) {
       if (row[field] && !/^[a-z][a-z0-9_-]{1,79}$/.test(row[field])) {
@@ -331,6 +350,9 @@ function validateImport(rows, expectedCount = 10) {
       }
       if (row.visual_display_mode !== "optional_after_answer") {
         errors.push(`${label}: unsupported visual_display_mode '${row.visual_display_mode}'.`);
+      }
+      if (!/^[a-z0-9][a-z0-9_-]{2,119}$/.test(normalizeVisualAssetKey(row.visual_asset_key))) {
+        errors.push(`${label}: invalid visual_asset_key '${row.visual_asset_key}'.`);
       }
     }
   });
@@ -393,6 +415,16 @@ function normalizeCognitiveLevel(value) {
   return value;
 }
 
+function normalizeDifficulty(value) {
+  return value === "medium_hard" ? "hard" : value;
+}
+
+function normalizeVisualAssetKey(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
 function questionPurpose(value) {
   if (value === "scenario") return "scenario_judgment";
   if (value === "misconception") return "misconception_check";
@@ -416,6 +448,8 @@ module.exports = {
   parseImport,
   parseSourcePages,
   normalizeCognitiveLevel,
+  normalizeDifficulty,
+  normalizeVisualAssetKey,
   normalizeMetadataCode,
   questionPurpose,
   splitReinforcementIds,

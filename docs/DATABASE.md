@@ -155,6 +155,15 @@ metadata as needed and stores its 75 draft rows in private package `LTL2_C8_75`.
 4. Generate types from the resulting schema.
 5. Apply to shared environments only after review and record the result in `CHECKPOINT_LOG.md`.
 
+## Aerospace Dimensions module classification
+
+Migration `202608040039` adds nullable, constrained `questions.module_number` and
+an exam/module/chapter lookup index. Existing Leadership rows remain null. It also
+extends the governed style-provenance constraint for the owner-supplied Aerospace
+sample-style analysis. Chapter names remain normalized in `chapters`; they are not
+duplicated on question records. No answer-key or client permission boundary is
+changed.
+
 ## Mitchell full practice-exam extension
 
 Migration `202608020034` adds question classification fields for chapter, exam

@@ -6,6 +6,8 @@ const {
   decodeImportBuffer,
   formatSourceReference,
   normalizeCognitiveLevel,
+  normalizeDifficulty,
+  normalizeVisualAssetKey,
   normalizeMetadataCode,
   parseImport,
   parseSourcePages,
@@ -68,6 +70,19 @@ const mitchell500InputPath = path.resolve(
   "Content",
   "LTL_V2_Chapters_4_8_500_Questions_Final_Exam_Tagged.csv",
 );
+const aerospaceModuleOneInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Dimensions_Module_1_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleOneDefaults = {
+  pilot_batch: "AD_M1_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -681,5 +696,104 @@ describe("Learn to Lead Volume 2 Chapter 8 validation", () => {
         ]),
       ),
     ).toEqual({ A: 20, B: 20, C: 17, D: 18 });
+  });
+});
+
+describe("Aerospace Dimensions Module 1 validation", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleOneInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer), aerospaceModuleOneDefaults);
+
+  it("parses one hundred unique draft rows using only documented import defaults", () => {
+    const validation = validateImport(rows, 100);
+
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation.errors).toEqual([]);
+    expect(validation.warnings).toEqual([]);
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(rows.every((row) => row.review_status === "draft")).toBe(true);
+    expect(rows.every((row) => row.feedback_display_version === "1")).toBe(true);
+    expect(rows.every((row) => row.common_mistake === "")).toBe(true);
+  });
+
+  it("preserves the module and documented three-chapter distribution", () => {
+    expect(rows.every((row) => row.module_number === "1")).toBe(true);
+    expect(
+      Object.fromEntries(
+        ["1", "2", "3"].map((chapter) => [
+          chapter,
+          rows.filter((row) => row.chapter_number === chapter).length,
+        ]),
+      ),
+    ).toEqual({ 1: 60, 2: 24, 3: 16 });
+    expect(
+      new Set(rows.filter((row) => row.chapter_number === "1").map((row) => row.chapter_title)),
+    ).toEqual(new Set(["Flight"]));
+    expect(
+      new Set(rows.filter((row) => row.chapter_number === "2").map((row) => row.chapter_title)),
+    ).toEqual(new Set(["Rising Air"]));
+    expect(
+      new Set(rows.filter((row) => row.chapter_number === "3").map((row) => row.chapter_title)),
+    ).toEqual(new Set(["Balloons"]));
+  });
+
+  it("retains all choices, explanations, learning support, and visual metadata", () => {
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.visual_asset_key).not.toBe("");
+      expect(row.visual_alt_text).not.toBe("");
+    }
+    expect(new Set(rows.map((row) => row.visual_asset_key)).size).toBe(100);
+    const normalizedAssetKeys = rows.map((row) => normalizeVisualAssetKey(row.visual_asset_key));
+    expect(new Set(normalizedAssetKeys).size).toBe(100);
+    expect(normalizedAssetKeys.every((key) => /^[a-z0-9][a-z0-9_-]{2,119}$/.test(key))).toBe(true);
+  });
+
+  it("maps medium-hard difficulty safely while preserving test-style classifications", () => {
+    expect(rows.filter((row) => row.difficulty === "medium")).toHaveLength(50);
+    expect(rows.filter((row) => row.difficulty === "medium_hard")).toHaveLength(50);
+    expect(rows.filter((row) => normalizeDifficulty(row.difficulty) === "hard")).toHaveLength(50);
+    expect(rows.filter((row) => row.cognitive_level === "recall")).toHaveLength(50);
+    expect(rows.filter((row) => row.cognitive_level === "application")).toHaveLength(50);
+    expect(rows.filter((row) => row.question_style === "direct_definition")).toHaveLength(50);
+    expect(rows.filter((row) => row.question_style === "brief_application")).toHaveLength(50);
+  });
+
+  it("contains seventy-five eligible questions and fifty paired families", () => {
+    expect(rows.filter((row) => row.eligible_for_final_exam === "true")).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    expect(new Set(rows.map((row) => row.objective_code)).size).toBe(50);
+    expect(new Set(rows.map((row) => row.concept_code)).size).toBe(50);
+  });
+
+  it("keeps every reinforcement link inside its two-question family", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    const links = rows.flatMap((row) =>
+      splitReinforcementIds(row.reinforcement_question_ids).map((target) => [row, target]),
+    );
+
+    expect(links).toHaveLength(100);
+    for (const [row, target] of links) {
+      expect(byId.has(target)).toBe(true);
+      expect(byId.get(target).question_family_code).toBe(row.question_family_code);
+    }
+  });
+
+  it("preserves the supplied balanced answer-key distribution", () => {
+    expect(
+      Object.fromEntries(
+        ["A", "B", "C", "D"].map((letter) => [
+          letter,
+          rows.filter((row) => row.correct_letter === letter).length,
+        ]),
+      ),
+    ).toEqual({ A: 27, B: 19, C: 23, D: 31 });
   });
 });

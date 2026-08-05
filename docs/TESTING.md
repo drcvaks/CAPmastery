@@ -126,6 +126,17 @@ advance after answer save, results ordering, chapter study actions, wrong-only
 review, and the Finish review exit. Progress component coverage verifies the
 latest full-test card and chapter action while keeping compact home output small.
 
+The Aerospace Module 1 actual-file suite verifies the BOM/tab format, 100 unique
+draft rows, controlled defaults for specialized missing headers, 60/24/16 chapter
+distribution, four choices with aligned feedback, complete learning support, 100
+unique visual keys, 75 final-exam-eligible rows, 50 objective/concept/family
+groups, all 100 internal sibling links, and supplied A 27/B 19/C 23/D 31 answer
+positions. It also verifies that `medium_hard` normalizes to the supported `hard`
+database enum without changing the richer classification fields. The content
+import/review SQL suite adds schema and constraint assertions for module number
+and Aerospace provenance. The completed local gate passed all 23 Jest suites and
+125/125 tests; linked SQL assertions remain pending migration 039 on development.
+
 `study_sessions.test.sql` also verifies the narrow session-context function exists,
 is executable by authenticated users, returns a topic label for every question to
 the owning student, and rejects another student. Component coverage confirms the

@@ -1498,6 +1498,7 @@ export type Database = {
           import_package: string | null;
           is_exam_style: boolean;
           learning_objective_id: string | null;
+          module_number: number | null;
           pilot_batch: string | null;
           purpose: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id: string | null;
@@ -1537,6 +1538,7 @@ export type Database = {
           import_package?: string | null;
           is_exam_style?: boolean;
           learning_objective_id?: string | null;
+          module_number?: number | null;
           pilot_batch?: string | null;
           purpose?: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id?: string | null;
@@ -1576,6 +1578,7 @@ export type Database = {
           import_package?: string | null;
           is_exam_style?: boolean;
           learning_objective_id?: string | null;
+          module_number?: number | null;
           pilot_batch?: string | null;
           purpose?: Database["public"]["Enums"]["question_purpose"] | null;
           question_family_id?: string | null;

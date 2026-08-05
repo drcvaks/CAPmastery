@@ -355,6 +355,31 @@ questions per chapter. Verify Heshy and Avigail each still have assignments for
 `LTL2_C4_75` through `LTL2_C8_75`; a missing chapter assignment causes final-exam
 creation to fail safely rather than leaking another package.
 
+### Aerospace Dimensions Module 1 import
+
+No new account, API credential, environment variable, or Supabase project is
+required. Apply migration `202608040039_aerospace_module_content.sql`, import the
+100 draft questions, and run linked tests with the development database password
+held only in the current PowerShell process:
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+npm.cmd run content:import:admodule1
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+The owner completed migration 039 and the linked suite passed 431/431. After the
+uppercase visual-key correction, the persistent import inserted all 100 rows with
+zero failures. The 100 warnings are expected because no corresponding approved
+visual assets are registered; they do not block study content.
+
+After import, assign exact package `AD_M1_100` to each intended cadet through the
+existing audited `admin_set_pilot_package_assignment` function. The only deferred
+manual product decision is the future Module 1 practice-test question count and
+time limit; adaptive 10-question study sessions do not require that decision.
+
 ### Final-test review and Progress follow-up
 
 Apply migration `202608020035_latest_practice_topic_progress.sql` before checking

@@ -131,6 +131,20 @@ New full-test sessions permit a server-authoritative pause: answering and naviga
 are disabled while paused, elapsed pause time is excluded, and refresh/resume uses
 the database timer snapshot rather than trusting the client clock.
 
+### Aerospace Dimensions module extension
+
+Aerospace Dimensions content reuses the normalized exam/course/volume/chapter/
+topic hierarchy and protected question delivery used by Leadership. Module 1 is
+stored as one volume with three chapter topics under the existing Billy Mitchell
+Aerospace exam. The nullable `questions.module_number` classification supports
+all seven future modules without duplicating chapter titles on question rows.
+
+Assigned students can use all 100 Module 1 questions through the existing secure
+adaptive study-session flow. A dedicated module practice-test blueprint is
+intentionally deferred until the owner chooses its question count and time limit;
+the source's eligibility tags are preserved now so that later selector can be
+added without changing or reimporting the question schema.
+
 Progress reads a separate protected projection of the latest completed Mitchell
 full test. This keeps the chapter snapshot current when another full test is
 completed without mixing practice attempts into ordinary adaptive mastery. Each

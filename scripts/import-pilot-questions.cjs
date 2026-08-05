@@ -7,7 +7,9 @@ const {
   decodeImportBuffer,
   formatSourceReference,
   normalizeCognitiveLevel,
+  normalizeDifficulty,
   normalizeMetadataCode,
+  normalizeVisualAssetKey,
   parseImport,
   parseSourcePages,
   questionPurpose,
@@ -138,9 +140,75 @@ const CHAPTER_CONFIGS = new Map([
   [8, CHAPTER_8_CONFIG],
 ]);
 const MITCHELL_500_FILENAME = "LTL_V2_Chapters_4_8_500_Questions_Final_Exam_Tagged.csv";
+const AEROSPACE_MODULE_1_FILENAME =
+  "Aerospace_Dimensions_Module_1_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_1_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M1_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M1",
+  volumeTitle: "Aerospace Dimensions, Module 1: Introduction to Flight",
+  volumeSortOrder: 10,
+  sourceExternalReference: "CAP:AD:M1:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 1: Introduction to Flight",
+  finalExamTagged: true,
+  moduleNumber: 1,
+  aerospaceModule: true,
+  fieldDefaults: {
+    pilot_batch: "AD_M1_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+};
+const AEROSPACE_MODULE_1_CHAPTER_CONFIGS = new Map([
+  [
+    1,
+    {
+      chapterCode: "AD_M1_C1",
+      chapterTitle: "Flight",
+      chapterSortOrder: 10,
+      topicCode: "AD_M1_C1",
+      topicTitle: "Aerospace Dimensions, Module 1, Chapter 1: Flight",
+      topicDescription: "Private Module 1 Chapter 1 Billy Mitchell Aerospace pilot content.",
+      topicSortOrder: 10,
+    },
+  ],
+  [
+    2,
+    {
+      chapterCode: "AD_M1_C2",
+      chapterTitle: "To Fly by the Lifting Power of Rising Air",
+      chapterSortOrder: 20,
+      topicCode: "AD_M1_C2",
+      topicTitle: "Aerospace Dimensions, Module 1, Chapter 2: Rising Air",
+      topicDescription: "Private Module 1 Chapter 2 Billy Mitchell Aerospace pilot content.",
+      topicSortOrder: 20,
+    },
+  ],
+  [
+    3,
+    {
+      chapterCode: "AD_M1_C3",
+      chapterTitle: "Balloons",
+      chapterSortOrder: 30,
+      topicCode: "AD_M1_C3",
+      topicTitle: "Aerospace Dimensions, Module 1, Chapter 3: Balloons",
+      topicDescription: "Private Module 1 Chapter 3 Billy Mitchell Aerospace pilot content.",
+      topicSortOrder: 30,
+    },
+  ],
+]);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_1_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_1_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_1_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === MITCHELL_500_FILENAME) {
     return {
       expectedCount: 500,
@@ -289,12 +357,13 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
   if (existing && config.finalExamTagged && row.content_origin === "existing_original_bank") {
     await client.query(
       `update public.questions set
-         chapter_number=$2, exam_likeness=$3, distractor_difficulty=$4,
-         eligible_for_final_exam=$5, final_exam_weight=$6,
-         content_origin=$7, style_reference=$8
+         module_number=$2, chapter_number=$3, exam_likeness=$4, distractor_difficulty=$5,
+         eligible_for_final_exam=$6, final_exam_weight=$7,
+         content_origin=$8, style_reference=$9
        where id=$1`,
       [
         existing.id,
+        row.module_number ? Number(row.module_number) : (config.moduleNumber ?? null),
         Number(row.chapter_number),
         row.exam_likeness,
         row.distractor_difficulty,
@@ -311,12 +380,13 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
     if (config.finalExamTagged) {
       await client.query(
         `update public.questions set
-           chapter_number=$2, exam_likeness=$3, distractor_difficulty=$4,
-           eligible_for_final_exam=$5, final_exam_weight=$6,
-           content_origin=$7, style_reference=$8
+           module_number=$2, chapter_number=$3, exam_likeness=$4, distractor_difficulty=$5,
+           eligible_for_final_exam=$6, final_exam_weight=$7,
+           content_origin=$8, style_reference=$9
          where id=$1`,
         [
           existing.id,
+          row.module_number ? Number(row.module_number) : (config.moduleNumber ?? null),
           Number(row.chapter_number),
           row.exam_likeness,
           row.distractor_difficulty,
@@ -351,7 +421,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
     formatSourceReference(row.source_reference_text, row.source_pages),
     row.question_text,
     row.question_type,
-    row.difficulty,
+    normalizeDifficulty(row.difficulty),
     cognitiveLevel,
     purpose,
     metadata.familyId,
@@ -363,6 +433,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
     row.source_status,
     row.question_mode || null,
     row.question_style || null,
+    row.module_number ? Number(row.module_number) : (config.moduleNumber ?? null),
     config.finalExamTagged ? Number(row.chapter_number) : null,
     config.finalExamTagged ? row.exam_likeness : null,
     config.finalExamTagged ? row.distractor_difficulty : null,
@@ -382,13 +453,14 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
          question_family_id=$13, estimated_time_seconds=$14, created_by=$15,
          pilot_batch=$17, import_package=$18, source_status=$19,
          question_mode=$20, question_style=$21,
-         chapter_number=coalesce($22, chapter_number),
-         exam_likeness=coalesce($23, exam_likeness),
-         distractor_difficulty=coalesce($24, distractor_difficulty),
-         eligible_for_final_exam=coalesce($25, eligible_for_final_exam),
-         final_exam_weight=coalesce($26, final_exam_weight),
-         content_origin=coalesce($27, content_origin),
-         style_reference=coalesce($28, style_reference),
+         module_number=coalesce($22, module_number),
+         chapter_number=coalesce($23, chapter_number),
+         exam_likeness=coalesce($24, exam_likeness),
+         distractor_difficulty=coalesce($25, distractor_difficulty),
+         eligible_for_final_exam=coalesce($26, eligible_for_final_exam),
+         final_exam_weight=coalesce($27, final_exam_weight),
+         content_origin=coalesce($28, content_origin),
+         style_reference=coalesce($29, style_reference),
          review_status='draft', status='draft', approved_by=null, approved_at=null,
          version=version + 1
        where external_id=$16 returning id`,
@@ -404,11 +476,11 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
          question_type, difficulty, cognitive_level, purpose, question_family_id,
          estimated_time_seconds, created_by, external_id, pilot_batch, import_package,
          source_status, question_mode, question_style, review_status, status,
-         chapter_number, exam_likeness, distractor_difficulty,
+         module_number, chapter_number, exam_likeness, distractor_difficulty,
          eligible_for_final_exam, final_exam_weight, content_origin, style_reference
        ) values (
          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-         'draft','draft',$22,$23,$24,coalesce($25,false),coalesce($26::numeric,0::numeric),$27,$28
+         'draft','draft',$22,$23,$24,$25,coalesce($26,false),coalesce($27::numeric,0::numeric),$28,$29
        ) returning id`,
       values,
     );
@@ -448,7 +520,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
       choiceIds[row.correct_letter],
       row.explanation,
       row.remediation_text,
-      row.common_mistake,
+      row.common_mistake || null,
       actorId,
     ],
   );
@@ -479,7 +551,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
         optional(row.visual_priority),
         optional(row.visual_type),
         optional(row.visual_display_mode),
-        optional(row.visual_asset_key),
+        optional(normalizeVisualAssetKey(row.visual_asset_key)),
         optional(row.visual_brief),
         optional(row.visual_caption),
         optional(row.visual_alt_text),
@@ -496,7 +568,9 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
 }
 
 async function warnForMissingVisualAssets(client, rows, summary) {
-  const assetKeys = [...new Set(rows.map((row) => row.visual_asset_key).filter(Boolean))];
+  const assetKeys = [
+    ...new Set(rows.map((row) => normalizeVisualAssetKey(row.visual_asset_key)).filter(Boolean)),
+  ];
   for (const assetKey of assetKeys) {
     const asset = await one(
       client,
@@ -547,7 +621,7 @@ async function main() {
   if (!Number.isInteger(expectedCount) || expectedCount < 1) {
     throw new Error("Expected row count must be a positive integer.");
   }
-  const rows = parseImport(decodeImportBuffer(await fs.readFile(inputPath)));
+  const rows = parseImport(decodeImportBuffer(await fs.readFile(inputPath)), config.fieldDefaults);
   const validation = validateImport(rows, expectedCount);
   if (validation.errors.length > 0) {
     throw new Error(`Import validation failed:\n${validation.errors.join("\n")}`);
@@ -607,7 +681,9 @@ async function main() {
     for (const row of rows) {
       const rowConfig = config.combinedChapters
         ? { ...CHAPTER_CONFIGS.get(Number(row.chapter_number)), finalExamTagged: true }
-        : config;
+        : config.chapterConfigs
+          ? { ...config, ...config.chapterConfigs.get(Number(row.chapter_number)) }
+          : config;
       if (!rowConfig?.examId) throw new Error(`Unsupported chapter ${row.chapter_number}.`);
       let context = contexts.get(rowConfig.chapterCode);
       if (!context) {
@@ -644,6 +720,36 @@ async function main() {
             `Post-import verification failed for Chapter ${chapter}: expected 100 total and 60 eligible.`,
           );
         }
+      }
+    }
+    if (config.aerospaceModule) {
+      const moduleCounts = await client.query(
+        `select chapter_number, count(*)::integer as total,
+           count(*) filter (where eligible_for_final_exam)::integer as eligible
+         from public.questions
+         where exam_id=$1 and module_number=$2 and import_package=$3
+         group by chapter_number
+         order by chapter_number`,
+        [config.examId, config.moduleNumber, config.importPackage],
+      );
+      const expectedByChapter = new Map([
+        [1, 60],
+        [2, 24],
+        [3, 16],
+      ]);
+      for (const [chapter, expected] of expectedByChapter) {
+        const count = moduleCounts.rows.find((item) => item.chapter_number === chapter);
+        if (!count || count.total !== expected) {
+          throw new Error(
+            `Post-import verification failed for Aerospace Module 1 Chapter ${chapter}: expected ${expected} questions.`,
+          );
+        }
+      }
+      const totalEligible = moduleCounts.rows.reduce((sum, item) => sum + item.eligible, 0);
+      if (totalEligible !== 75) {
+        throw new Error(
+          `Post-import verification failed for Aerospace Module 1: expected 75 eligible questions.`,
+        );
       }
     }
     await client.query("commit");

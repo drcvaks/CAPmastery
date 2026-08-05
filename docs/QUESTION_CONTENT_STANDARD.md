@@ -88,6 +88,29 @@ records are upserted by external ID without replacing their UUIDs; Q076–Q100 a
 new original textbook-grounded rows. Four choices and their four explanations must
 remain aligned, and missing visual files remain warnings rather than import errors.
 
+## Aerospace Dimensions Module 1 bank
+
+The owner-supplied Module 1 source is a UTF-8 BOM, tab-delimited 100-question
+bank in private package `AD_M1_100`. It contains 60 Chapter 1 questions, 24
+Chapter 2 questions, and 16 Chapter 3 questions; 50 two-question families; and
+75 rows tagged as final-exam eligible. All supplied sibling reinforcement links
+remain internal to the file.
+
+The source's `medium_hard` difficulty is normalized to the database's existing
+`hard` enum value. The more specific supplied `question_style` and
+`distractor_difficulty` classifications remain unchanged. Controlled importer
+defaults supply the package, feedback version, and authorized-source status that
+are absent from this specialized export. Missing `common_mistake` values remain
+null rather than being invented; a reviewer must add required misconception
+metadata before approving a row. Visual metadata is retained, but no student
+visual control appears until a corresponding reviewed asset is registered.
+Supplied visual asset keys are normalized to lowercase at the import boundary to
+meet the existing private asset registry contract; the database constraint is not
+weakened.
+Supplied visual asset keys are normalized to lowercase at the import boundary to
+meet the existing private asset registry contract; the database constraint is not
+weakened.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

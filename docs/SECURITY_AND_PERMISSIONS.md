@@ -100,6 +100,15 @@ ID substitution, guessed route/UUID access, changed role claims, direct REST que
 - Correctness, correct-choice IDs, explanations, remediation, memory support, and aggregate scores remain null during an active test, including immediately after answer submission.
 - Completion releases feedback only for answered questions. Practice attempts cannot write normal mastery state and are excluded from normal recent-accuracy/trend calculations.
 
+## Aerospace Module 1 private access
+
+The 100 Module 1 rows import as drafts in exact private package `AD_M1_100`.
+Draft access requires an active assignment for that exact package and does not
+broaden access to another Aerospace module. Correct choices remain in protected
+answer-key storage, grading remains server-side, and student delivery follows the
+same session-owned projections and RLS rules as every other assigned draft bank.
+The module number and final-exam tags classify content; neither grants access.
+
 ## Mitchell full-exam enforcement
 
 - Final-exam eligibility is a content classification, not an authorization grant.
