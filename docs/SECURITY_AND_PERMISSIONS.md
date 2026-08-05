@@ -109,6 +109,13 @@ answer-key storage, grading remains server-side, and student delivery follows th
 same session-owned projections and RLS rules as every other assigned draft bank.
 The module number and final-exam tags classify content; neither grants access.
 
+The Study catalog is access-aware through `get_accessible_study_catalog()`. The
+security-definer function verifies the student role and returns only exam/topic
+IDs with aggregate available counts. It never returns package names, question
+text, choices, answer keys, feedback, or another student's assignments. Client
+hiding is a usability measure; session creation independently repeats the access
+check.
+
 ## Mitchell full-exam enforcement
 
 - Final-exam eligibility is a content classification, not an authorization grant.

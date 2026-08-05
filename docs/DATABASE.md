@@ -169,6 +169,11 @@ Migration `202608050040` archives the original Leadership and Aerospace
 keys and transaction-only fixtures, while active catalog reads no longer display
 obsolete coming-soon controls.
 
+Migration `202608050041` adds `get_accessible_study_catalog()`. It groups eligible
+questions by exam/topic for the authenticated student, using the same approved-or-
+exact-assigned-package rule as `create_study_session`. It returns IDs and counts
+only and grants no new table access.
+
 ## Mitchell full practice-exam extension
 
 Migration `202608020034` adds question classification fields for chapter, exam

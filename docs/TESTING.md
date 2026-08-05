@@ -147,6 +147,17 @@ The pilot-package and study-session SQL suites explicitly activate their reused
 seed topic inside their rolled-back transactions. This keeps fixtures independent
 of the production catalog status while leaving the obsolete labels archived.
 
+Access-aware catalog tests cover unassigned denial, exact private-package access,
+another-student isolation, the no-argument projection contract, exam filtering,
+and the ten-question session threshold. Migration 041 expands the pilot-package
+plan from 19 to 23 and the expected linked aggregate from 432 to 436.
+The access-aware catalog local gate passes all 25 Jest suites and 130/130 tests,
+strict TypeScript, Expo ESLint, formatting, Expo Doctor 20/20, and web export.
+Linked private-catalog assertions use each student's approved-content baseline so
+persistent approved banks do not create false failures; the assigned draft must
+increase only the assigned student's topic count by exactly one.
+The owner-linked migration 041 regression run passed all suites at 436/436.
+
 `study_sessions.test.sql` also verifies the narrow session-context function exists,
 is executable by authenticated users, returns a topic label for every question to
 the owning student, and rejects another student. Component coverage confirms the

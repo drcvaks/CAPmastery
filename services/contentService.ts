@@ -2,7 +2,7 @@ import {
   parseApprovedQuestionRows,
   type ApprovedQuestionPreview,
 } from "../features/content/schemas";
-import { isCatalogPlaceholder } from "../features/content/catalog";
+import { filterCatalogForStudyAccess, isCatalogPlaceholder } from "../features/content/catalog";
 import { getSupabaseClient } from "../lib/supabase/client";
 import type { Database } from "../types/database";
 
@@ -30,35 +30,38 @@ export type ContentExam = ExamRow & { topics: ContentTopic[] };
 
 export async function fetchContentCatalog(): Promise<ContentExam[]> {
   const supabase = getSupabaseClient();
-  const [examsResult, topicsResult, volumesResult, chaptersResult] = await Promise.all([
-    supabase
-      .from("exams")
-      .select("id, program_id, code, title, description, sort_order")
-      .eq("status", "active")
-      .order("sort_order"),
-    supabase
-      .from("topics")
-      .select("id, exam_id, volume_id, chapter_id, code, title, description, sort_order")
-      .eq("status", "active")
-      .order("sort_order"),
-    supabase
-      .from("volumes")
-      .select("id, code, title, sort_order")
-      .eq("status", "active")
-      .order("sort_order"),
-    supabase
-      .from("chapters")
-      .select("id, code, title, sort_order")
-      .eq("status", "active")
-      .order("sort_order"),
-  ]);
+  const [examsResult, topicsResult, volumesResult, chaptersResult, accessResult] =
+    await Promise.all([
+      supabase
+        .from("exams")
+        .select("id, program_id, code, title, description, sort_order")
+        .eq("status", "active")
+        .order("sort_order"),
+      supabase
+        .from("topics")
+        .select("id, exam_id, volume_id, chapter_id, code, title, description, sort_order")
+        .eq("status", "active")
+        .order("sort_order"),
+      supabase
+        .from("volumes")
+        .select("id, code, title, sort_order")
+        .eq("status", "active")
+        .order("sort_order"),
+      supabase
+        .from("chapters")
+        .select("id, code, title, sort_order")
+        .eq("status", "active")
+        .order("sort_order"),
+      supabase.rpc("get_accessible_study_catalog"),
+    ]);
 
   if (examsResult.error) throw examsResult.error;
   if (topicsResult.error) throw topicsResult.error;
   if (volumesResult.error) throw volumesResult.error;
   if (chaptersResult.error) throw chaptersResult.error;
+  if (accessResult.error) throw accessResult.error;
 
-  return examsResult.data.map((exam) => ({
+  const catalog = examsResult.data.map((exam) => ({
     ...exam,
     topics: topicsResult.data
       .filter((topic) => topic.exam_id === exam.id && !isCatalogPlaceholder(topic.code))
@@ -68,6 +71,8 @@ export async function fetchContentCatalog(): Promise<ContentExam[]> {
         chapter: chaptersResult.data.find((chapter) => chapter.id === topic.chapter_id) ?? null,
       })),
   }));
+
+  return filterCatalogForStudyAccess(catalog, accessResult.data);
 }
 
 export async function fetchApprovedQuestionPreviews(

@@ -64,8 +64,8 @@ export function ContentBrowser() {
   if (!catalog.data.length) {
     return (
       <AppCard
-        title="No study tracks yet"
-        description="An administrator must publish an authorized catalog before content appears here."
+        title="No study content assigned"
+        description="Ask a parent or administrator to assign a question package before starting a study session."
       />
     );
   }

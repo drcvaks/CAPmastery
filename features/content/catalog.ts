@@ -1,4 +1,10 @@
-import type { ContentTopic } from "../../services/contentService";
+import type { ContentExam, ContentTopic } from "../../services/contentService";
+
+type StudyCatalogAccess = {
+  exam_id: string;
+  topic_id: string;
+  available_question_count: number;
+};
 
 export type ContentModuleGroup = {
   id: string;
@@ -10,6 +16,29 @@ export type ContentModuleGroup = {
 
 export function isCatalogPlaceholder(code: string): boolean {
   return code.endsWith("_CATALOG_PENDING");
+}
+
+export function filterCatalogForStudyAccess(
+  catalog: ContentExam[],
+  accessRows: StudyCatalogAccess[],
+  requiredQuestionCount = 10,
+): ContentExam[] {
+  const accessByTopic = new Map(
+    accessRows.map((row) => [row.topic_id, row.available_question_count]),
+  );
+  const totalByExam = accessRows.reduce((totals, row) => {
+    totals.set(row.exam_id, (totals.get(row.exam_id) ?? 0) + row.available_question_count);
+    return totals;
+  }, new Map<string, number>());
+
+  return catalog
+    .filter((exam) => (totalByExam.get(exam.id) ?? 0) >= requiredQuestionCount)
+    .map((exam) => ({
+      ...exam,
+      topics: exam.topics.filter(
+        (topic) => (accessByTopic.get(topic.id) ?? 0) >= requiredQuestionCount,
+      ),
+    }));
 }
 
 export function groupTopicsByModule(topics: ContentTopic[]): ContentModuleGroup[] {

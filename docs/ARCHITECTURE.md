@@ -152,6 +152,13 @@ they are imported. Leadership retains its existing topic browser. The two
 catalog-seed placeholder topics are filtered from clients and archived once real
 content exists.
 
+Catalog visibility follows the same server-owned eligibility rule as adaptive
+session creation. A narrow security-definer projection returns only per-topic
+counts for approved active questions or exact private packages assigned to the
+authenticated student. The client displays only exams with at least ten total
+available questions and chapters with at least ten available questions, preventing
+known-failing session controls without exposing prompts, packages, or answer data.
+
 Progress reads a separate protected projection of the latest completed Mitchell
 full test. This keeps the chapter snapshot current when another full test is
 completed without mixing practice attempts into ordinary adaptive mastery. Each

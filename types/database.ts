@@ -2413,6 +2413,14 @@ export type Database = {
           topic_id: string;
         }[];
       };
+      get_accessible_study_catalog: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          available_question_count: number;
+          exam_id: string;
+          topic_id: string;
+        }[];
+      };
       get_challenge_creation_exams: {
         Args: { p_student_ids: string[] };
         Returns: {

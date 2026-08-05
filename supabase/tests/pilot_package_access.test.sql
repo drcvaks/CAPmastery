@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(19);
+select plan(23);
 
 -- This synthetic suite intentionally reuses the stable seed topic ID. Production
 -- archives the obsolete catalog label, so the transaction owns its active fixture.
@@ -15,6 +15,10 @@ select has_column('public', 'questions', 'import_package', 'questions preserve i
 select has_column('public', 'questions', 'source_status', 'questions preserve source status');
 select has_column('public', 'question_families', 'source_code', 'families preserve supplied source code');
 select has_table('public', 'pilot_package_assignments', 'pilot package assignment table exists');
+select has_function(
+  'public', 'get_accessible_study_catalog', array[]::text[],
+  'student-safe accessible study catalog function exists'
+);
 select ok(
   (select relrowsecurity from pg_class where oid = 'public.pilot_package_assignments'::regclass),
   'pilot package assignments have RLS enabled'
@@ -67,6 +71,19 @@ grant select, insert on table pilot_session to authenticated;
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'b1111111-1111-4111-8111-111111111111', true);
+select is(
+  coalesce((
+    select available_question_count
+    from public.get_accessible_study_catalog()
+    where topic_id = '40000000-0000-4000-8000-000000000001'
+  ), 0),
+  (
+    select count(*)::integer
+    from public.questions
+    where topic_id = '40000000-0000-4000-8000-000000000001'
+  ),
+  'unassigned catalog count contains only student-visible approved questions'
+);
 select throws_ok(
   $$select public.admin_set_pilot_package_assignment(
     'b1111111-1111-4111-8111-111111111111', 'PILOT_ACCESS_TEST', true
@@ -120,6 +137,19 @@ select public.create_study_session(
 grant select on table pilot_session to authenticated;
 select is((select count(*)::integer from pilot_session), 1, 'assigned student creates pilot session');
 select is(
+  (
+    select available_question_count
+    from public.get_accessible_study_catalog()
+    where topic_id = '40000000-0000-4000-8000-000000000001'
+  ),
+  (
+    select count(*)::integer + 1
+    from public.questions
+    where topic_id = '40000000-0000-4000-8000-000000000001'
+  ),
+  'assigned student catalog count adds exactly the assigned private question'
+);
+select is(
   (select selection_reason from public.study_session_questions where session_id = (select id from pilot_session)),
   'new_or_harder',
   'draft pilot questions participate in adaptive selection without being published'
@@ -135,6 +165,19 @@ select is(
 );
 
 select set_config('request.jwt.claim.sub', 'b2222222-2222-4222-8222-222222222222', true);
+select is(
+  coalesce((
+    select available_question_count
+    from public.get_accessible_study_catalog()
+    where topic_id = '40000000-0000-4000-8000-000000000001'
+  ), 0),
+  (
+    select count(*)::integer
+    from public.questions
+    where topic_id = '40000000-0000-4000-8000-000000000001'
+  ),
+  'another student catalog count excludes the assigned private question'
+);
 select is(
   (select count(*)::integer from public.pilot_package_assignments),
   0,

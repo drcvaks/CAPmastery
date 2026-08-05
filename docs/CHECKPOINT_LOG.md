@@ -895,6 +895,22 @@ Mitchell full-test usability follow-up:
   activate that stable topic only inside their rollback transactions; production
   catalog status remains archived and no additional migration is required. The
   corrected owner-linked rerun passed all suites at 432/432.
+  After family acceptance, catalog visibility was tightened to the same
+  approved-or-exact-package rule used by session creation. Migration
+  `202608050041_accessible_study_catalog.sql` exposes only student-safe per-topic
+  counts. The client hides exams and chapters that cannot support a ten-question
+  session, so Leadership-only and Aerospace-only students no longer receive
+  predictable session errors from inaccessible controls. The expanded pilot
+  package plan is 23 assertions and the expected linked aggregate is 436/436.
+  The complete local gate passes strict TypeScript, Expo ESLint, formatting, all
+  25 Jest suites with 130/130 tests, Expo Doctor 20/20, and a 1,582-module web
+  export. Migration 041 was pending at the local handoff.
+  The owner applied migration 041 successfully. The first linked run showed two
+  fixture expectations had assumed a completely empty public catalog, while the
+  development project correctly contains approved shared content. The assertions
+  now compare against each student's RLS-visible approved baseline and prove the
+  assigned private draft increases only the assigned student's count.
+  The corrected owner-linked rerun passed all suites at 436/436.
 - Enabled bathroom/break pauses for newly created Mitchell 50-question tests through
   migration `202608030038_mitchell_full_exam_pause.sql`. It changes only the
   blueprint setting; existing sessions retain their immutable pause snapshot. The

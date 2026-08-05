@@ -385,6 +385,12 @@ Study catalog. It archives only the two obsolete coming-soon topics; it does not
 delete content or require a new account, credential, or environment variable.
 The owner applied it to development and the corrected linked suite passed 432/432.
 
+Apply `202608050041_accessible_study_catalog.sql` so students see only study tracks
+that can create a ten-question session from approved content or their exact
+assigned packages. No account, credential, package assignment, or environment
+variable changes are required. Rerun linked tests; the expected aggregate is
+436/436. The owner applied migration 041 and the linked aggregate passed 436/436.
+
 ### Final-test review and Progress follow-up
 
 Apply migration `202608020035_latest_practice_topic_progress.sql` before checking
