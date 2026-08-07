@@ -9,6 +9,7 @@ import {
   type ProgressStudent,
 } from "../features/progress/schemas";
 import { z } from "zod";
+import { practiceReviewProgressSchema } from "../features/practice/schemas";
 
 export async function fetchProgressStudents(): Promise<ProgressStudent[]> {
   const { data, error } = await getSupabaseClient().rpc("get_progress_students");
@@ -44,13 +45,24 @@ export async function fetchProgressDashboard(studentId: string): Promise<ExamPro
       if (topicsResult.error) throw topicsResult.error;
       if (trendsResult.error) throw trendsResult.error;
       if (latestPracticeResult.error) throw latestPracticeResult.error;
+      const latestPracticeTopics = z
+        .array(latestPracticeTopicResultSchema)
+        .parse(latestPracticeResult.data);
+      const latestSessionId = latestPracticeTopics[0]?.session_id;
+      let latestPracticeReview = null;
+      if (latestSessionId) {
+        const reviewResult = await client.rpc("get_practice_test_review_progress", {
+          p_session_id: latestSessionId,
+        });
+        if (reviewResult.error) throw reviewResult.error;
+        latestPracticeReview = practiceReviewProgressSchema.parse(reviewResult.data?.[0]);
+      }
       return {
         ...overview,
         topics: z.array(topicProgressSchema).parse(topicsResult.data),
         trends: z.array(progressTrendSchema).parse(trendsResult.data),
-        latestPracticeTopics: z
-          .array(latestPracticeTopicResultSchema)
-          .parse(latestPracticeResult.data),
+        latestPracticeTopics,
+        latestPracticeReview,
       };
     }),
   );

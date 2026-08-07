@@ -4,8 +4,10 @@ import {
   completePracticeTest,
   createPracticeTest,
   fetchPracticeTestOptions,
+  fetchPracticeTestReviewProgress,
   fetchPracticeTestResults,
   fetchPracticeTestWeakAreas,
+  markPracticeAnswerReviewed,
   setPracticeTestQuestionFlag,
   setPracticeTestPaused,
 } from "../../../services/practiceService";
@@ -14,6 +16,7 @@ import { studyQueryKeys } from "../../study/hooks/useStudySession";
 export const practiceQueryKeys = {
   options: ["practice", "options"] as const,
   results: (sessionId: string) => ["practice", "results", sessionId] as const,
+  reviewProgress: (sessionId: string) => ["practice", "review-progress", sessionId] as const,
   weakAreas: (sessionId: string) => ["practice", "weak-areas", sessionId] as const,
 };
 
@@ -80,5 +83,22 @@ export function usePracticeTestResults(sessionId: string, enabled: boolean) {
     queryKey: practiceQueryKeys.results(sessionId),
     queryFn: () => fetchPracticeTestResults(sessionId),
     enabled,
+  });
+}
+
+export function usePracticeTestReviewProgress(sessionId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: practiceQueryKeys.reviewProgress(sessionId),
+    queryFn: () => fetchPracticeTestReviewProgress(sessionId),
+    enabled,
+  });
+}
+
+export function useMarkPracticeAnswerReviewed(sessionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sessionQuestionId: string) => markPracticeAnswerReviewed(sessionQuestionId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: practiceQueryKeys.reviewProgress(sessionId) }),
   });
 }

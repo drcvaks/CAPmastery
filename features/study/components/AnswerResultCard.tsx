@@ -11,6 +11,7 @@ type AnswerResultCardProps = {
   isCorrect: boolean;
   memoryAid: string | null;
   nextLabel: string;
+  nextLoading?: boolean;
   onNext: () => void;
   remediation: string | null;
   selectedChoiceFeedback: string | null;
@@ -53,6 +54,7 @@ export function AnswerResultCard({
   isCorrect,
   memoryAid,
   nextLabel,
+  nextLoading = false,
   onNext,
   remediation,
   selectedChoiceFeedback,
@@ -162,7 +164,7 @@ export function AnswerResultCard({
       </View>
 
       <Text style={styles.source}>Source: {sourceReference}</Text>
-      <AppButton label={nextLabel} onPress={onNext} />
+      <AppButton label={nextLabel} loading={nextLoading} onPress={onNext} />
     </AppCard>
   );
 }

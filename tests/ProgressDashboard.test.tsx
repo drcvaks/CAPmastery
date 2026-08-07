@@ -85,6 +85,15 @@ const exam = {
       performance_label: "Developing" as const,
     },
   ],
+  latestPracticeReview: {
+    session_id: "a5555555-5555-4555-8555-555555555555",
+    tracking_available: true,
+    missed_count: 4,
+    reviewed_count: 2,
+    review_percent: 50,
+    review_complete: false,
+    reviewed_session_question_ids: ["a7777777-7777-4777-8777-777777777777"],
+  },
 };
 
 beforeEach(() => {
@@ -142,6 +151,7 @@ describe("ProgressDashboard", () => {
     expect(screen.getByText("Review 2 questions due now.")).toBeVisible();
     expect(screen.getByText("Core Values")).toBeVisible();
     expect(screen.getByText("Latest full practice test")).toBeVisible();
+    expect(screen.getByText("Missed-answer review: 2 of 4 (50%)")).toBeVisible();
     expect(screen.getByRole("button", { name: "Start Chapter 4 study" })).toBeVisible();
     expect(screen.getByText("30-day trend")).toBeVisible();
     expect(screen.getByText("This is a study estimate, not an official CAP result.")).toBeVisible();

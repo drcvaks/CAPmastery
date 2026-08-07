@@ -2,9 +2,11 @@ import { z } from "zod";
 
 import {
   practiceTestOptionSchema,
+  practiceReviewProgressSchema,
   practiceTopicResultSchema,
   practiceWeakAreaSchema,
   type PracticeTestOption,
+  type PracticeReviewProgress,
   type PracticeTopicResult,
   type PracticeWeakArea,
 } from "../features/practice/schemas";
@@ -65,6 +67,23 @@ export async function fetchPracticeTestResults(sessionId: string): Promise<Pract
   });
   if (error) throw error;
   return z.array(practiceTopicResultSchema).parse(data);
+}
+
+export async function fetchPracticeTestReviewProgress(
+  sessionId: string,
+): Promise<PracticeReviewProgress> {
+  const { data, error } = await getSupabaseClient().rpc("get_practice_test_review_progress", {
+    p_session_id: sessionId,
+  });
+  if (error) throw error;
+  return practiceReviewProgressSchema.parse(data?.[0]);
+}
+
+export async function markPracticeAnswerReviewed(sessionQuestionId: string): Promise<void> {
+  const { error } = await getSupabaseClient().rpc("mark_practice_answer_reviewed", {
+    p_session_question_id: sessionQuestionId,
+  });
+  if (error) throw error;
 }
 
 export async function fetchPracticeTestWeakAreas(sessionId: string): Promise<PracticeWeakArea[]> {

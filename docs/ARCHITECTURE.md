@@ -174,3 +174,11 @@ shared session view keeps that context above the current question, including whe
 Back/Next changes chapters in a full practice test. The authenticated profile's
 first name is displayed in every shared page header so students can verify whose
 account is active even when the workspace rail is not rendered.
+
+Missed-answer review for newly created Mitchell 50-question tests is persistent
+and resumable. The result screen reads a protected review summary, starts at the
+first unreviewed missed answer, and records completion only when the cadet uses
+Next missed answer or Finish review after seeing the released explanation. The
+latest-test Progress card presents the same reviewed/total percentage to the
+student or an authorized linked guardian. Historical sessions are explicitly
+shown as untracked instead of inferring review from page visits.

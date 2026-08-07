@@ -2009,6 +2009,7 @@ export type Database = {
           position: number;
           question_id: string;
           question_version: number;
+          reviewed_at: string | null;
           selection_reason: string;
           session_id: string;
         };
@@ -2019,6 +2020,7 @@ export type Database = {
           position: number;
           question_id: string;
           question_version: number;
+          reviewed_at?: string | null;
           selection_reason?: string;
           session_id: string;
         };
@@ -2029,6 +2031,7 @@ export type Database = {
           position?: number;
           question_id?: string;
           question_version?: number;
+          reviewed_at?: string | null;
           selection_reason?: string;
           session_id?: string;
         };
@@ -2062,6 +2065,7 @@ export type Database = {
           mode: Database["public"]["Enums"]["study_session_mode"];
           paused_at: string | null;
           question_count: number;
+          review_tracking_version: number | null;
           requested_count: number;
           started_at: string;
           status: Database["public"]["Enums"]["study_session_status"];
@@ -2084,6 +2088,7 @@ export type Database = {
           mode?: Database["public"]["Enums"]["study_session_mode"];
           paused_at?: string | null;
           question_count: number;
+          review_tracking_version?: number | null;
           requested_count: number;
           started_at?: string;
           status?: Database["public"]["Enums"]["study_session_status"];
@@ -2106,6 +2111,7 @@ export type Database = {
           mode?: Database["public"]["Enums"]["study_session_mode"];
           paused_at?: string | null;
           question_count?: number;
+          review_tracking_version?: number | null;
           requested_count?: number;
           started_at?: string;
           status?: Database["public"]["Enums"]["study_session_status"];
@@ -2487,6 +2493,18 @@ export type Database = {
           session_question_id: string;
         }[];
       };
+      get_practice_test_review_progress: {
+        Args: { p_session_id: string };
+        Returns: {
+          missed_count: number;
+          review_complete: boolean;
+          review_percent: number | null;
+          reviewed_count: number;
+          reviewed_session_question_ids: string[];
+          session_id: string;
+          tracking_available: boolean;
+        }[];
+      };
       get_practice_test_results: {
         Args: { p_session_id: string };
         Returns: {
@@ -2732,6 +2750,10 @@ export type Database = {
           p_question_id: string;
           p_source_alignment_rating: number;
         };
+        Returns: undefined;
+      };
+      mark_practice_answer_reviewed: {
+        Args: { p_session_question_id: string };
         Returns: undefined;
       };
       send_challenge_encouragement: {

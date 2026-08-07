@@ -43,6 +43,19 @@ export const practiceWeakAreaSchema = z
   })
   .strict();
 
+export const practiceReviewProgressSchema = z
+  .object({
+    session_id: z.uuid(),
+    tracking_available: z.boolean(),
+    missed_count: z.number().int().nonnegative(),
+    reviewed_count: z.number().int().nonnegative(),
+    review_percent: z.number().int().min(0).max(100).nullable(),
+    review_complete: z.boolean(),
+    reviewed_session_question_ids: z.array(z.uuid()),
+  })
+  .strict();
+
 export type PracticeTestOption = z.infer<typeof practiceTestOptionSchema>;
 export type PracticeTopicResult = z.infer<typeof practiceTopicResultSchema>;
 export type PracticeWeakArea = z.infer<typeof practiceWeakAreaSchema>;
+export type PracticeReviewProgress = z.infer<typeof practiceReviewProgressSchema>;

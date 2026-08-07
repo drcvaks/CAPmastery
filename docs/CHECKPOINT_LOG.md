@@ -923,3 +923,25 @@ Mitchell full-test usability follow-up:
   applied migration 038 successfully to the linked development project. The
   Mitchell suite passed 36/36 and all linked pgTAP suites passed 428/428. The
   post-push Docker cache-catalog warning was nonblocking.
+- Added persistent missed-answer review tracking for new Mitchell 50-question
+  tests. Migration `202608060042_missed_answer_review_tracking.sql` records only a
+  deliberate Next missed answer/Finish review action after completion, supports
+  resumable review, and exposes an owner-or-linked-guardian percentage without
+  changing grading or releasing protected answers. Earlier tests report tracking
+  unavailable rather than receiving a guessed value. The complete local code gate
+  passes strict TypeScript, Expo ESLint, repository formatting, and all 25 Jest
+  suites with 130/130 tests. Expo public configuration resolves; web export bundles
+  1,582 modules and Android export bundles 1,700 modules. Expo Doctor completed
+  18/20 checks but could not reach `exp.host` or React Native Directory, so its two
+  network-dependent checks remain unverified rather than failed project checks.
+  Migration application, linked pgTAP, a connected Expo Doctor rerun, and owner
+  web acceptance were pending at this local handoff.
+  The owner applied migration 042 successfully; the later Docker catalog warning
+  was nonblocking. The first linked Mitchell run passed 49/56. Six failures were
+  downstream of a rollback-only fixture retrieving a private draft choice as
+  `NULL` through student RLS, and one exposed `tracking_available = NULL` for an
+  older session. The fixture now stores its synthetic wrong-choice ID in a granted
+  temporary table, and forward migration `202608070043` returns an explicit false
+  for historical sessions. The owner applied migration 043 and the corrected
+  linked run passed Mitchell full exam 56/56 and the complete aggregate 456/456.
+  Owner UI acceptance and a connected Expo Doctor rerun remain.

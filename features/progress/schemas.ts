@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { PracticeReviewProgress } from "../practice/schemas";
 
 const score = z.number().min(0).max(100);
 
@@ -88,4 +89,5 @@ export type ExamProgress = ProgressOverview & {
   topics: TopicProgress[];
   trends: ProgressTrend[];
   latestPracticeTopics: LatestPracticeTopicResult[];
+  latestPracticeReview: PracticeReviewProgress | null;
 };

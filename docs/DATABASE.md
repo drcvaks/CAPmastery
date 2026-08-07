@@ -214,4 +214,17 @@ The setting is copied into each new session, preserving an already-started
 session's configuration. Existing owner-checked pause/resume functions and pause
 duration accounting remain authoritative.
 
+Migration `202608060042` adds nullable `study_sessions.review_tracking_version`
+and `study_session_questions.reviewed_at`. A before-insert trigger enables version
+1 only for new Mitchell full-exam sessions, leaving older sessions null because
+their review history cannot be reconstructed. `mark_practice_answer_reviewed`
+idempotently accepts only an incorrect attempted question in the authenticated
+student's completed tracked test. `get_practice_test_review_progress` returns the
+missed count, reviewed count, percentage, completion state, and reviewed row IDs
+for resumable review to the student or an authorized linked guardian.
+
+Forward migration `202608070043` makes historical tracking availability an
+explicit `false` instead of SQL `null`. It changes no stored learning data and
+keeps the migration-042 function contract intact.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

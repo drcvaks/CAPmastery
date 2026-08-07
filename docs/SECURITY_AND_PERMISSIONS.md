@@ -140,3 +140,10 @@ check.
   assigned private draft without widening the student's direct `questions` read
   policy. Another student receives the same not-found response as a nonexistent
   session, and no protected assessment or feedback field is returned.
+- Missed-answer review is not client-writable table state. The protected marker
+  function verifies test ownership, completed status, Mitchell full-exam strategy,
+  tracking version, an existing attempt, and an incorrect server-graded result.
+  The summary function uses the existing self-or-active-linked-guardian progress
+  check. Guardians receive aggregate review counts only; reviewed row IDs are
+  returned solely to the owning student for resume navigation. Neither path
+  exposes a prompt, selected choice, answer key, explanation, or correctness value.

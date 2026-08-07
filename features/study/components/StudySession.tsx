@@ -7,7 +7,9 @@ import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
 import {
   useCompletePracticeTest,
+  useMarkPracticeAnswerReviewed,
   usePracticeTestResults,
+  usePracticeTestReviewProgress,
   useSetPracticeTestQuestionFlag,
   useSetPracticeTestPaused,
 } from "../../practice/hooks/usePracticeTest";
@@ -23,6 +25,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const completePractice = useCompletePracticeTest(sessionId);
   const setPaused = useSetPracticeTestPaused(sessionId);
   const setFlag = useSetPracticeTestQuestionFlag(sessionId);
+  const markReviewed = useMarkPracticeAnswerReviewed(sessionId);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
@@ -39,6 +42,12 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const practiceResults = usePracticeTestResults(
     sessionId,
     session?.mode === "practice_test" && session.status === "completed",
+  );
+  const reviewProgress = usePracticeTestReviewProgress(
+    sessionId,
+    session?.mode === "practice_test" &&
+      session.status === "completed" &&
+      session.questionCount === 50,
   );
 
   useEffect(() => {
@@ -117,9 +126,19 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           onBack={() => router.replace("/study")}
           onRetry={() => void practiceResults.refetch()}
           onReview={() => {
-            const firstMissed = session.questions.findIndex(
-              (question) => question.attempt_id && question.is_correct === false,
+            const reviewedIds = new Set(reviewProgress.data?.reviewed_session_question_ids ?? []);
+            const firstUnreviewedMissed = session.questions.findIndex(
+              (question) =>
+                question.attempt_id &&
+                question.is_correct === false &&
+                !reviewedIds.has(question.session_question_id),
             );
+            const firstMissed =
+              firstUnreviewedMissed >= 0
+                ? firstUnreviewedMissed
+                : session.questions.findIndex(
+                    (question) => question.attempt_id && question.is_correct === false,
+                  );
             if (firstMissed >= 0) {
               setCurrentIndex(firstMissed);
               setShowResults(false);
@@ -134,6 +153,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           results={practiceResults.data}
           error={practiceResults.isError}
           missedCount={session.questions.filter((question) => question.is_correct === false).length}
+          reviewProgress={reviewProgress.data}
         />
       );
     }
@@ -218,10 +238,16 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   function advance() {
     if (!session) return;
     if (session.mode === "practice_test" && session.status === "completed") {
-      const nextMissed = session.questions.findIndex(
-        (question, index) =>
-          index > currentIndex && question.attempt_id && question.is_correct === false,
+      const reviewedIds = new Set(reviewProgress.data?.reviewed_session_question_ids ?? []);
+      const skipPreviouslyReviewed = Boolean(
+        reviewProgress.data?.tracking_available && !reviewProgress.data.review_complete,
       );
+      const nextMissed = session.questions.findIndex((question, index) => {
+        if (index <= currentIndex || !question.attempt_id || question.is_correct !== false) {
+          return false;
+        }
+        return !skipPreviouslyReviewed || !reviewedIds.has(question.session_question_id);
+      });
       if (nextMissed < 0) {
         setShowResults(true);
       } else {
@@ -234,6 +260,18 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       return;
     }
     setCurrentIndex((index) => index + 1);
+  }
+
+  async function completeCurrentReview() {
+    if (!currentQuestion) return;
+    if (reviewProgress.data?.tracking_available && currentQuestion.is_correct === false) {
+      try {
+        await markReviewed.mutateAsync(currentQuestion.session_question_id);
+      } catch {
+        return;
+      }
+    }
+    advance();
   }
 
   function goPrevious() {
@@ -413,33 +451,47 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       </AppCard>
 
       {answered && session.feedbackReleased ? (
-        <AnswerResultCard
-          explanation={currentQuestion.explanation}
-          isCorrect={Boolean(currentQuestion.is_correct)}
-          key={currentQuestion.session_question_id}
-          memoryAid={currentQuestion.memory_aid}
-          nextLabel={nextLabel(session.mode, session.status, currentIndex, session.questions)}
-          onNext={advance}
-          remediation={currentQuestion.remediation}
-          selectedChoiceFeedback={currentQuestion.selected_choice_feedback}
-          shortExplanation={currentQuestion.short_explanation}
-          sourceReference={currentQuestion.source_reference}
-          visual={
-            currentQuestion.visual_uri &&
-            currentQuestion.visual_caption &&
-            currentQuestion.visual_alt_text &&
-            currentQuestion.visual_width &&
-            currentQuestion.visual_height
-              ? {
-                  altText: currentQuestion.visual_alt_text,
-                  caption: currentQuestion.visual_caption,
-                  height: currentQuestion.visual_height,
-                  uri: currentQuestion.visual_uri,
-                  width: currentQuestion.visual_width,
-                }
-              : null
-          }
-        />
+        <View style={styles.stack}>
+          <AnswerResultCard
+            explanation={currentQuestion.explanation}
+            isCorrect={Boolean(currentQuestion.is_correct)}
+            key={currentQuestion.session_question_id}
+            memoryAid={currentQuestion.memory_aid}
+            nextLabel={nextLabel(
+              session.mode,
+              session.status,
+              currentIndex,
+              session.questions,
+              reviewProgress.data,
+            )}
+            nextLoading={markReviewed.isPending}
+            onNext={() => void completeCurrentReview()}
+            remediation={currentQuestion.remediation}
+            selectedChoiceFeedback={currentQuestion.selected_choice_feedback}
+            shortExplanation={currentQuestion.short_explanation}
+            sourceReference={currentQuestion.source_reference}
+            visual={
+              currentQuestion.visual_uri &&
+              currentQuestion.visual_caption &&
+              currentQuestion.visual_alt_text &&
+              currentQuestion.visual_width &&
+              currentQuestion.visual_height
+                ? {
+                    altText: currentQuestion.visual_alt_text,
+                    caption: currentQuestion.visual_caption,
+                    height: currentQuestion.visual_height,
+                    uri: currentQuestion.visual_uri,
+                    width: currentQuestion.visual_width,
+                  }
+                : null
+            }
+          />
+          {markReviewed.isError ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              Review progress could not be saved. Please try again before continuing.
+            </Text>
+          ) : null}
+        </View>
       ) : answered && delayedFeedbackActive ? (
         <AppCard
           title="Answer saved"
@@ -482,6 +534,7 @@ function PracticeResults({
   questionCount,
   results,
   missedCount,
+  reviewProgress,
 }: {
   answeredCount: number;
   correctCount: number;
@@ -494,6 +547,7 @@ function PracticeResults({
   questionCount: number;
   results?: PracticeTopicResult[];
   missedCount: number;
+  reviewProgress?: import("../../practice/schemas").PracticeReviewProgress;
 }) {
   const percentage = Math.round((correctCount / questionCount) * 100);
   return (
@@ -508,10 +562,13 @@ function PracticeResults({
         </Text>
       </AppCard>
       {missedCount > 0 ? (
-        <AppButton
-          label={`Review ${missedCount} missed answers and explanations`}
-          onPress={onReview}
-        />
+        <View style={styles.stack}>
+          {reviewProgress ? <ReviewProgressSummary review={reviewProgress} /> : null}
+          <AppButton
+            label={`Review ${missedCount} missed answers and explanations`}
+            onPress={onReview}
+          />
+        </View>
       ) : (
         <AppCard
           title="No missed answers"
@@ -549,16 +606,55 @@ function PracticeResults({
   );
 }
 
+function ReviewProgressSummary({
+  review,
+}: {
+  review: import("../../practice/schemas").PracticeReviewProgress;
+}) {
+  if (!review.tracking_available) {
+    return (
+      <AppCard
+        title="Missed-answer review"
+        description="Review tracking is unavailable for this earlier test."
+      />
+    );
+  }
+  return (
+    <AppCard
+      title="Missed-answer review"
+      description={`${review.reviewed_count} of ${review.missed_count} reviewed (${review.review_percent}%).`}
+    >
+      <Text style={review.review_complete ? styles.reviewComplete : styles.muted}>
+        {review.review_complete
+          ? "All missed explanations have been reviewed."
+          : "Progress is saved after each missed explanation."}
+      </Text>
+    </AppCard>
+  );
+}
+
 function nextLabel(
   mode: "study" | "practice_test" | "challenge",
   status: "active" | "completed" | "abandoned",
   currentIndex: number,
-  questions: Array<{ attempt_id: string | null; is_correct: boolean | null }>,
+  questions: Array<{
+    attempt_id: string | null;
+    is_correct: boolean | null;
+    session_question_id: string;
+  }>,
+  reviewProgress?: import("../../practice/schemas").PracticeReviewProgress,
 ): string {
   if (mode === "practice_test" && status === "completed") {
+    const reviewedIds = new Set(reviewProgress?.reviewed_session_question_ids ?? []);
+    const skipPreviouslyReviewed = Boolean(
+      reviewProgress?.tracking_available && !reviewProgress.review_complete,
+    );
     const hasAnotherMissed = questions.some(
       (question, index) =>
-        index > currentIndex && question.attempt_id && question.is_correct === false,
+        index > currentIndex &&
+        question.attempt_id &&
+        question.is_correct === false &&
+        (!skipPreviouslyReviewed || !reviewedIds.has(question.session_question_id)),
     );
     return hasAnotherMissed ? "Next missed answer" : "Finish review";
   }
@@ -604,6 +700,7 @@ const styles = StyleSheet.create({
   errorBox: { gap: theme.spacing.xs },
   muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
   progress: { color: theme.colors.muted, fontSize: 14, fontWeight: "700" },
+  reviewComplete: { color: theme.colors.success, fontSize: 15, fontWeight: "800" },
   navigationControl: { flex: 1, minWidth: 145 },
   progressRow: {
     alignItems: "center",

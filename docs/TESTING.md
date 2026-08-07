@@ -168,3 +168,23 @@ Mitchell full-exam SQL coverage verifies the active 50-question blueprint uses a
 the active exam's visible timer and Pause control, hidden chapter cue,
 Backâ€“Flagâ€“Next ordering, question-50-only completion action, and restored chapter
 label during review.
+
+Migration 042 expands `mitchell_full_exam.test.sql` from 36 to 56 assertions. It
+checks the review columns and function grants, automatic tracking on new full
+tests, pre-completion denial, wrong-answer counting, cross-student denial,
+idempotent marking, aggregate-only parent visibility, 0-to-100 percent progress,
+and explicit unavailability for historical sessions. Component coverage verifies that review
+completion is saved on Finish review and that the latest Progress card displays
+the reviewed/total percentage.
+The local feature gate passes all 25 Jest suites and 130/130 tests, TypeScript,
+Expo ESLint, formatting, public Expo configuration, a 1,582-module web export,
+and a 1,700-module Android export. Expo Doctor passed 18 local checks; its Expo
+schema and React Native Directory checks could not complete because the validation
+service DNS endpoints were unavailable during the run.
+The first linked run after migration 042 passed 49/56 Mitchell assertions. Its
+incorrect-answer fixture had attempted to read a private draft choice through
+student RLS and therefore supplied `NULL`; the fixture now retains that synthetic
+choice ID in its granted rollback-only temporary table. The run also exposed a
+real nullable-boolean result for historical sessions, corrected by forward
+migration 043. The corrected linked rerun passed the Mitchell suite 56/56 and all
+linked suites 456/456.

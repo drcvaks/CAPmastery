@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(36);
+select plan(56);
 
 select has_column('public', 'questions', 'chapter_number', 'questions store chapter number');
 select has_column('public', 'questions', 'exam_likeness', 'questions store exam likeness');
@@ -11,6 +11,8 @@ select has_column('public', 'questions', 'final_exam_weight', 'questions store f
 select has_column('public', 'questions', 'content_origin', 'questions store content origin');
 select has_column('public', 'questions', 'style_reference', 'questions store style reference');
 select has_column('public', 'study_session_questions', 'flagged_at', 'practice questions store review flags');
+select has_column('public', 'study_sessions', 'review_tracking_version', 'sessions identify reliable review tracking');
+select has_column('public', 'study_session_questions', 'reviewed_at', 'missed answers store deliberate review completion');
 select is(
   (
     select time_limit_seconds
@@ -34,7 +36,11 @@ select has_function('public', 'set_practice_test_question_flag', array['uuid', '
 select has_function('public', 'get_practice_test_question_flags', array['uuid'], 'review-flag read function exists');
 select has_function('public', 'get_practice_test_weak_areas', array['uuid'], 'weak-area function exists');
 select has_function('public', 'get_latest_practice_test_topic_results', array['uuid', 'uuid'], 'latest full-test progress function exists');
+select has_function('public', 'get_practice_test_review_progress', array['uuid'], 'review progress function exists');
+select has_function('public', 'mark_practice_answer_reviewed', array['uuid'], 'missed-answer review function exists');
 select is(has_function_privilege('authenticated', 'public.get_latest_practice_test_topic_results(uuid, uuid)', 'execute'), true, 'authenticated users can execute protected latest-test analysis');
+select is(has_function_privilege('authenticated', 'public.get_practice_test_review_progress(uuid)', 'execute'), true, 'authenticated users can execute protected review progress');
+select is(has_function_privilege('anon', 'public.mark_practice_answer_reviewed(uuid)', 'execute'), false, 'anonymous users cannot record answer review');
 select has_function('public', 'reviewer_save_question_with_classification', array['uuid', 'jsonb', 'text'], 'reviewer classification edit function exists');
 select is(has_function_privilege('authenticated', 'public.create_mitchell_full_practice_exam(uuid, boolean)', 'execute'), true, 'students can execute protected full-exam creation');
 select is(has_function_privilege('anon', 'public.create_mitchell_full_practice_exam(uuid, boolean)', 'execute'), false, 'anonymous users cannot create full exams');
@@ -82,7 +88,8 @@ create temporary table mitchell_topics (
 create temporary table mitchell_exam_questions (
   question_id uuid primary key,
   chapter_number integer not null,
-  family_id uuid not null
+  family_id uuid not null,
+  wrong_choice_id uuid
 );
 grant select on mitchell_topics, mitchell_exam_questions to authenticated;
 
@@ -94,6 +101,8 @@ declare
   v_objective uuid;
   v_family uuid;
   v_question uuid;
+  v_correct_choice uuid;
+  v_wrong_choice uuid;
 begin
   for v_chapter in 4..8 loop
     v_topic := gen_random_uuid();
@@ -136,7 +145,23 @@ begin
         case when v_item = 1 then 1.2 else 1.0 end,
         'original_textbook_grounded', 'Mitchell_sample_style_analysis'
       );
-      insert into mitchell_exam_questions values (v_question, v_chapter, v_family);
+      insert into mitchell_exam_questions (question_id, chapter_number, family_id)
+      values (v_question, v_chapter, v_family);
+      v_correct_choice := gen_random_uuid();
+      v_wrong_choice := gen_random_uuid();
+      insert into public.question_choices (id, question_id, choice_key, choice_text, sort_order)
+      values
+        (v_correct_choice, v_question, 'A', 'Correct synthetic choice', 0),
+        (v_wrong_choice, v_question, 'B', 'Incorrect synthetic choice', 1);
+      insert into private.question_answer_keys (
+        question_id, correct_choice_id, explanation, remediation, common_mistake, created_by
+      ) values (
+        v_question, v_correct_choice, 'Synthetic explanation', 'Synthetic remediation',
+        'Synthetic misconception', 'f3333333-3333-4333-8333-333333333333'
+      );
+      update mitchell_exam_questions
+      set wrong_choice_id = v_wrong_choice
+      where question_id = v_question;
     end loop;
   end loop;
 end;
@@ -160,6 +185,11 @@ insert into mitchell_sessions values (
   public.create_mitchell_full_practice_exam('f5000000-0000-4000-8000-000000000001', true)
 );
 select is((select count(*)::integer from mitchell_sessions), 1, 'student creates a full practice exam');
+select is(
+  (select review_tracking_version from public.study_sessions where id = (select id from mitchell_sessions)),
+  1::smallint,
+  'new Mitchell full exams enable review tracking'
+);
 select is(
   (select count(*)::integer from public.study_session_questions
    where session_id = (select id from mitchell_sessions)),
@@ -235,6 +265,19 @@ select is(
   1,
   'review flag is persisted server-side'
 );
+select throws_ok(
+  format('select * from public.get_practice_test_review_progress(%L)', (select id from mitchell_sessions)),
+  'P0002', 'Completed Mitchell practice test not found',
+  'review progress remains unavailable before completion'
+);
+select lives_ok(
+  format(
+    'select public.submit_answer(%L, %L, 1000, null::smallint)',
+    (select sq.id from public.study_session_questions sq where sq.session_id = (select id from mitchell_sessions) order by sq.position limit 1),
+    (select q.wrong_choice_id from public.study_session_questions sq join mitchell_exam_questions q on q.question_id = sq.question_id where sq.session_id = (select id from mitchell_sessions) order by sq.position limit 1)
+  ),
+  'student submits one incorrect answer for review tracking'
+);
 
 select set_config('request.jwt.claim.sub', 'f2222222-2222-4222-8222-222222222222', true);
 select throws_ok(
@@ -247,6 +290,52 @@ select set_config('request.jwt.claim.sub', 'f1111111-1111-4111-8111-111111111111
 select lives_ok(
   format('select public.complete_practice_test(%L)', (select id from mitchell_sessions)),
   'student submits the full exam'
+);
+select is(
+  (select missed_count from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  1,
+  'completed review progress counts the incorrect answer'
+);
+select is(
+  (select review_percent from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  0,
+  'newly completed test begins at zero percent reviewed'
+);
+
+select set_config('request.jwt.claim.sub', 'f2222222-2222-4222-8222-222222222222', true);
+select throws_ok(
+  format(
+    'select public.mark_practice_answer_reviewed(%L)',
+    (select sq.id from public.study_session_questions sq join public.question_attempts a on a.session_question_id = sq.id where sq.session_id = (select id from mitchell_sessions) and not a.is_correct)
+  ),
+  'P0002', 'Reviewable missed answer not found',
+  'another student cannot record review completion'
+);
+
+select set_config('request.jwt.claim.sub', 'f1111111-1111-4111-8111-111111111111', true);
+select lives_ok(
+  format(
+    'select public.mark_practice_answer_reviewed(%L)',
+    (select sq.id from public.study_session_questions sq join public.question_attempts a on a.session_question_id = sq.id where sq.session_id = (select id from mitchell_sessions) and not a.is_correct)
+  ),
+  'student records deliberate review of the missed answer'
+);
+select lives_ok(
+  format(
+    'select public.mark_practice_answer_reviewed(%L)',
+    (select sq.id from public.study_session_questions sq join public.question_attempts a on a.session_question_id = sq.id where sq.session_id = (select id from mitchell_sessions) and not a.is_correct)
+  ),
+  'recording the same review is idempotent'
+);
+select is(
+  (select reviewed_count from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  1,
+  'reviewed count is not duplicated'
+);
+select is(
+  (select review_percent from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  100,
+  'review progress reaches one hundred percent'
 );
 select is(
   (select count(*)::integer from public.get_practice_test_weak_areas((select id from mitchell_sessions))),
@@ -280,6 +369,33 @@ select is(
   )),
   5,
   'linked parent reads the latest full-test chapter analysis'
+);
+select is(
+  (select review_percent from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  100,
+  'linked parent reads missed-answer review completion'
+);
+select is(
+  (select cardinality(reviewed_session_question_ids) from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  0,
+  'linked parent receives aggregate review progress without session-question identifiers'
+);
+
+reset role;
+update public.study_sessions
+set review_tracking_version = null
+where id = (select id from mitchell_sessions);
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'f1111111-1111-4111-8111-111111111111', true);
+select is(
+  (select tracking_available from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  false,
+  'historical full tests report review tracking unavailable'
+);
+select is(
+  (select review_percent from public.get_practice_test_review_progress((select id from mitchell_sessions))),
+  null::integer,
+  'historical full tests do not imply a review percentage'
 );
 
 select * from finish();

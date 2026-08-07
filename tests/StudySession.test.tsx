@@ -1,10 +1,12 @@
-import { fireEvent, render, screen, userEvent } from "@testing-library/react-native";
+import { render, screen, userEvent } from "@testing-library/react-native";
 
 import { StudySessionView } from "../features/study/components/StudySession";
 import { useStudySession, useSubmitStudyAnswer } from "../features/study/hooks/useStudySession";
 import {
   useCompletePracticeTest,
+  useMarkPracticeAnswerReviewed,
   usePracticeTestResults,
+  usePracticeTestReviewProgress,
   useSetPracticeTestQuestionFlag,
   useSetPracticeTestPaused,
 } from "../features/practice/hooks/usePracticeTest";
@@ -16,7 +18,9 @@ jest.mock("../features/study/hooks/useStudySession", () => ({
 }));
 jest.mock("../features/practice/hooks/usePracticeTest", () => ({
   useCompletePracticeTest: jest.fn(),
+  useMarkPracticeAnswerReviewed: jest.fn(),
   usePracticeTestResults: jest.fn(),
+  usePracticeTestReviewProgress: jest.fn(),
   useSetPracticeTestQuestionFlag: jest.fn(),
   useSetPracticeTestPaused: jest.fn(),
 }));
@@ -98,6 +102,16 @@ beforeEach(() => {
   jest.mocked(useCompletePracticeTest).mockReturnValue({ isPending: false } as never);
   jest.mocked(useSetPracticeTestPaused).mockReturnValue({ isPending: false } as never);
   jest.mocked(useSetPracticeTestQuestionFlag).mockReturnValue({ isPending: false } as never);
+  jest.mocked(useMarkPracticeAnswerReviewed).mockReturnValue({
+    isPending: false,
+    isError: false,
+    mutateAsync: jest.fn().mockResolvedValue(undefined),
+  } as never);
+  jest.mocked(usePracticeTestReviewProgress).mockReturnValue({
+    data: undefined,
+    isPending: false,
+    isError: false,
+  } as never);
   jest
     .mocked(usePracticeTestResults)
     .mockReturnValue({ isPending: false, isError: false } as never);
@@ -309,9 +323,29 @@ describe("practice test session", () => {
       isError: false,
       refetch: jest.fn(),
     } as never);
+    const markReviewed = jest.fn().mockResolvedValue(undefined);
+    jest.mocked(useMarkPracticeAnswerReviewed).mockReturnValue({
+      isPending: false,
+      isError: false,
+      mutateAsync: markReviewed,
+    } as never);
+    jest.mocked(usePracticeTestReviewProgress).mockReturnValue({
+      data: {
+        session_id: activeSession.id,
+        tracking_available: true,
+        missed_count: 1,
+        reviewed_count: 0,
+        review_percent: 0,
+        review_complete: false,
+        reviewed_session_question_ids: [],
+      },
+      isPending: false,
+      isError: false,
+    } as never);
 
     await render(<StudySessionView sessionId={activeSession.id} />);
-    fireEvent.press(
+    const user = userEvent.setup();
+    await user.press(
       screen.getByRole("button", { name: "Review 1 missed answers and explanations" }),
     );
 
@@ -319,7 +353,8 @@ describe("practice test session", () => {
     expect(screen.getByText("Chapter 5: Brainpower for Leadership")).toBeVisible();
     expect(screen.queryByText("Correct answer should be skipped")).toBeNull();
     expect(screen.getByRole("button", { name: "Finish review" })).toBeVisible();
-    fireEvent.press(screen.getByRole("button", { name: "Finish review" }));
+    await user.press(screen.getByRole("button", { name: "Finish review" }));
     expect(await screen.findByText("Practice test complete")).toBeVisible();
+    expect(markReviewed).toHaveBeenCalledWith(missedQuestion.session_question_id);
   });
 });

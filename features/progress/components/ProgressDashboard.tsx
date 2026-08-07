@@ -193,6 +193,7 @@ function ExamProgressSection({
             startingTopicId={startingTopicId}
             studyError={studyError}
             topics={exam.latestPracticeTopics}
+            review={exam.latestPracticeReview}
           />
           <TopicProgressList topics={exam.topics} />
           <TrendCard trends={exam.trends} />
@@ -207,11 +208,13 @@ function LatestPracticeAnalysis({
   startingTopicId,
   studyError,
   topics,
+  review,
 }: {
   onStudyTopic?: (topicId: string) => void;
   startingTopicId?: string;
   studyError?: unknown;
   topics: LatestPracticeTopicResult[];
+  review: ExamProgress["latestPracticeReview"];
 }) {
   if (!topics.length) return null;
   const completedAt = topics[0]?.completed_at;
@@ -224,6 +227,7 @@ function LatestPracticeAnalysis({
           : "Chapter analysis from the latest completed full test."
       }
     >
+      {review ? <ReviewProgressSummary review={review} /> : null}
       {topics.map((topic) => (
         <View key={topic.topic_id} style={styles.practiceTopicRow}>
           <View style={styles.practiceTopicText}>
@@ -248,6 +252,36 @@ function LatestPracticeAnalysis({
         </Text>
       ) : null}
     </AppCard>
+  );
+}
+
+function ReviewProgressSummary({
+  review,
+}: {
+  review: NonNullable<ExamProgress["latestPracticeReview"]>;
+}) {
+  if (!review.tracking_available) {
+    return (
+      <Text style={styles.muted}>
+        Missed-answer review tracking is unavailable for this earlier test.
+      </Text>
+    );
+  }
+  if (review.missed_count === 0) {
+    return <Text style={styles.reviewComplete}>No missed answers to review.</Text>;
+  }
+  return (
+    <View style={styles.reviewSummary}>
+      <Text style={review.review_complete ? styles.reviewComplete : styles.reviewPending}>
+        Missed-answer review: {review.reviewed_count} of {review.missed_count} (
+        {review.review_percent}%)
+      </Text>
+      <Text style={styles.muted}>
+        {review.review_complete
+          ? "All missed answers were reviewed."
+          : "Open the completed test and review each missed explanation."}
+      </Text>
+    </View>
   );
 }
 
@@ -424,6 +458,14 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: 3,
+  },
+  reviewComplete: { color: theme.colors.success, fontSize: 15, fontWeight: "800" },
+  reviewPending: { color: theme.colors.accent, fontSize: 15, fontWeight: "800" },
+  reviewSummary: {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.radius.sm,
+    gap: theme.spacing.xs,
+    padding: theme.spacing.md,
   },
   section: { gap: theme.spacing.lg },
   smallText: { color: theme.colors.muted, fontSize: 12, lineHeight: 18 },
