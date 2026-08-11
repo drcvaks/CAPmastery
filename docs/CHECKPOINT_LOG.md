@@ -945,3 +945,28 @@ Mitchell full-test usability follow-up:
   for historical sessions. The owner applied migration 043 and the corrected
   linked run passed Mitchell full exam 56/56 and the complete aggregate 456/456.
   Owner UI acceptance and a connected Expo Doctor rerun remain.
+- Prepared the Aerospace Module 1 shared-visual integration. The updated 100-row
+  bank preserves every stable ID and all nonvisual assessment fields; 94 questions
+  reuse six supplied 1536x1024 PNGs, while Q003, Q004, and Q013-Q016 remain
+  explicitly missing/hidden. Migration `202608110044_learning_visual_storage.sql`
+  adds a private 5 MiB PNG-only bucket, administrator upload policies, answer-aware
+  student reads, and audited asset registration. The operator upload script signs
+  in with an existing admin and publishable key only; it never uses a service-role
+  key. Focused actual-file coverage passes 52/52. The complete local gate passes
+  strict TypeScript, Expo ESLint, repository formatting, and all 25 Jest suites
+  with 134/134 tests. Expo public configuration resolves; web export bundles 1,582
+  modules and Android export bundles 1,700 modules. Expo Doctor passes 19/20 checks
+  and reports only four existing SDK 57 patch-level dependency mismatches; an
+  attempted patch alignment timed out, so no partial dependency change was kept.
+  Migration application, six-asset upload, 100-row visual metadata upsert, linked
+  pgTAP (expected 471), and owner UI acceptance remain.
+  The owner then applied migration 044, uploaded and registered all six 1536x1024
+  assets, and updated all 100 Module 1 questions with zero failures. The six
+  warnings were the intentionally missing/hidden concepts. The first linked run
+  passed every assertion except one randomized study fixture: it attached its
+  synthetic visual to source fixture position 1 but answered whichever question
+  adaptive selection placed at session position 1. The rollback-only test now
+  attaches that visual after session creation to the question actually selected
+  at position 1. No production function, policy, content row, or migration changed;
+  the corrected owner-linked rerun passed study sessions 45/45 and the complete
+  aggregate 471/471. Owner UI acceptance remains.

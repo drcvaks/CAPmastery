@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(42);
+select plan(45);
 
 -- This synthetic suite intentionally reuses the stable seed topic ID. Production
 -- archives the obsolete catalog label, so the transaction owns its active fixture.
@@ -169,6 +169,15 @@ begin
 end;
 $$;
 
+insert into private.visual_assets (
+  asset_key, storage_path, mime_type, width, height, alt_text,
+  status, created_by, approved_by, approved_at
+) values (
+  'policy_visual', 'assets/cap-visuals/policy.png', 'image/png', 640, 480,
+  'Synthetic policy visual', 'approved',
+  'a3333333-3333-4333-8333-333333333333',
+  'a3333333-3333-4333-8333-333333333333', now()
+);
 create temporary table study_test_session (id uuid primary key);
 grant select, insert on table study_test_session to authenticated;
 create temporary table study_test_session_answers (
@@ -193,6 +202,19 @@ select sq.id, sq.position, q.correct_choice_id, q.wrong_choice_id
 from public.study_session_questions sq
 join study_test_questions q on q.question_id = sq.question_id
 where sq.session_id = (select id from study_test_session);
+
+reset role;
+update private.question_learning_support
+set visual_asset_key = 'policy_visual'
+where question_id = (
+  select sq.question_id
+  from public.study_session_questions sq
+  where sq.session_id = (select id from study_test_session)
+    and sq.position = 1
+);
+set local role authenticated;
+select set_config('request.jwt.claim.sub', 'a1111111-1111-4111-8111-111111111111', true);
+
 select is((select count(*)::integer from study_test_session), 1, 'Student creates a 10-question session');
 select is(
   (select count(*)::integer from public.study_session_questions where session_id = (select id from study_test_session)),
@@ -246,6 +268,11 @@ select is(
   0,
   'Unanswered delivery exposes no learning support'
 );
+select is(
+  private.can_read_learning_visual('assets/cap-visuals/policy.png'),
+  false,
+  'student cannot read a learning visual before answering its question'
+);
 
 select set_config('request.jwt.claim.sub', 'a2222222-2222-4222-8222-222222222222', true);
 select is((select count(*)::integer from public.study_sessions), 0, 'Other student cannot read session');
@@ -265,6 +292,11 @@ select throws_ok(
     (select correct_choice_id from study_test_session_answers where session_position = 1), 1000
   )$$,
   'P0002', 'Session question not found', 'Other student cannot submit to hidden session question'
+);
+select is(
+  private.can_read_learning_visual('assets/cap-visuals/policy.png'),
+  false,
+  'another student cannot read the learning visual'
 );
 
 select set_config('request.jwt.claim.sub', 'a1111111-1111-4111-8111-111111111111', true);
@@ -292,6 +324,11 @@ select is(
   ),
   true,
   'Server grades a correct answer'
+);
+select is(
+  private.can_read_learning_visual('assets/cap-visuals/policy.png'),
+  true,
+  'student can read the approved learning visual after answering'
 );
 select ok(
   (select is_correct from public.question_attempts limit 1),
@@ -367,8 +404,8 @@ select is(
     from public.get_study_session_questions((select id from study_test_session))
     where visual_asset_key is not null or visual_storage_path is not null
   ),
-  0,
-  'Missing or unapproved visual assets remain hidden after submission'
+  1,
+  'Only the registered approved visual is released after submission'
 );
 
 select set_config('request.jwt.claim.sub', 'a2222222-2222-4222-8222-222222222222', true);

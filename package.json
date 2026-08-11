@@ -27,6 +27,8 @@
     "content:import:ltl2c8": "node scripts/import-pilot-questions.cjs Content/LTL_V2_Chapter_8_75_Questions_Complete_Support.csv 75",
     "content:import:mitchell500": "node scripts/import-pilot-questions.cjs Content/LTL_V2_Chapters_4_8_500_Questions_Final_Exam_Tagged.csv 500",
     "content:import:admodule1": "node scripts/import-pilot-questions.cjs Content/Aerospace/Aerospace_Dimensions_Module_1_100_Questions_Complete_Support.csv 100",
+    "content:import:admodule1:visuals": "node scripts/import-pilot-questions.cjs Content/Aerospace/Aerospace_Dimensions_Module_1_100_Questions_With_Visual_Assets.csv 100",
+    "content:upload:admodule1:visuals": "node scripts/upload-aerospace-module-1-visuals.cjs",
     "db:lint": "supabase db lint --local --level error",
     "db:reset": "supabase db reset --local",
     "types:database": "supabase gen types typescript --linked --schema public > types/database.ts",

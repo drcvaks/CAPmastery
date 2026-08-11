@@ -2345,6 +2345,17 @@ export type Database = {
         Args: { p_confirm?: boolean; p_reason: string; p_student_id: string };
         Returns: Json;
       };
+      admin_register_learning_visual: {
+        Args: {
+          p_alt_text: string;
+          p_asset_key: string;
+          p_height: number;
+          p_mime_type: string;
+          p_storage_path: string;
+          p_width: number;
+        };
+        Returns: undefined;
+      };
       admin_set_guardian_link: {
         Args: {
           p_can_assign_content?: boolean;

@@ -391,6 +391,35 @@ assigned packages. No account, credential, package assignment, or environment
 variable changes are required. Rerun linked tests; the expected aggregate is
 436/436. The owner applied migration 041 and the linked aggregate passed 436/436.
 
+### Aerospace Module 1 shared visuals
+
+Apply migration `202608110044_learning_visual_storage.sql` before uploading. It
+creates a private PNG-only bucket and answer-aware policies. Use an existing global
+administrator's ordinary email/password only in the current PowerShell process;
+the upload script reads the project URL and publishable key from ignored
+`.env.local`. It neither needs nor accepts a service-role key:
+
+```powershell
+npx.cmd supabase db push --linked
+
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:admodule1:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:admodule1:visuals
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+The upload should report six registered assets. The idempotent question import
+should update 100 existing rows with zero inserts/failures and emit exactly six
+missing-asset warnings for Q003, Q004, and Q013â€“Q016, whose supplied visual buttons
+are deliberately disabled. The expected linked aggregate is 471/471. Never save
+the administrator password, database password, or a service-role key in a file.
+
 ### Final-test review and Progress follow-up
 
 Apply migration `202608020035_latest_practice_topic_progress.sql` before checking

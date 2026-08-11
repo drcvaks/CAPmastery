@@ -188,3 +188,11 @@ choice ID in its granted rollback-only temporary table. The run also exposed a
 real nullable-boolean result for historical sessions, corrected by forward
 migration 043. The corrected linked rerun passed the Mitchell suite 56/56 and all
 linked suites 456/456.
+
+The Module 1 visual integration adds four actual-file assertions: 100 stable
+upserts with 94 enabled/6 missing mappings, assessment-field preservation, exact
+six-asset shared counts, and PNG/path/manifest validation. `learning_support` grows
+from 12 to 24 assertions for the private bucket, grants, policies, and protected
+registration function; `study_sessions` grows from 42 to 45 assertions proving
+visual denial before an answer, cross-student denial, and access after an owned
+attempt. The expected linked aggregate grows from 456 to 471.

@@ -55,6 +55,14 @@ Draft pilot delivery is package-scoped. Students cannot directly insert assignme
 
 Short explanations, memory aids, internal visual briefs, and the visual-asset registry live in the private schema with no client table grants. Owned session delivery returns short explanations and memory aids only after an attempt. It never returns `visual_brief`; visual key/caption/alt/storage metadata remain null unless a separately registered asset has approved status. The client also hides the visual control if a signed image cannot be resolved, preventing broken-image disclosure.
 
+The private learning-visual bucket is not publicly readable. An authenticated
+administrator can upload or replace objects, then an audited RPC verifies the
+object before approving its registry metadata. Student Storage reads call a
+security-definer policy helper that requires an owned attempted study question or
+a completed delayed-feedback session associated with the approved asset. The
+operator script uses the ordinary publishable key plus a process-only administrator
+login; no service-role credential is accepted or stored.
+
 ## Checkpoint 5 mastery enforcement
 
 Question state and topic mastery are private student records in API-exposed tables with RLS enabled. Authenticated users receive select-only access filtered to `student_id = auth.uid()`; they cannot insert, update, delete, forge scores, or inspect another student's rows. Reviewers receive no student-mastery access by role.

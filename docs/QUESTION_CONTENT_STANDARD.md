@@ -107,9 +107,15 @@ visual control appears until a corresponding reviewed asset is registered.
 Supplied visual asset keys are normalized to lowercase at the import boundary to
 meet the existing private asset registry contract; the database constraint is not
 weakened.
-Supplied visual asset keys are normalized to lowercase at the import boundary to
-meet the existing private asset registry contract; the database constraint is not
-weakened.
+
+The Module 1 visual extension preserves all 100 stable question IDs and changes
+only visual-support metadata. Ninety-four questions intentionally reuse six
+reviewed shared visuals; six questions retain their prior placeholder keys with
+`visual_status=missing` and `show_visual_button=false`. Supabase object paths are
+normalized from the source's leading-slash notation to
+`assets/cap-visuals/<filename>`. Student visibility is derived from an approved
+registry record and secure session state, not trusted from the CSV's convenience
+status/button columns.
 
 ## Initial content decision
 

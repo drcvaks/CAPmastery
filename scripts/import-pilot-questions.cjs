@@ -142,6 +142,8 @@ const CHAPTER_CONFIGS = new Map([
 const MITCHELL_500_FILENAME = "LTL_V2_Chapters_4_8_500_Questions_Final_Exam_Tagged.csv";
 const AEROSPACE_MODULE_1_FILENAME =
   "Aerospace_Dimensions_Module_1_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_1_VISUAL_FILENAME =
+  "Aerospace_Dimensions_Module_1_100_Questions_With_Visual_Assets.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -203,7 +205,7 @@ const AEROSPACE_MODULE_1_CHAPTER_CONFIGS = new Map([
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
-  if (filename === AEROSPACE_MODULE_1_FILENAME) {
+  if (filename === AEROSPACE_MODULE_1_FILENAME || filename === AEROSPACE_MODULE_1_VISUAL_FILENAME) {
     return {
       ...AEROSPACE_MODULE_1_BASE_CONFIG,
       chapterConfigs: AEROSPACE_MODULE_1_CHAPTER_CONFIGS,

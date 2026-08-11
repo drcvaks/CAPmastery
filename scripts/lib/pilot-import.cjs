@@ -355,6 +355,40 @@ function validateImport(rows, expectedCount = 10) {
         errors.push(`${label}: invalid visual_asset_key '${row.visual_asset_key}'.`);
       }
     }
+
+    if (row.show_visual_button !== undefined) {
+      if (!new Set(["true", "false"]).has(row.show_visual_button)) {
+        errors.push(`${label}: show_visual_button must be true or false.`);
+      }
+      if (!new Set(["approved", "missing"]).has(row.visual_status)) {
+        errors.push(`${label}: visual_status must be approved or missing.`);
+      }
+      if (row.show_visual_button === "true") {
+        if (row.visual_status !== "approved") {
+          errors.push(`${label}: enabled visual must have approved status.`);
+        }
+        if (
+          !row.visual_group ||
+          row.visual_group !== normalizeVisualAssetKey(row.visual_asset_key)
+        ) {
+          errors.push(`${label}: visual_group must match the normalized visual_asset_key.`);
+        }
+        if (!/^[a-z0-9][a-z0-9_.-]{2,199}\.png$/.test(row.visual_file_name)) {
+          errors.push(`${label}: enabled visual requires a safe PNG filename.`);
+        }
+        const normalizedPath = String(row.visual_storage_path).replace(/^\/+/, "");
+        if (normalizedPath !== `assets/cap-visuals/${row.visual_file_name}`) {
+          errors.push(`${label}: visual_storage_path does not match visual_file_name.`);
+        }
+      } else if (
+        row.visual_status !== "missing" ||
+        row.visual_group ||
+        row.visual_file_name ||
+        row.visual_storage_path
+      ) {
+        errors.push(`${label}: missing visual must keep its group, filename, and path blank.`);
+      }
+    }
   });
 
   if (rows.length === 500 && rows.every((row) => row.chapter_number !== undefined)) {

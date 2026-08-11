@@ -227,4 +227,14 @@ Forward migration `202608070043` makes historical tracking availability an
 explicit `false` instead of SQL `null`. It changes no stored learning data and
 keeps the migration-042 function contract intact.
 
+Migration `202608110044` creates the private `learning-visuals` bucket with a
+5 MiB PNG-only limit. Storage-object policies allow insert/update only to an
+authenticated global administrator and allow reads through
+`private.can_read_learning_visual`, which rechecks an approved registry entry,
+session ownership, an existing attempt, and delayed-feedback completion rules.
+`admin_register_learning_visual` verifies the uploaded object and constrained
+metadata, upserts an approved `private.visual_assets` record, and writes a safe
+audit event. Question imports continue to update only normalized private learning
+support; no redundant visual columns are added to `public.questions`.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

@@ -175,6 +175,15 @@ Back/Next changes chapters in a full practice test. The authenticated profile's
 first name is displayed in every shared page header so students can verify whose
 account is active even when the workspace rail is not rendered.
 
+Module 1 shared visuals use the existing expandable `Show visual` result control
+and a private `learning-visuals` Supabase Storage bucket. A process-only operator
+script signs in as an existing administrator with the client-safe publishable key,
+uploads the six reviewed PNGs, and invokes an audited registration RPC; it never
+uses a service-role key. The client requests a short-lived signed URL only after
+owned session delivery releases an approved asset. Storage RLS independently
+requires an answered study question or a completed delayed-feedback session, so a
+known object path is not sufficient to fetch a visual early.
+
 Missed-answer review for newly created Mitchell 50-question tests is persistent
 and resumable. The result screen reads a protected review summary, starts at the
 first unreviewed missed answer, and records completion only when the cadet uses

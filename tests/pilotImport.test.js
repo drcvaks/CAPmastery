@@ -15,6 +15,12 @@ const {
   splitReinforcementIds,
   validateImport,
 } = require("../scripts/lib/pilot-import.cjs");
+const {
+  normalizeStoragePath,
+  parseVisualManifest,
+  readPngDimensions,
+  validateVisualManifest,
+} = require("../scripts/lib/visual-assets.cjs");
 
 const inputPath = path.resolve(
   __dirname,
@@ -76,6 +82,20 @@ const aerospaceModuleOneInputPath = path.resolve(
   "Content",
   "Aerospace",
   "Aerospace_Dimensions_Module_1_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleOneVisualInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Dimensions_Module_1_100_Questions_With_Visual_Assets.csv",
+);
+const aerospaceModuleOneVisualManifestPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Dimensions_Module_1_Visual_Asset_Manifest.csv",
 );
 const aerospaceModuleOneDefaults = {
   pilot_batch: "AD_M1_100",
@@ -795,5 +815,79 @@ describe("Aerospace Dimensions Module 1 validation", () => {
         ]),
       ),
     ).toEqual({ A: 27, B: 19, C: 23, D: 31 });
+  });
+});
+
+describe("Aerospace Dimensions Module 1 shared visual integration", () => {
+  const assetDirectory = path.dirname(aerospaceModuleOneVisualInputPath);
+  const originalRows = parseImport(
+    decodeImportBuffer(fs.readFileSync(aerospaceModuleOneInputPath)),
+    aerospaceModuleOneDefaults,
+  );
+  const rows = parseImport(
+    decodeImportBuffer(fs.readFileSync(aerospaceModuleOneVisualInputPath)),
+    aerospaceModuleOneDefaults,
+  );
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleOneVisualManifestPath));
+
+  it("validates one hundred stable question upserts and the supported visual controls", () => {
+    expect(validateImport(rows, 100).errors).toEqual([]);
+    expect(rows).toHaveLength(100);
+    expect(rows.map((row) => row.external_id)).toEqual(originalRows.map((row) => row.external_id));
+    expect(rows.filter((row) => row.show_visual_button === "true")).toHaveLength(94);
+    expect(rows.filter((row) => row.visual_status === "approved")).toHaveLength(94);
+    expect(rows.filter((row) => row.show_visual_button === "false")).toHaveLength(6);
+    expect(rows.filter((row) => row.visual_status === "missing")).toHaveLength(6);
+  });
+
+  it("changes visual support only and preserves assessment content", () => {
+    const visualFields = new Set([
+      "visual_priority",
+      "visual_type",
+      "visual_display_mode",
+      "visual_asset_key",
+      "visual_brief",
+      "visual_caption",
+      "visual_alt_text",
+      "visual_group",
+      "visual_file_name",
+      "visual_storage_path",
+      "visual_status",
+      "show_visual_button",
+    ]);
+    for (const [index, original] of originalRows.entries()) {
+      const updated = rows[index];
+      for (const field of Object.keys(original)) {
+        if (!visualFields.has(field)) expect(updated[field]).toBe(original[field]);
+      }
+    }
+  });
+
+  it("maps ninety-four questions to the six reviewed shared assets", () => {
+    const expectedCounts = Object.fromEntries(
+      manifest.map((asset) => [asset.visual_asset_key, Number(asset.question_count)]),
+    );
+    const actualCounts = Object.fromEntries(
+      Object.keys(expectedCounts).map((assetKey) => [
+        assetKey,
+        rows.filter((row) => row.visual_asset_key === assetKey).length,
+      ]),
+    );
+
+    expect(manifest).toHaveLength(6);
+    expect(actualCounts).toEqual(expectedCounts);
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(94);
+  });
+
+  it("validates every PNG and normalizes manifest paths for Supabase Storage", () => {
+    expect(validateVisualManifest(manifest, assetDirectory)).toEqual([]);
+    for (const asset of manifest) {
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(fs.readFileSync(path.join(assetDirectory, asset.visual_file_name))),
+      ).toEqual({ width: 1536, height: 1024 });
+    }
   });
 });
