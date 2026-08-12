@@ -134,6 +134,21 @@ independent administrator action; CSV approval labels alone never make an asset
 student-visible. The supplied `medium_hard` difficulty continues to map to the
 supported `hard` enum without changing its source classification.
 
+## Aerospace Dimensions Module 3 bank
+
+The owner-supplied Module 3 source is a UTF-8 BOM, comma-delimited 100-question
+bank in private package `AD_M3_100`. It contains five ordered chapters: The
+Atmosphere 24, Air Circulation 24, Weather Elements 22, Moisture and Clouds 14,
+and Weather Systems and Severe Weather 16. It includes 50 two-question families,
+100 internal sibling links, and 75 final-exam-eligible rows with complete feedback
+and learning support.
+
+All 100 questions map to seven reviewed shared 1448x1086 PNG assets. The supplied
+manifest uses description/status fields instead of the earlier duplicated visual
+group, caption, alt-text, and count fields. The importer normalizes those fields
+explicitly and verifies the authoritative per-asset counts from the question bank;
+it does not weaken asset-key, path, MIME, dimension, or approval validation.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

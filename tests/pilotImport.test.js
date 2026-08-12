@@ -123,6 +123,27 @@ const aerospaceModuleTwoDefaults = {
   common_mistake: "",
   source_status: "approved_source",
 };
+const aerospaceModuleThreeDirectory = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Module_3",
+);
+const aerospaceModuleThreeInputPath = path.join(
+  aerospaceModuleThreeDirectory,
+  "Aerospace_Dimensions_Module_3_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleThreeVisualManifestPath = path.join(
+  aerospaceModuleThreeDirectory,
+  "Aerospace_Dimensions_Module_3_Visual_Asset_Manifest.csv",
+);
+const aerospaceModuleThreeDefaults = {
+  pilot_batch: "AD_M3_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -1008,6 +1029,103 @@ describe("Aerospace Dimensions Module 2 validation and visual integration", () =
       expect(
         readPngDimensions(fs.readFileSync(path.join(assetDirectory, asset.visual_file_name))),
       ).toEqual({ width: 1600, height: 1000 });
+    }
+  });
+});
+
+describe("Aerospace Dimensions Module 3 validation and visual integration", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleThreeInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer), aerospaceModuleThreeDefaults);
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleThreeVisualManifestPath));
+
+  it("accepts the comma-delimited BOM source as one hundred unique draft rows", () => {
+    const validation = validateImport(rows, 100);
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation).toEqual({ errors: [], warnings: [] });
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(rows.every((row) => row.module_number === "3" && row.review_status === "draft")).toBe(
+      true,
+    );
+  });
+
+  it("preserves the five-chapter organization from the source", () => {
+    expect(
+      Object.fromEntries(
+        ["1", "2", "3", "4", "5"].map((chapter) => [
+          chapter,
+          rows.filter((row) => row.chapter_number === chapter).length,
+        ]),
+      ),
+    ).toEqual({ 1: 24, 2: 24, 3: 22, 4: 14, 5: 16 });
+    expect(new Set(rows.map((row) => row.chapter_title))).toEqual(
+      new Set([
+        "The Atmosphere",
+        "Air Circulation",
+        "Weather Elements",
+        "Moisture and Clouds",
+        "Weather Systems and Severe Weather",
+      ]),
+    );
+  });
+
+  it("retains complete feedback, support, eligibility, and sibling links", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    expect(rows.filter((row) => row.eligible_for_final_exam === "true")).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.memory_aid).not.toBe("");
+      expect(row.short_explanation).not.toBe("");
+      expect(row.show_visual_button).toBe("true");
+      for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
+        expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+      }
+    }
+  });
+
+  it("maps all questions exactly to the seven manifest assets", () => {
+    const actualCounts = Object.fromEntries(
+      manifest.map((asset) => [
+        asset.visual_asset_key,
+        rows.filter((row) => row.visual_asset_key === asset.visual_asset_key).length,
+      ]),
+    );
+    expect(manifest).toHaveLength(7);
+    expect(actualCounts).toEqual({
+      module3_atmosphere_layers: 24,
+      module3_solar_heating_seasons: 14,
+      module3_coriolis_winds_jetstream: 10,
+      module3_weather_elements_heat_transfer: 22,
+      module3_moisture_clouds: 14,
+      module3_fronts_air_masses: 10,
+      module3_severe_weather_safety: 6,
+    });
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(100);
+  });
+
+  it("normalizes the alternate manifest contract and validates all PNG files", () => {
+    expect(
+      validateVisualManifest(manifest, aerospaceModuleThreeDirectory, {
+        expectedAssetCount: 7,
+        expectedQuestionCount: null,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(asset.visual_group).toBe(asset.visual_asset_key);
+      expect(asset.visual_status).toBe("approved");
+      expect(asset.visual_alt_text).toBe(asset.visual_description);
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(
+          fs.readFileSync(path.join(aerospaceModuleThreeDirectory, asset.visual_file_name)),
+        ),
+      ).toEqual({ width: 1448, height: 1086 });
     }
   });
 });

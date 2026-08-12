@@ -31,6 +31,8 @@
     "content:upload:admodule1:visuals": "node scripts/upload-aerospace-visuals.cjs Aerospace_Dimensions_Module_1_Visual_Asset_Manifest.csv 6 94",
     "content:import:admodule2": "node scripts/import-pilot-questions.cjs Content/Aerospace/Aerospace_Dimensions_Module_2_100_Questions_Complete_Support.csv 100",
     "content:upload:admodule2:visuals": "node scripts/upload-aerospace-visuals.cjs Aerospace_Dimensions_Module_2_Visual_Asset_Manifest.csv 7 100",
+    "content:import:admodule3": "node scripts/import-pilot-questions.cjs Content/Aerospace/Aerospace_Module_3/Aerospace_Dimensions_Module_3_100_Questions_Complete_Support.csv 100",
+    "content:upload:admodule3:visuals": "node scripts/upload-aerospace-visuals.cjs Aerospace_Module_3/Aerospace_Dimensions_Module_3_Visual_Asset_Manifest.csv 7 manifest-only",
     "db:lint": "supabase db lint --local --level error",
     "db:reset": "supabase db reset --local",
     "types:database": "supabase gen types typescript --linked --schema public > types/database.ts",

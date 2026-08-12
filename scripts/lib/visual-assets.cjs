@@ -3,16 +3,7 @@ const path = require("node:path");
 
 const { decodeImportBuffer, parseDelimited } = require("./pilot-import.cjs");
 
-const MANIFEST_FIELDS = [
-  "visual_group",
-  "visual_asset_key",
-  "visual_file_name",
-  "visual_storage_path",
-  "visual_status",
-  "visual_caption",
-  "visual_alt_text",
-  "question_count",
-];
+const MANIFEST_FIELDS = ["visual_asset_key", "visual_file_name", "visual_storage_path"];
 
 function parseVisualManifest(buffer) {
   const matrix = parseDelimited(decodeImportBuffer(buffer).replace(/^\uFEFF/, ""), ",");
@@ -26,7 +17,17 @@ function parseVisualManifest(buffer) {
         `Visual manifest row ${index + 2} has ${values.length} fields; expected ${headers.length}.`,
       );
     }
-    return Object.fromEntries(headers.map((header, column) => [header, values[column].trim()]));
+    const source = Object.fromEntries(
+      headers.map((header, column) => [header, values[column].trim()]),
+    );
+    return {
+      ...source,
+      visual_group: source.visual_group || source.visual_asset_key,
+      visual_status: source.visual_status || source.status,
+      visual_caption: source.visual_caption || source.visual_description,
+      visual_alt_text: source.visual_alt_text || source.visual_description,
+      question_count: source.question_count || "",
+    };
   });
 }
 
@@ -75,9 +76,12 @@ function validateVisualManifest(
     if (!row.visual_caption || !row.visual_alt_text) {
       errors.push(`${label}: caption and alt text are required.`);
     }
-    if (!/^\d+$/.test(row.question_count) || Number(row.question_count) < 1) {
-      errors.push(`${label}: question_count must be a positive integer.`);
-    } else {
+    if (
+      row.question_count &&
+      (!/^\d+$/.test(row.question_count) || Number(row.question_count) < 1)
+    ) {
+      errors.push(`${label}: question_count must be a positive integer when supplied.`);
+    } else if (row.question_count) {
       questionCount += Number(row.question_count);
     }
     if (!fs.existsSync(filePath)) {
@@ -96,7 +100,7 @@ function validateVisualManifest(
   if (rows.length !== expectedAssetCount) {
     errors.push(`Expected ${expectedAssetCount} visual assets but found ${rows.length}.`);
   }
-  if (questionCount !== expectedQuestionCount) {
+  if (expectedQuestionCount !== null && questionCount !== expectedQuestionCount) {
     errors.push(
       `Expected visual mappings for ${expectedQuestionCount} questions but found ${questionCount}.`,
     );

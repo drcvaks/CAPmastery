@@ -118,6 +118,7 @@ same session-owned projections and RLS rules as every other assigned draft bank.
 The module number and final-exam tags classify content; neither grants access.
 Module 2 follows the same boundary in exact package `AD_M2_100`; an assignment to
 Module 1 does not imply Module 2 access, or vice versa.
+Module 3 uses exact package `AD_M3_100` and remains equally independent.
 
 The Study catalog is access-aware through `get_accessible_study_catalog()`. The
 security-definer function verifies the student role and returns only exam/topic

@@ -146,6 +146,8 @@ const AEROSPACE_MODULE_1_VISUAL_FILENAME =
   "Aerospace_Dimensions_Module_1_100_Questions_With_Visual_Assets.csv";
 const AEROSPACE_MODULE_2_FILENAME =
   "Aerospace_Dimensions_Module_2_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_3_FILENAME =
+  "Aerospace_Dimensions_Module_3_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -274,9 +276,63 @@ const AEROSPACE_MODULE_2_CHAPTER_CONFIGS = new Map([
     },
   ],
 ]);
+const AEROSPACE_MODULE_3_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M3_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M3",
+  volumeTitle: "Aerospace Dimensions, Module 3: Air Environment",
+  volumeSortOrder: 30,
+  sourceExternalReference: "CAP:AD:M3:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 3: Air Environment",
+  finalExamTagged: true,
+  moduleNumber: 3,
+  aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 24],
+    [2, 24],
+    [3, 22],
+    [4, 14],
+    [5, 16],
+  ]),
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "AD_M3_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+};
+const AEROSPACE_MODULE_3_CHAPTER_CONFIGS = new Map(
+  [
+    [1, "The Atmosphere"],
+    [2, "Air Circulation"],
+    [3, "Weather Elements"],
+    [4, "Moisture and Clouds"],
+    [5, "Weather Systems and Severe Weather"],
+  ].map(([chapterNumber, chapterTitle]) => [
+    chapterNumber,
+    {
+      chapterCode: `AD_M3_C${chapterNumber}`,
+      chapterTitle,
+      chapterSortOrder: chapterNumber * 10,
+      topicCode: `AD_M3_C${chapterNumber}`,
+      topicTitle: `Aerospace Dimensions, Module 3, Chapter ${chapterNumber}: ${chapterTitle}`,
+      topicDescription: `Private Module 3 Chapter ${chapterNumber} Billy Mitchell Aerospace pilot content.`,
+      topicSortOrder: chapterNumber * 10,
+    },
+  ]),
+);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_3_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_3_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_3_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === AEROSPACE_MODULE_2_FILENAME) {
     return {
       ...AEROSPACE_MODULE_2_BASE_CONFIG,

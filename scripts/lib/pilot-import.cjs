@@ -140,7 +140,10 @@ function parseDelimited(text, delimiter = "\t") {
 }
 
 function parseImport(text, defaults = {}) {
-  const matrix = parseDelimited(text.replace(/^\uFEFF/, ""));
+  const normalizedText = text.replace(/^\uFEFF/, "");
+  const firstLine = normalizedText.split(/\r?\n/, 1)[0];
+  const delimiter = firstLine.includes("\t") ? "\t" : ",";
+  const matrix = parseDelimited(normalizedText, delimiter);
   if (matrix.length < 2) throw new Error("The import file has no data rows.");
   const headers = matrix[0];
   const missingHeaders = REQUIRED_FIELDS.filter(

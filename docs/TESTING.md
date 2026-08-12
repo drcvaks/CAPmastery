@@ -201,3 +201,8 @@ The Module 2 actual-file suite adds six assertions covering its UTF-8 BOM and
 100 unique stable IDs, 52/32/16 chapter organization, complete answer and learning
 support, 75 eligible questions and 50 sibling families, exact seven-asset mapping
 counts, seven valid 1600x1000 PNG files, and normalized private Storage paths.
+
+The Module 3 actual-file suite adds five assertions covering safe comma-delimiter
+detection, 100 unique IDs, the 24/24/22/14/16 five-chapter organization, complete
+support and sibling links, exact seven-asset question mappings, normalization of
+the alternate manifest contract, and seven valid 1448x1086 private PNG objects.

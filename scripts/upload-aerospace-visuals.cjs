@@ -11,7 +11,7 @@ const {
 } = require("./lib/visual-assets.cjs");
 
 const root = path.resolve(__dirname, "..");
-const assetDirectory = path.join(root, "Content", "Aerospace");
+const aerospaceDirectory = path.join(root, "Content", "Aerospace");
 
 function positiveInteger(value, label) {
   if (!/^\d+$/.test(value) || Number(value) < 1) {
@@ -22,15 +22,21 @@ function positiveInteger(value, label) {
 
 async function main() {
   const manifestFileName = process.argv[2];
-  if (!manifestFileName || path.basename(manifestFileName) !== manifestFileName) {
-    throw new Error("Provide a visual manifest filename from Content/Aerospace.");
+  if (
+    !manifestFileName ||
+    path.isAbsolute(manifestFileName) ||
+    manifestFileName.split(/[\\/]/).includes("..") ||
+    !manifestFileName.endsWith(".csv")
+  ) {
+    throw new Error("Provide a safe visual manifest path within Content/Aerospace.");
   }
   const expectedAssetCount = positiveInteger(process.argv[3] ?? "", "Expected asset count");
-  const expectedQuestionCount = positiveInteger(
-    process.argv[4] ?? "",
-    "Expected question mapping count",
-  );
-  const manifestPath = path.join(assetDirectory, manifestFileName);
+  const expectedQuestionCount =
+    process.argv[4] === "manifest-only"
+      ? null
+      : positiveInteger(process.argv[4] ?? "", "Expected question mapping count");
+  const manifestPath = path.join(aerospaceDirectory, manifestFileName);
+  const assetDirectory = path.dirname(manifestPath);
   const manifest = parseVisualManifest(await fs.readFile(manifestPath));
   const validationErrors = validateVisualManifest(manifest, assetDirectory, {
     expectedAssetCount,
