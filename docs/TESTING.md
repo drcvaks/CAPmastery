@@ -196,3 +196,8 @@ from 12 to 24 assertions for the private bucket, grants, policies, and protected
 registration function; `study_sessions` grows from 42 to 45 assertions proving
 visual denial before an answer, cross-student denial, and access after an owned
 attempt. The expected linked aggregate grows from 456 to 471.
+
+The Module 2 actual-file suite adds six assertions covering its UTF-8 BOM and
+100 unique stable IDs, 52/32/16 chapter organization, complete answer and learning
+support, 75 eligible questions and 50 sibling families, exact seven-asset mapping
+counts, seven valid 1600x1000 PNG files, and normalized private Storage paths.

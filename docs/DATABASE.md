@@ -237,4 +237,10 @@ metadata, upserts an approved `private.visual_assets` record, and writes a safe
 audit event. Question imports continue to update only normalized private learning
 support; no redundant visual columns are added to `public.questions`.
 
+Aerospace Module 2 reuses migration 044 without a schema change. Its seven
+objects receive distinct `module2_*` private Storage paths and approved registry
+keys. The operator import creates the `AD_M2` volume, three normalized chapters
+and topics, governed objective/concept/family metadata, and 100 draft questions
+in exact private package `AD_M2_100`.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

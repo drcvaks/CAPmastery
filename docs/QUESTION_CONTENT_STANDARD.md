@@ -117,6 +117,23 @@ normalized from the source's leading-slash notation to
 registry record and secure session state, not trusted from the CSV's convenience
 status/button columns.
 
+## Aerospace Dimensions Module 2 bank
+
+The owner-supplied Module 2 source is a UTF-8 BOM, tab-delimited 100-question
+bank in private package `AD_M2_100`. It contains 52 Chapter 1 Airplane Systems
+questions, 32 Chapter 2 Airports questions, and 16 Chapter 3 Aeronautical Charts
+questions. The bank has 50 two-question families, 100 internal sibling links,
+and 75 rows tagged as final-exam eligible. All questions retain four aligned
+choice explanations, short and full feedback, memory support, remediation, and
+exact source-page text.
+
+All 100 Module 2 questions map to seven reviewed shared PNG assets. The manifest
+and question rows must agree on asset key, normalized private Storage path, and
+question count before upload or import begins. Visual registration remains an
+independent administrator action; CSV approval labels alone never make an asset
+student-visible. The supplied `medium_hard` difficulty continues to map to the
+supported `hard` enum without changing its source classification.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

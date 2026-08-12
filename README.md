@@ -61,6 +61,8 @@ npm run content:import:ltl2c8
 npm run content:import:mitchell500
 npm run content:upload:admodule1:visuals
 npm run content:import:admodule1:visuals
+npm run content:upload:admodule2:visuals
+npm run content:import:admodule2
 npm run db:test:linked
 ```
 

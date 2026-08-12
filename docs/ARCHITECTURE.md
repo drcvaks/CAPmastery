@@ -175,10 +175,10 @@ Back/Next changes chapters in a full practice test. The authenticated profile's
 first name is displayed in every shared page header so students can verify whose
 account is active even when the workspace rail is not rendered.
 
-Module 1 shared visuals use the existing expandable `Show visual` result control
+Shared Aerospace visuals use the existing expandable `Show visual` result control
 and a private `learning-visuals` Supabase Storage bucket. A process-only operator
 script signs in as an existing administrator with the client-safe publishable key,
-uploads the six reviewed PNGs, and invokes an audited registration RPC; it never
+uploads a manifest's reviewed PNGs, and invokes an audited registration RPC; it never
 uses a service-role key. The client requests a short-lived signed URL only after
 owned session delivery releases an approved asset. Storage RLS independently
 requires an answered study question or a completed delayed-feedback session, so a

@@ -144,6 +144,8 @@ const AEROSPACE_MODULE_1_FILENAME =
   "Aerospace_Dimensions_Module_1_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_VISUAL_FILENAME =
   "Aerospace_Dimensions_Module_1_100_Questions_With_Visual_Assets.csv";
+const AEROSPACE_MODULE_2_FILENAME =
+  "Aerospace_Dimensions_Module_2_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -157,6 +159,12 @@ const AEROSPACE_MODULE_1_BASE_CONFIG = {
   finalExamTagged: true,
   moduleNumber: 1,
   aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 60],
+    [2, 24],
+    [3, 16],
+  ]),
+  expectedEligibleCount: 75,
   fieldDefaults: {
     pilot_batch: "AD_M1_100",
     feedback_display_version: "1",
@@ -202,9 +210,79 @@ const AEROSPACE_MODULE_1_CHAPTER_CONFIGS = new Map([
     },
   ],
 ]);
+const AEROSPACE_MODULE_2_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M2_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M2",
+  volumeTitle: "Aerospace Dimensions, Module 2: Aircraft Systems and Airports",
+  volumeSortOrder: 20,
+  sourceExternalReference: "CAP:AD:M2:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 2: Aircraft Systems and Airports",
+  finalExamTagged: true,
+  moduleNumber: 2,
+  aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 52],
+    [2, 32],
+    [3, 16],
+  ]),
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "AD_M2_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+};
+const AEROSPACE_MODULE_2_CHAPTER_CONFIGS = new Map([
+  [
+    1,
+    {
+      chapterCode: "AD_M2_C1",
+      chapterTitle: "Airplane Systems",
+      chapterSortOrder: 10,
+      topicCode: "AD_M2_C1",
+      topicTitle: "Aerospace Dimensions, Module 2, Chapter 1: Airplane Systems",
+      topicDescription: "Private Module 2 Chapter 1 Billy Mitchell Aerospace pilot content.",
+      topicSortOrder: 10,
+    },
+  ],
+  [
+    2,
+    {
+      chapterCode: "AD_M2_C2",
+      chapterTitle: "Airports",
+      chapterSortOrder: 20,
+      topicCode: "AD_M2_C2",
+      topicTitle: "Aerospace Dimensions, Module 2, Chapter 2: Airports",
+      topicDescription: "Private Module 2 Chapter 2 Billy Mitchell Aerospace pilot content.",
+      topicSortOrder: 20,
+    },
+  ],
+  [
+    3,
+    {
+      chapterCode: "AD_M2_C3",
+      chapterTitle: "Aeronautical Charts",
+      chapterSortOrder: 30,
+      topicCode: "AD_M2_C3",
+      topicTitle: "Aerospace Dimensions, Module 2, Chapter 3: Aeronautical Charts",
+      topicDescription: "Private Module 2 Chapter 3 Billy Mitchell Aerospace pilot content.",
+      topicSortOrder: 30,
+    },
+  ],
+]);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_2_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_2_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_2_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === AEROSPACE_MODULE_1_FILENAME || filename === AEROSPACE_MODULE_1_VISUAL_FILENAME) {
     return {
       ...AEROSPACE_MODULE_1_BASE_CONFIG,
@@ -734,23 +812,19 @@ async function main() {
          order by chapter_number`,
         [config.examId, config.moduleNumber, config.importPackage],
       );
-      const expectedByChapter = new Map([
-        [1, 60],
-        [2, 24],
-        [3, 16],
-      ]);
+      const expectedByChapter = config.expectedChapterCounts;
       for (const [chapter, expected] of expectedByChapter) {
         const count = moduleCounts.rows.find((item) => item.chapter_number === chapter);
         if (!count || count.total !== expected) {
           throw new Error(
-            `Post-import verification failed for Aerospace Module 1 Chapter ${chapter}: expected ${expected} questions.`,
+            `Post-import verification failed for Aerospace Module ${config.moduleNumber} Chapter ${chapter}: expected ${expected} questions.`,
           );
         }
       }
       const totalEligible = moduleCounts.rows.reduce((sum, item) => sum + item.eligible, 0);
-      if (totalEligible !== 75) {
+      if (totalEligible !== config.expectedEligibleCount) {
         throw new Error(
-          `Post-import verification failed for Aerospace Module 1: expected 75 eligible questions.`,
+          `Post-import verification failed for Aerospace Module ${config.moduleNumber}: expected ${config.expectedEligibleCount} eligible questions.`,
         );
       }
     }

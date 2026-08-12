@@ -970,3 +970,25 @@ Mitchell full-test usability follow-up:
   at position 1. No production function, policy, content row, or migration changed;
   the corrected owner-linked rerun passed study sessions 45/45 and the complete
   aggregate 471/471. Owner UI acceptance remains.
+- Prepared Aerospace Dimensions Module 2 as a post-Checkpoint-9 content extension.
+  The UTF-8 tab-delimited bank validates as 100 unique draft questions in private
+  package `AD_M2_100`, organized as Airplane Systems 52, Airports 32, and
+  Aeronautical Charts 16. It contains 50 two-question families, 100 internal
+  sibling links, 75 final-exam-eligible rows, and complete choice-level and
+  learning support. All 100 questions map exactly to seven supplied 1600x1000
+  PNGs. The reusable manifest uploader preserves the Module 1 command while adding
+  Module 2 upload/registration without a service-role key. Focused actual-file
+  coverage passes 58/58. No schema migration is required because Module 2 reuses
+  migration 044's private bucket, registry, and answer-aware RLS. The runway visual
+  has a clipped left-edge threshold caption and the instrument visual has some
+  overlapping labels; both remain usable but should receive owner visual review.
+  The complete local gate passes strict TypeScript, Expo ESLint, repository
+  formatting, and all 25 Jest suites with 140/140 tests. Expo public configuration
+  resolves; web export bundles 1,582 modules and Android export bundles 1,700
+  modules. Both exports recovered from a stale Metro disk-cache entry by performing
+  a successful full crawl. Expo Doctor passes 19/20 and reports only the existing
+  `expo-router` and `jest-expo` SDK 57 patch-level mismatches. The owner uploaded
+  and registered all seven assets, then imported Module 2 with 100 inserted, zero
+  updated/skipped/failed, and zero warnings. The owner-linked database suite passed
+  study sessions 45/45 and the complete aggregate 471/471. Student package
+  assignment and owner UI acceptance remain.

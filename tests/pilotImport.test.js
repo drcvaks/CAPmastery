@@ -103,6 +103,26 @@ const aerospaceModuleOneDefaults = {
   common_mistake: "",
   source_status: "approved_source",
 };
+const aerospaceModuleTwoInputPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Dimensions_Module_2_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleTwoVisualManifestPath = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Dimensions_Module_2_Visual_Asset_Manifest.csv",
+);
+const aerospaceModuleTwoDefaults = {
+  pilot_batch: "AD_M2_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -888,6 +908,106 @@ describe("Aerospace Dimensions Module 1 shared visual integration", () => {
       expect(
         readPngDimensions(fs.readFileSync(path.join(assetDirectory, asset.visual_file_name))),
       ).toEqual({ width: 1536, height: 1024 });
+    }
+  });
+});
+
+describe("Aerospace Dimensions Module 2 validation and visual integration", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleTwoInputPath);
+  const assetDirectory = path.dirname(aerospaceModuleTwoInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer), aerospaceModuleTwoDefaults);
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleTwoVisualManifestPath));
+
+  it("parses one hundred stable, valid Module 2 draft questions", () => {
+    const validation = validateImport(rows, 100);
+
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validation.errors).toEqual([]);
+    expect(validation.warnings).toEqual([]);
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(rows.every((row) => row.module_number === "2")).toBe(true);
+    expect(rows.every((row) => row.review_status === "draft")).toBe(true);
+  });
+
+  it("preserves the documented three-chapter organization", () => {
+    expect(
+      Object.fromEntries(
+        ["1", "2", "3"].map((chapter) => [
+          chapter,
+          rows.filter((row) => row.chapter_number === chapter).length,
+        ]),
+      ),
+    ).toEqual({ 1: 52, 2: 32, 3: 16 });
+    expect(
+      new Set(rows.filter((row) => row.chapter_number === "1").map((row) => row.chapter_title)),
+    ).toEqual(new Set(["Airplane Systems"]));
+    expect(
+      new Set(rows.filter((row) => row.chapter_number === "2").map((row) => row.chapter_title)),
+    ).toEqual(new Set(["Airports"]));
+    expect(
+      new Set(rows.filter((row) => row.chapter_number === "3").map((row) => row.chapter_title)),
+    ).toEqual(new Set(["Aeronautical Charts"]));
+  });
+
+  it("retains complete answer feedback and learning support", () => {
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.show_visual_button).toBe("true");
+      expect(row.visual_status).toBe("approved");
+    }
+  });
+
+  it("contains seventy-five exam-eligible questions and fifty sibling families", () => {
+    expect(rows.filter((row) => row.eligible_for_final_exam === "true")).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    const links = rows.flatMap((row) =>
+      splitReinforcementIds(row.reinforcement_question_ids).map((target) => [row, target]),
+    );
+    expect(links).toHaveLength(100);
+    for (const [row, target] of links) {
+      expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+    }
+  });
+
+  it("maps every question to the seven reviewed shared assets", () => {
+    const expectedCounts = Object.fromEntries(
+      manifest.map((asset) => [asset.visual_asset_key, Number(asset.question_count)]),
+    );
+    const actualCounts = Object.fromEntries(
+      Object.keys(expectedCounts).map((assetKey) => [
+        assetKey,
+        rows.filter((row) => row.visual_asset_key === assetKey).length,
+      ]),
+    );
+
+    expect(manifest).toHaveLength(7);
+    expect(actualCounts).toEqual(expectedCounts);
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(100);
+  });
+
+  it("validates all seven PNG files and private Storage paths", () => {
+    expect(
+      validateVisualManifest(manifest, assetDirectory, {
+        expectedAssetCount: 7,
+        expectedQuestionCount: 100,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(fs.readFileSync(path.join(assetDirectory, asset.visual_file_name))),
+      ).toEqual({ width: 1600, height: 1000 });
     }
   });
 });

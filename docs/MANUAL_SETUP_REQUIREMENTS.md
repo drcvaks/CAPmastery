@@ -420,6 +420,31 @@ missing-asset warnings for Q003, Q004, and Q013â€“Q016, whose supplied visu
 are deliberately disabled. The expected linked aggregate is 471/471. Never save
 the administrator password, database password, or a service-role key in a file.
 
+### Aerospace Module 2 questions and shared visuals
+
+Migration 044 is already applied and supports Module 2 without another database
+migration. Upload/register the seven reviewed assets first, then import the 100
+draft questions and run the unchanged linked security suite:
+
+```powershell
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:admodule2:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:admodule2
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+The upload should report seven registered 1600x1000 assets. A first import should
+report 100 inserted, zero failed, and zero missing-asset warnings; a safe rerun
+should report 100 updated instead. The linked aggregate remains 471/471. Students
+see Module 2 only after an administrator assigns exact package `AD_M2_100` with
+the existing audited package-assignment function.
+
 ### Final-test review and Progress follow-up
 
 Apply migration `202608020035_latest_practice_topic_progress.sql` before checking
