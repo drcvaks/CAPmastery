@@ -1009,3 +1009,15 @@ Mitchell full-test usability follow-up:
   then imported Module 3 with 100 inserted, zero updated/skipped/failed, and zero
   warnings. The owner-linked suite passed study sessions 45/45 and the complete
   aggregate 471/471. Student package assignment and owner UI acceptance remain.
+- Prepared Aerospace Dimensions Module 4 as another post-Checkpoint-9 content
+  extension. Its 100-row comma-delimited bank validates without errors or warnings
+  across three ordered chapters (42/42/16), 50 paired families, 100 internal
+  sibling links, 75 final-exam-eligible rows, and complete answer and learning
+  support. All questions map exactly to seven valid 1586x992 shared PNG assets.
+  The importer now creates the `AD_M4` hierarchy and upserts stable drafts in
+  exact private package `AD_M4_100`; the existing visual registry and security
+  model require no migration. Focused actual-file coverage passes 68/68. Asset
+  upload, package assignment, and owner UI acceptance remain. The owner imported
+  Module 4 with 100 inserted, zero updated/skipped/failed, and zero warnings. The
+  owner-linked suite passed study sessions 45/45 and the complete aggregate
+  471/471.

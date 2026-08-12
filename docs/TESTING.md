@@ -206,3 +206,8 @@ The Module 3 actual-file suite adds five assertions covering safe comma-delimite
 detection, 100 unique IDs, the 24/24/22/14/16 five-chapter organization, complete
 support and sibling links, exact seven-asset question mappings, normalization of
 the alternate manifest contract, and seven valid 1448x1086 private PNG objects.
+
+The Module 4 actual-file suite adds five assertions covering the UTF-8 BOM and
+comma delimiter, 100 unique package-bound drafts, the 42/42/16 three-chapter
+organization, complete support and sibling links, 75 final-exam-eligible rows,
+exact seven-asset question mappings, and seven valid 1586x992 private PNG objects.

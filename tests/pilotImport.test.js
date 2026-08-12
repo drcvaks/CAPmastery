@@ -144,6 +144,27 @@ const aerospaceModuleThreeDefaults = {
   common_mistake: "",
   source_status: "approved_source",
 };
+const aerospaceModuleFourDirectory = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Module_4",
+);
+const aerospaceModuleFourInputPath = path.join(
+  aerospaceModuleFourDirectory,
+  "Aerospace_Dimensions_Module_4_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleFourVisualManifestPath = path.join(
+  aerospaceModuleFourDirectory,
+  "Aerospace_Dimensions_Module_4_Visual_Asset_Manifest.csv",
+);
+const aerospaceModuleFourDefaults = {
+  pilot_batch: "AD_M4_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -1126,6 +1147,105 @@ describe("Aerospace Dimensions Module 3 validation and visual integration", () =
           fs.readFileSync(path.join(aerospaceModuleThreeDirectory, asset.visual_file_name)),
         ),
       ).toEqual({ width: 1448, height: 1086 });
+    }
+  });
+});
+
+describe("Aerospace Dimensions Module 4 validation and visual integration", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleFourInputPath);
+  const rows = parseImport(decodeImportBuffer(inputBuffer), aerospaceModuleFourDefaults);
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleFourVisualManifestPath));
+
+  it("accepts the comma-delimited BOM source as one hundred unique draft rows", () => {
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(validateImport(rows, 100)).toEqual({ errors: [], warnings: [] });
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(
+      rows.every(
+        (row) =>
+          row.module_number === "4" &&
+          row.package_code === "AD_M4_100" &&
+          row.review_status === "draft",
+      ),
+    ).toBe(true);
+  });
+
+  it("preserves the three-chapter organization from the source", () => {
+    expect(
+      Object.fromEntries(
+        ["1", "2", "3"].map((chapter) => [
+          chapter,
+          rows.filter((row) => row.chapter_number === chapter).length,
+        ]),
+      ),
+    ).toEqual({ 1: 42, 2: 42, 3: 16 });
+    expect(new Set(rows.map((row) => row.chapter_title))).toEqual(
+      new Set([
+        "History of Rockets",
+        "Rocket Principles, Systems and Engines",
+        "Rocket and Private Space Travel",
+      ]),
+    );
+  });
+
+  it("retains complete feedback, support, eligibility, and sibling links", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    expect(rows.filter((row) => row.eligible_for_final_exam === "true")).toHaveLength(75);
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.memory_aid).not.toBe("");
+      expect(row.short_explanation).not.toBe("");
+      expect(row.show_visual_button).toBe("true");
+      for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
+        expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+      }
+    }
+  });
+
+  it("maps all questions exactly to the seven manifest assets", () => {
+    const actualCounts = Object.fromEntries(
+      manifest.map((asset) => [
+        asset.visual_asset_key,
+        rows.filter((row) => row.visual_asset_key === asset.visual_asset_key).length,
+      ]),
+    );
+    expect(manifest).toHaveLength(7);
+    expect(actualCounts).toEqual({
+      module4_history_timeline: 12,
+      module4_modern_rocketry_pioneers: 10,
+      module4_space_race_launches: 20,
+      module4_newton_rocket_forces: 16,
+      module4_rocket_systems_controls: 10,
+      module4_propulsion_staging: 12,
+      module4_land_speed_private_space: 20,
+    });
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(100);
+  });
+
+  it("normalizes the manifest contract and validates all PNG files", () => {
+    expect(
+      validateVisualManifest(manifest, aerospaceModuleFourDirectory, {
+        expectedAssetCount: 7,
+        expectedQuestionCount: null,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(asset.visual_group).toBe(asset.visual_asset_key);
+      expect(asset.visual_status).toBe("approved");
+      expect(asset.visual_alt_text).toBe(asset.visual_description);
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(
+          fs.readFileSync(path.join(aerospaceModuleFourDirectory, asset.visual_file_name)),
+        ),
+      ).toEqual({ width: 1586, height: 992 });
     }
   });
 });

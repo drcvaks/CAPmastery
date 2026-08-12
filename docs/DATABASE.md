@@ -248,4 +248,9 @@ Module 3 likewise needs no schema migration. Its operator import creates volume
 draft questions in exact package `AD_M3_100`. Seven distinct `module3_*` visual
 objects reuse migration 044's private Storage registry and answer-aware policies.
 
+Module 4 also needs no schema migration. Its operator import creates volume
+`AD_M4`, three ordered chapter/topic rows, governed learning metadata, and 100
+draft questions in exact package `AD_M4_100`. Seven distinct `module4_*` visual
+objects reuse migration 044's private Storage registry and answer-aware policies.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

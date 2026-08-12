@@ -148,6 +148,8 @@ const AEROSPACE_MODULE_2_FILENAME =
   "Aerospace_Dimensions_Module_2_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_3_FILENAME =
   "Aerospace_Dimensions_Module_3_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_4_FILENAME =
+  "Aerospace_Dimensions_Module_4_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -324,9 +326,59 @@ const AEROSPACE_MODULE_3_CHAPTER_CONFIGS = new Map(
     },
   ]),
 );
+const AEROSPACE_MODULE_4_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M4_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M4",
+  volumeTitle: "Aerospace Dimensions, Module 4: Rockets",
+  volumeSortOrder: 40,
+  sourceExternalReference: "CAP:AD:M4:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 4: Rockets",
+  finalExamTagged: true,
+  moduleNumber: 4,
+  aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 42],
+    [2, 42],
+    [3, 16],
+  ]),
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "AD_M4_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+};
+const AEROSPACE_MODULE_4_CHAPTER_CONFIGS = new Map(
+  [
+    [1, "History of Rockets"],
+    [2, "Rocket Principles, Systems and Engines"],
+    [3, "Rocket and Private Space Travel"],
+  ].map(([chapterNumber, chapterTitle]) => [
+    chapterNumber,
+    {
+      chapterCode: `AD_M4_C${chapterNumber}`,
+      chapterTitle,
+      chapterSortOrder: chapterNumber * 10,
+      topicCode: `AD_M4_C${chapterNumber}`,
+      topicTitle: `Aerospace Dimensions, Module 4, Chapter ${chapterNumber}: ${chapterTitle}`,
+      topicDescription: `Private Module 4 Chapter ${chapterNumber} Billy Mitchell Aerospace pilot content.`,
+      topicSortOrder: chapterNumber * 10,
+    },
+  ]),
+);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_4_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_4_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_4_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === AEROSPACE_MODULE_3_FILENAME) {
     return {
       ...AEROSPACE_MODULE_3_BASE_CONFIG,
