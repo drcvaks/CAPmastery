@@ -121,6 +121,8 @@ Module 1 does not imply Module 2 access, or vice versa.
 Module 3 uses exact package `AD_M3_100` and remains equally independent.
 Module 4 uses exact package `AD_M4_100`; access to Modules 1-3 does not imply
 Module 4 access.
+Module 5 uses exact package `AD_M5_100` and remains independent of every other
+module assignment.
 
 The Study catalog is access-aware through `get_accessible_study_catalog()`. The
 security-definer function verifies the student role and returns only exam/topic

@@ -1021,3 +1021,18 @@ Mitchell full-test usability follow-up:
   Module 4 with 100 inserted, zero updated/skipped/failed, and zero warnings. The
   owner-linked suite passed study sessions 45/45 and the complete aggregate
   471/471.
+- Prepared Aerospace Dimensions Module 5 as another post-Checkpoint-9 content
+  extension. The original file exposed four controlled-vocabulary conflicts;
+  exact package-specific aliases now normalize their equivalent database values
+  without weakening validation or modifying question/answer content. The bank
+  validates as 100 unique drafts across four ordered chapters (24/24/26/26), 50
+  paired families, 100 internal links, balanced answer/style/difficulty/cognition
+  distributions, 75 final-exam-eligible rows, and complete learning support. All
+  questions map exactly to seven valid 1586x992 shared PNG assets. No migration is
+  required. Focused actual-file coverage passes 73/73. The full local gate passes
+  strict TypeScript, Expo ESLint, repository formatting, and all 25 Jest suites
+  with 155/155 tests. Expo public configuration resolves and the cache-cleared web
+  export bundles 1,582 modules. The owner imported Module 5 with 100 inserted,
+  zero updated/skipped/failed, and zero warnings. The owner-linked suite passed
+  study sessions 45/45 and the complete aggregate 471/471. Package assignment
+  and owner UI acceptance remain.

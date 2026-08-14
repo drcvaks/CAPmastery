@@ -163,6 +163,24 @@ rows remain authoritative for exact per-asset mapping counts, while upload
 validation independently requires safe keys, private paths, approved status,
 descriptions/alt text, and valid image files.
 
+## Aerospace Dimensions Module 5 bank
+
+The owner-supplied Module 5 source is a UTF-8 BOM, comma-delimited 100-question,
+50-column bank in private package `AD_M5_100`. Its four chapters contain 24, 24,
+26, and 26 questions. It has 50 direct/50 application questions, 50 medium/50
+medium-hard rows, 50 recall/50 application rows, 50 paired families, 100 internal
+sibling links, 75 final-exam-eligible rows, and exactly 25 correct answers in each
+A-D position.
+
+The file uses four source labels outside the controlled database vocabulary. The
+Module-5 import configuration maps only their equivalent meanings:
+`Aerospace_Dimensions_Module_5_source_grounded` to
+`original_textbook_grounded`, `Module_4_100_question_bank_style` to
+`Mitchell_Aerospace_sample_style_analysis`, `recommended` visual priority to
+`medium`, and `optional_modal` to `optional_after_answer`. Validation remains
+strict for every other package and field. All 100 rows map to seven reviewed
+shared 1586x992 PNG assets.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

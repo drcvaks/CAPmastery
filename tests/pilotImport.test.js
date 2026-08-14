@@ -165,6 +165,37 @@ const aerospaceModuleFourDefaults = {
   common_mistake: "",
   source_status: "approved_source",
 };
+const aerospaceModuleFiveDirectory = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Module_5",
+);
+const aerospaceModuleFiveInputPath = path.join(
+  aerospaceModuleFiveDirectory,
+  "Aerospace_Dimensions_Module_5_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleFiveVisualManifestPath = path.join(
+  aerospaceModuleFiveDirectory,
+  "Aerospace_Dimensions_Module_5_Visual_Asset_Manifest.csv",
+);
+const aerospaceModuleFiveDefaults = {
+  pilot_batch: "AD_M5_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
+const aerospaceModuleFiveAliases = {
+  content_origin: {
+    Aerospace_Dimensions_Module_5_source_grounded: "original_textbook_grounded",
+  },
+  style_reference: {
+    Module_4_100_question_bank_style: "Mitchell_Aerospace_sample_style_analysis",
+  },
+  visual_priority: { recommended: "medium" },
+  visual_display_mode: { optional_modal: "optional_after_answer" },
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -1244,6 +1275,120 @@ describe("Aerospace Dimensions Module 4 validation and visual integration", () =
       expect(
         readPngDimensions(
           fs.readFileSync(path.join(aerospaceModuleFourDirectory, asset.visual_file_name)),
+        ),
+      ).toEqual({ width: 1586, height: 992 });
+    }
+  });
+});
+
+describe("Aerospace Dimensions Module 5 validation and visual integration", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleFiveInputPath);
+  const decodedInput = decodeImportBuffer(inputBuffer);
+  const rows = parseImport(decodedInput, aerospaceModuleFiveDefaults, aerospaceModuleFiveAliases);
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleFiveVisualManifestPath));
+
+  it("normalizes only the four documented source labels into controlled values", () => {
+    const rawRows = parseImport(decodedInput, aerospaceModuleFiveDefaults);
+    expect(new Set(rawRows.map((row) => row.content_origin))).toEqual(
+      new Set(["Aerospace_Dimensions_Module_5_source_grounded"]),
+    );
+    expect(new Set(rows.map((row) => row.content_origin))).toEqual(
+      new Set(["original_textbook_grounded"]),
+    );
+    expect(new Set(rows.map((row) => row.style_reference))).toEqual(
+      new Set(["Mitchell_Aerospace_sample_style_analysis"]),
+    );
+    expect(new Set(rows.map((row) => row.visual_priority))).toEqual(new Set(["medium", "high"]));
+    expect(new Set(rows.map((row) => row.visual_display_mode))).toEqual(
+      new Set(["optional_after_answer"]),
+    );
+  });
+
+  it("accepts the 50-column comma-delimited BOM source as one hundred unique drafts", () => {
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(
+      decodedInput
+        .replace(/^\uFEFF/, "")
+        .split(/\r?\n/, 1)[0]
+        .split(","),
+    ).toHaveLength(50);
+    expect(validateImport(rows, 100)).toEqual({ errors: [], warnings: [] });
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(
+      rows.every(
+        (row) =>
+          row.module_number === "5" &&
+          row.package_code === "AD_M5_100" &&
+          row.review_status === "draft",
+      ),
+    ).toBe(true);
+  });
+
+  it("preserves chapter, style, difficulty, cognition, eligibility, and answer balance", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+    expect(["1", "2", "3", "4"].map((chapter) => count("chapter_number", chapter))).toEqual([
+      24, 24, 26, 26,
+    ]);
+    expect(count("question_style", "direct_exam_style")).toBe(50);
+    expect(count("question_style", "brief_application")).toBe(50);
+    expect(count("difficulty", "medium")).toBe(50);
+    expect(count("difficulty", "medium_hard")).toBe(50);
+    expect(count("cognitive_level", "recall")).toBe(50);
+    expect(count("cognitive_level", "application")).toBe(50);
+    expect(count("eligible_for_final_exam", "true")).toBe(75);
+    for (const letter of ["A", "B", "C", "D"]) expect(count("correct_letter", letter)).toBe(25);
+  });
+
+  it("retains complete feedback, support, and paired sibling links", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.show_visual_button).toBe("true");
+      for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
+        expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+      }
+    }
+  });
+
+  it("maps all questions exactly to seven valid 1586 by 992 PNG assets", () => {
+    const actualCounts = Object.fromEntries(
+      manifest.map((asset) => [
+        asset.visual_asset_key,
+        rows.filter((row) => row.visual_asset_key === asset.visual_asset_key).length,
+      ]),
+    );
+    expect(actualCounts).toEqual({
+      module5_space_basics: 16,
+      module5_galaxies_universe: 8,
+      module5_stars_life_cycle: 24,
+      module5_sun_moon_eclipses: 20,
+      module5_small_bodies: 6,
+      module5_inner_outer_planets: 22,
+      module5_planet_dwarf_pluto: 4,
+    });
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(100);
+    expect(
+      validateVisualManifest(manifest, aerospaceModuleFiveDirectory, {
+        expectedAssetCount: 7,
+        expectedQuestionCount: null,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(
+          fs.readFileSync(path.join(aerospaceModuleFiveDirectory, asset.visual_file_name)),
         ),
       ).toEqual({ width: 1586, height: 992 });
     }

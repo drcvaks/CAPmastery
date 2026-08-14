@@ -211,3 +211,9 @@ The Module 4 actual-file suite adds five assertions covering the UTF-8 BOM and
 comma delimiter, 100 unique package-bound drafts, the 42/42/16 three-chapter
 organization, complete support and sibling links, 75 final-exam-eligible rows,
 exact seven-asset question mappings, and seven valid 1586x992 private PNG objects.
+
+The Module 5 actual-file suite adds five assertions covering its four explicit
+source-label aliases, UTF-8 BOM and 50-column comma contract, 100 unique
+package-bound drafts, 24/24/26/26 chapter organization, exact style/difficulty/
+cognition/eligibility/answer balance, complete support and sibling links, exact
+seven-asset mappings, and seven valid 1586x992 private PNG objects.

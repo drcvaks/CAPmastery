@@ -150,6 +150,8 @@ const AEROSPACE_MODULE_3_FILENAME =
   "Aerospace_Dimensions_Module_3_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_4_FILENAME =
   "Aerospace_Dimensions_Module_4_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_5_FILENAME =
+  "Aerospace_Dimensions_Module_5_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -370,9 +372,71 @@ const AEROSPACE_MODULE_4_CHAPTER_CONFIGS = new Map(
     },
   ]),
 );
+const AEROSPACE_MODULE_5_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M5_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M5",
+  volumeTitle: "Aerospace Dimensions, Module 5: Space Environment",
+  volumeSortOrder: 50,
+  sourceExternalReference: "CAP:AD:M5:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 5: Space Environment",
+  finalExamTagged: true,
+  moduleNumber: 5,
+  aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 24],
+    [2, 24],
+    [3, 26],
+    [4, 26],
+  ]),
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "AD_M5_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+  valueAliases: {
+    content_origin: {
+      Aerospace_Dimensions_Module_5_source_grounded: "original_textbook_grounded",
+    },
+    style_reference: {
+      Module_4_100_question_bank_style: "Mitchell_Aerospace_sample_style_analysis",
+    },
+    visual_priority: { recommended: "medium" },
+    visual_display_mode: { optional_modal: "optional_after_answer" },
+  },
+};
+const AEROSPACE_MODULE_5_CHAPTER_CONFIGS = new Map(
+  [
+    [1, "Space"],
+    [2, "Stars"],
+    [3, "Our Solar System: Sun, Moon, and More"],
+    [4, "Our Solar System: Planets"],
+  ].map(([chapterNumber, chapterTitle]) => [
+    chapterNumber,
+    {
+      chapterCode: `AD_M5_C${chapterNumber}`,
+      chapterTitle,
+      chapterSortOrder: chapterNumber * 10,
+      topicCode: `AD_M5_C${chapterNumber}`,
+      topicTitle: `Aerospace Dimensions, Module 5, Chapter ${chapterNumber}: ${chapterTitle}`,
+      topicDescription: `Private Module 5 Chapter ${chapterNumber} Billy Mitchell Aerospace pilot content.`,
+      topicSortOrder: chapterNumber * 10,
+    },
+  ]),
+);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_5_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_5_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_5_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === AEROSPACE_MODULE_4_FILENAME) {
     return {
       ...AEROSPACE_MODULE_4_BASE_CONFIG,
@@ -809,7 +873,11 @@ async function main() {
   if (!Number.isInteger(expectedCount) || expectedCount < 1) {
     throw new Error("Expected row count must be a positive integer.");
   }
-  const rows = parseImport(decodeImportBuffer(await fs.readFile(inputPath)), config.fieldDefaults);
+  const rows = parseImport(
+    decodeImportBuffer(await fs.readFile(inputPath)),
+    config.fieldDefaults,
+    config.valueAliases,
+  );
   const validation = validateImport(rows, expectedCount);
   if (validation.errors.length > 0) {
     throw new Error(`Import validation failed:\n${validation.errors.join("\n")}`);

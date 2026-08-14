@@ -139,7 +139,7 @@ function parseDelimited(text, delimiter = "\t") {
   return rows.filter((values) => values.some((value) => value.length > 0));
 }
 
-function parseImport(text, defaults = {}) {
+function parseImport(text, defaults = {}, valueAliases = {}) {
   const normalizedText = text.replace(/^\uFEFF/, "");
   const firstLine = normalizedText.split(/\r?\n/, 1)[0];
   const delimiter = firstLine.includes("\t") ? "\t" : ",";
@@ -156,12 +156,16 @@ function parseImport(text, defaults = {}) {
     if (values.length !== headers.length) {
       throw new Error(`Row ${index + 2} has ${values.length} fields; expected ${headers.length}.`);
     }
-    return {
+    const row = {
       ...Object.fromEntries(
         Object.entries(defaults).map(([field, value]) => [field, String(value).trim()]),
       ),
       ...Object.fromEntries(headers.map((header, column) => [header, values[column].trim()])),
     };
+    for (const [field, aliases] of Object.entries(valueAliases)) {
+      if (Object.hasOwn(aliases, row[field])) row[field] = aliases[row[field]];
+    }
+    return row;
   });
 }
 
