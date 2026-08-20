@@ -46,20 +46,31 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
   const createTest = useCreatePracticeTest();
   const [timed, setTimed] = useState(true);
   const minutes = Math.ceil(option.time_limit_seconds / 60);
-  const isFullExam = option.selection_strategy === "mitchell_full_exam";
+  const isLeadershipFullExam = option.selection_strategy === "mitchell_full_exam";
+  const isAerospaceFullExam = option.selection_strategy === "aerospace_full_exam";
+  const isFullExam = isLeadershipFullExam || isAerospaceFullExam;
+  const coverageLabel = isLeadershipFullExam
+    ? "Chapters 4–8 exam pool"
+    : isAerospaceFullExam
+      ? "Modules 1–7 exam pool"
+      : "Chapter 1 legacy pilot blueprint";
 
   return (
     <AppCard title={option.blueprint_name} description={option.description}>
       <Text style={styles.unofficial}>Unofficial study practice—not an official CAP exam.</Text>
       <Text style={styles.detail}>
-        {option.question_count} questions ·{" "}
-        {isFullExam ? "Chapters 4–8 exam pool" : "Chapter 1 legacy pilot blueprint"} · Feedback
-        after completion
+        {option.question_count} questions · {coverageLabel} · Feedback after completion
       </Text>
-      {isFullExam ? (
+      {isLeadershipFullExam ? (
         <Text style={styles.muted}>
           Every form uses 7–13 questions from each chapter, favors high exam-likeness questions, and
           avoids duplicate question families.
+        </Text>
+      ) : null}
+      {isAerospaceFullExam ? (
+        <Text style={styles.muted}>
+          Every form balances all seven Aerospace Dimensions modules, favors high exam-likeness
+          questions, and avoids duplicate question families.
         </Text>
       ) : null}
       {!isFullExam ? (

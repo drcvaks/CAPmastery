@@ -12,6 +12,7 @@ import {
   setPracticeTestPaused,
 } from "../../../services/practiceService";
 import { studyQueryKeys } from "../../study/hooks/useStudySession";
+import type { PracticeSelectionStrategy } from "../schemas";
 
 export const practiceQueryKeys = {
   options: ["practice", "options"] as const,
@@ -33,7 +34,7 @@ export function useCreatePracticeTest() {
     }: {
       blueprintId: string;
       timed: boolean;
-      strategy: "fixed_blueprint" | "mitchell_full_exam";
+      strategy: PracticeSelectionStrategy;
     }) => createPracticeTest(blueprintId, timed, strategy),
   });
 }

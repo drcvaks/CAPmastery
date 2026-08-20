@@ -267,7 +267,7 @@ select is(
 );
 select throws_ok(
   format('select * from public.get_practice_test_review_progress(%L)', (select id from mitchell_sessions)),
-  'P0002', 'Completed Mitchell practice test not found',
+  'P0002', 'Completed full practice test not found',
   'review progress remains unavailable before completion'
 );
 select lives_ok(

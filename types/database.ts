@@ -2394,6 +2394,10 @@ export type Database = {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;
       };
+      create_aerospace_full_practice_exam: {
+        Args: { p_blueprint_id: string; p_timed?: boolean };
+        Returns: string;
+      };
       create_practice_test: {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;

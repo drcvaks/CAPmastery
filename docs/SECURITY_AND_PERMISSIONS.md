@@ -136,13 +136,16 @@ text, choices, answer keys, feedback, or another student's assignments. Client
 hiding is a usability measure; session creation independently repeats the access
 check.
 
-## Mitchell full-exam enforcement
+## Leadership and Aerospace full-exam enforcement
 
 - Final-exam eligibility is a content classification, not an authorization grant.
   Every candidate must still be approved/active or belong to an exact private
   package assigned to the authenticated student.
 - The server selects and stores all 50 question IDs and versions. The client cannot
-  supply the pool, chapter allocation, family exclusions, answer keys, or score.
+  supply the pool, chapter/module allocation, family exclusions, answer keys, or score.
+- The Aerospace launcher requires enough accessible eligible families in all
+  seven modules. Creation independently repeats this check and accepts draft rows
+  only from exact packages assigned to the authenticated student.
 - Back/Next navigation and flags do not reveal correctness. Flags are persisted by
   owner-checked functions and are unreadable by another student.
 - Answers remain server-graded. Saving each answer protects work across refreshes,
@@ -161,7 +164,7 @@ check.
   policy. Another student receives the same not-found response as a nonexistent
   session, and no protected assessment or feedback field is returned.
 - Missed-answer review is not client-writable table state. The protected marker
-  function verifies test ownership, completed status, Mitchell full-exam strategy,
+  function verifies test ownership, completed status, a supported full-exam strategy,
   tracking version, an existing attempt, and an incorrect server-graded result.
   The summary function uses the existing self-or-active-linked-guardian progress
   check. Guardians receive aggregate review counts only; reviewed row IDs are

@@ -169,6 +169,15 @@ the active exam's visible timer and Pause control, hidden chapter cue,
 Backâ€“Flagâ€“Next ordering, question-50-only completion action, and restored chapter
 label during review.
 
+`aerospace_full_exam.test.sql` declares 31 rollback-only assertions. It verifies
+the dedicated strategy and protected creation RPC, 60-minute/pause configuration,
+package-aware launcher visibility, denial without all seven module packages,
+exactly 50 unique questions and families, seven-to-eight questions per module,
+one rotated eighth-question module, frozen timer/pause settings, flags, secure
+completion, missed-answer review tracking, and latest-test analysis across all
+seven module topics. Client schema coverage accepts only the three known server
+selection strategies, including `aerospace_full_exam`.
+
 Migration 042 expands `mitchell_full_exam.test.sql` from 36 to 56 assertions. It
 checks the review columns and function grants, automatic tracking on new full
 tests, pre-completion denial, wrong-answer counting, cross-student denial,

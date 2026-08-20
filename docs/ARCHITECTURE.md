@@ -140,10 +140,11 @@ Aerospace exam. The nullable `questions.module_number` classification supports
 all seven future modules without duplicating chapter titles on question rows.
 
 Assigned students can use all 100 Module 1 questions through the existing secure
-adaptive study-session flow. A dedicated module practice-test blueprint is
-intentionally deferred until the owner chooses its question count and time limit;
-the source's eligibility tags are preserved now so that later selector can be
-added without changing or reimporting the question schema.
+adaptive study-session flow. After all seven modules were imported, the preserved
+eligibility tags became the input to a shared 50-question Aerospace full-test
+selector. The selector balances every form at seven questions per module plus one
+rotating eighth question, with a 60-minute optional timer and server-authoritative
+pause. No question reimport or answer-key exposure is required.
 
 The Study catalog renders Aerospace volumes as expandable module controls and
 orders their chapter topics by normalized hierarchy sort values. Only modules
@@ -159,8 +160,8 @@ authenticated student. The client displays only exams with at least ten total
 available questions and chapters with at least ten available questions, preventing
 known-failing session controls without exposing prompts, packages, or answer data.
 
-Progress reads a separate protected projection of the latest completed Mitchell
-full test. This keeps the chapter snapshot current when another full test is
+Progress reads a separate protected projection of the latest completed Leadership
+or Aerospace full test. This keeps the topic snapshot current when another full test is
 completed without mixing practice attempts into ordinary adaptive mastery. Each
 student chapter row starts the existing secure 10-question adaptive session with
 that chapter topic as its filter and opens the new session immediately; linked
@@ -184,7 +185,7 @@ owned session delivery releases an approved asset. Storage RLS independently
 requires an answered study question or a completed delayed-feedback session, so a
 known object path is not sufficient to fetch a visual early.
 
-Missed-answer review for newly created Mitchell 50-question tests is persistent
+Missed-answer review for newly created Leadership and Aerospace 50-question tests is persistent
 and resumable. The result screen reads a protected review summary, starts at the
 first unreviewed missed answer, and records completion only when the cadet uses
 Next missed answer or Finish review after seeing the released explanation. The

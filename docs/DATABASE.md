@@ -223,6 +223,24 @@ student's completed tracked test. `get_practice_test_review_progress` returns th
 missed count, reviewed count, percentage, completion state, and reviewed row IDs
 for resumable review to the student or an authorized linked guardian.
 
+## Aerospace full practice-exam extension
+
+Migration `202608200045` adds the `aerospace_full_exam` blueprint strategy and an
+active, explicitly unofficial 50-question blueprint for the Billy Mitchell
+Aerospace track. `create_aerospace_full_practice_exam` requires the student role,
+an active Aerospace blueprint, and an accessible eligible high-likeness pool in
+all seven modules. It chooses seven distinct question families per module plus an
+eighth family from one deterministically rotated module, then freezes the exact
+50 question IDs, versions, and order in the normal practice-test session tables.
+
+The Aerospace launcher is returned only when the authenticated student can access
+at least eight eligible families in every module. This is a usability filter, not
+the authorization boundary: creation independently rechecks every selected row
+against approved-active access or the exact assigned private package. Existing
+flags, 60-minute timer snapshot, pause accounting, completion-gated scoring,
+wrong-answer review, parent review percentage, and latest-test topic analysis are
+shared with the Leadership full exam.
+
 Forward migration `202608070043` makes historical tracking availability an
 explicit `false` instead of SQL `null`. It changes no stored learning data and
 keeps the migration-042 function contract intact.

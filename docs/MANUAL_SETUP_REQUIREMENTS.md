@@ -573,3 +573,22 @@ npx.cmd supabase db push --linked
 npm.cmd run db:test:linked
 Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
 ```
+
+### Aerospace 50-question full practice exam
+
+Apply migration `202608200045_aerospace_full_practice_exam.sql`, then run the
+complete linked rollback-only pgTAP suite. No new account, API key, storage
+bucket, or environment variable is required.
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Migration 045 was applied to the linked development project and the aggregate
+passed 502/502. The Aerospace launcher
+appears only for a student who can access at least eight eligible question
+families in each of Modules 1–7. For the current draft banks, assign all exact
+packages `AD_M1_100` through `AD_M7_100` to the intended student.

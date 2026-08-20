@@ -1063,3 +1063,23 @@ Mitchell full-test usability follow-up:
   Module 7 with 100 inserted, zero updated/skipped/failed, and zero warnings. The
   owner-linked suite passed study sessions 45/45 and the complete aggregate
   471/471. Package assignment and owner UI acceptance remain.
+- Added the post-Checkpoint-9 Billy Mitchell Aerospace full practice exam. New
+  migration `202608200045_aerospace_full_practice_exam.sql` introduces the
+  `aerospace_full_exam` strategy, an active unofficial 50-question/60-minute
+  pause-enabled blueprint, package-aware option visibility, and a protected
+  selector that freezes seven distinct families from every module plus one
+  deterministic rotating extra. The existing flag, delayed-feedback, timer,
+  pause, wrong-only review, review-percentage, and latest-topic Progress paths now
+  accept both Leadership and Aerospace full-test strategies. The client launcher
+  identifies the Modules 1–7 pool and dispatches only to the matching typed RPC.
+  A new 31-assertion rollback-only SQL suite covers authorization, access hiding,
+  balanced/unique selection, immutable session settings, flags, grading,
+  completion, review tracking, and seven-module Progress analysis. Local
+  validation passes strict TypeScript; Expo ESLint; formatting; all 26 Jest suites
+  and 167/167 tests; public Expo configuration; and a 1,582-module web export.
+  Expo Doctor passed 19/21 checks: its config-schema request lost its Expo API
+  connection, and it reports five existing SDK 57 patch-level mismatches. The
+  owner applied migration 045 to the linked development project. Supabase CLI's
+  post-application migration-catalog cache refresh reported an authentication
+  warning, but the migration completed and every linked rollback-only suite
+  passed, including Aerospace full exam 31/31 and the complete aggregate 502/502.

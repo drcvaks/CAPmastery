@@ -7,6 +7,7 @@ import {
   practiceWeakAreaSchema,
   type PracticeTestOption,
   type PracticeReviewProgress,
+  type PracticeSelectionStrategy,
   type PracticeTopicResult,
   type PracticeWeakArea,
 } from "../features/practice/schemas";
@@ -21,12 +22,15 @@ export async function fetchPracticeTestOptions(): Promise<PracticeTestOption[]> 
 export async function createPracticeTest(
   blueprintId: string,
   timed: boolean,
-  strategy: "fixed_blueprint" | "mitchell_full_exam",
+  strategy: PracticeSelectionStrategy,
 ): Promise<string> {
-  const functionName =
-    strategy === "mitchell_full_exam"
-      ? "create_mitchell_full_practice_exam"
-      : "create_practice_test";
+  const functionName = (
+    {
+      aerospace_full_exam: "create_aerospace_full_practice_exam",
+      fixed_blueprint: "create_practice_test",
+      mitchell_full_exam: "create_mitchell_full_practice_exam",
+    } as const
+  )[strategy];
   const { data, error } = await getSupabaseClient().rpc(functionName, {
     p_blueprint_id: blueprintId,
     p_timed: timed,

@@ -1,10 +1,18 @@
 import { z } from "zod";
 
+export const practiceSelectionStrategySchema = z.enum([
+  "fixed_blueprint",
+  "mitchell_full_exam",
+  "aerospace_full_exam",
+]);
+
+export type PracticeSelectionStrategy = z.infer<typeof practiceSelectionStrategySchema>;
+
 export const practiceTestOptionSchema = z
   .object({
     blueprint_id: z.uuid(),
     blueprint_code: z.string().min(1),
-    selection_strategy: z.enum(["fixed_blueprint", "mitchell_full_exam"]),
+    selection_strategy: practiceSelectionStrategySchema,
     exam_id: z.uuid(),
     exam_title: z.string().min(1),
     blueprint_name: z.string().min(1),
