@@ -223,3 +223,11 @@ The Module 6 actual-file suite adds five assertions covering its UTF-8 BOM and
 organization, exact style/difficulty/cognition/eligibility/answer balance,
 controlled metadata compatibility without aliases, complete support and sibling
 links, exact seven-asset mappings, and seven valid 1448x1086 private PNG objects.
+
+The Module 7 actual-file suite adds five assertions covering its UTF-8 BOM and
+50-column comma contract, 100 unique package-bound drafts, 24/20/20/18/18 chapter
+organization, style/cognition/eligibility/weight/answer distributions, controlled
+metadata compatibility, complete support and sibling links, and seven valid
+1448x1086 PNG objects. Asset-count assertions explicitly preserve the supplied
+zero-question mapping for the quick-review visual while reconciling the remaining
+six mappings to all 100 questions.

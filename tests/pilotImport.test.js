@@ -217,6 +217,27 @@ const aerospaceModuleSixDefaults = {
   common_mistake: "",
   source_status: "approved_source",
 };
+const aerospaceModuleSevenDirectory = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Module_7",
+);
+const aerospaceModuleSevenInputPath = path.join(
+  aerospaceModuleSevenDirectory,
+  "Aerospace_Dimensions_Module_7_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleSevenVisualManifestPath = path.join(
+  aerospaceModuleSevenDirectory,
+  "Aerospace_Dimensions_Module_7_Visual_Asset_Manifest.csv",
+);
+const aerospaceModuleSevenDefaults = {
+  pilot_batch: "AD_M7_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -1523,6 +1544,116 @@ describe("Aerospace Dimensions Module 6 validation and visual integration", () =
       expect(
         readPngDimensions(
           fs.readFileSync(path.join(aerospaceModuleSixDirectory, asset.visual_file_name)),
+        ),
+      ).toEqual({ width: 1448, height: 1086 });
+    }
+  });
+});
+
+describe("Aerospace Dimensions Module 7 validation and visual integration", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleSevenInputPath);
+  const decodedInput = decodeImportBuffer(inputBuffer);
+  const rows = parseImport(decodedInput, aerospaceModuleSevenDefaults);
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleSevenVisualManifestPath));
+
+  it("accepts the 50-column comma-delimited BOM source as one hundred unique drafts", () => {
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(
+      decodedInput
+        .replace(/^\uFEFF/, "")
+        .split(/\r?\n/, 1)[0]
+        .split(","),
+    ).toHaveLength(50);
+    expect(validateImport(rows, 100)).toEqual({ errors: [], warnings: [] });
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(
+      rows.every(
+        (row) =>
+          row.module_number === "7" &&
+          row.package_code === "AD_M7_100" &&
+          row.review_status === "draft",
+      ),
+    ).toBe(true);
+  });
+
+  it("preserves chapter, purpose, eligibility, weight, and answer distributions", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+    expect(["1", "2", "3", "4", "5"].map((chapter) => count("chapter_number", chapter))).toEqual([
+      24, 20, 20, 18, 18,
+    ]);
+    expect(count("question_style", "direct_exam_style")).toBe(50);
+    expect(count("question_style", "scenario_exam_style")).toBe(50);
+    expect(count("cognitive_level", "recall")).toBe(50);
+    expect(count("cognitive_level", "application")).toBe(50);
+    expect(count("eligible_for_final_exam", "true")).toBe(75);
+    expect(count("final_exam_weight", "1.0")).toBe(75);
+    expect(count("final_exam_weight", "0.5")).toBe(25);
+    for (const letter of ["A", "B", "C", "D"]) expect(count("correct_letter", letter)).toBe(25);
+  });
+
+  it("uses the existing controlled metadata values without normalization", () => {
+    expect(new Set(rows.map((row) => row.content_origin))).toEqual(
+      new Set(["original_textbook_grounded"]),
+    );
+    expect(new Set(rows.map((row) => row.style_reference))).toEqual(
+      new Set(["Mitchell_Aerospace_sample_style_analysis"]),
+    );
+    expect(new Set(rows.map((row) => row.visual_priority))).toEqual(new Set(["high"]));
+    expect(new Set(rows.map((row) => row.visual_display_mode))).toEqual(
+      new Set(["optional_after_answer"]),
+    );
+  });
+
+  it("retains complete feedback, support, and paired sibling links", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.show_visual_button).toBe("true");
+      for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
+        expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+      }
+    }
+  });
+
+  it("validates seven assets while preserving the one intentionally unused visual", () => {
+    const actualCounts = Object.fromEntries(
+      manifest.map((asset) => [
+        asset.visual_asset_key,
+        rows.filter((row) => row.visual_asset_key === asset.visual_asset_key).length,
+      ]),
+    );
+    expect(actualCounts).toEqual({
+      module7_cyberspace_basics: 14,
+      module7_common_cyberattacks: 20,
+      module7_quick_review_memory_aids: 0,
+      module7_personal_security_privacy: 20,
+      module7_digital_footprint_safety: 18,
+      module7_cyber_careers_pathways: 18,
+      module7_network_communication: 10,
+    });
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(100);
+    expect(
+      validateVisualManifest(manifest, aerospaceModuleSevenDirectory, {
+        expectedAssetCount: 7,
+        expectedQuestionCount: null,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(
+          fs.readFileSync(path.join(aerospaceModuleSevenDirectory, asset.visual_file_name)),
         ),
       ).toEqual({ width: 1448, height: 1086 });
     }

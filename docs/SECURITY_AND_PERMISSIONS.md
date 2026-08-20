@@ -125,6 +125,9 @@ Module 5 uses exact package `AD_M5_100` and remains independent of every other
 module assignment.
 Module 6 uses exact package `AD_M6_100`; access requires its own active assignment
 and is not implied by access to Modules 1-5.
+Module 7 uses exact package `AD_M7_100` and remains independent of every other
+module assignment. Registering an unreferenced visual does not make it readable
+through question feedback.
 
 The Study catalog is access-aware through `get_accessible_study_catalog()`. The
 security-definer function verifies the student role and returns only exam/topic

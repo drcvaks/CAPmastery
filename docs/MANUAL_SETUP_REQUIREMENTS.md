@@ -537,6 +537,30 @@ missing-asset warnings on first import. A safe rerun updates the stable IDs.
 Linked pgTAP should remain 471/471. Assign exact package `AD_M6_100` only to
 intended students after verification.
 
+### Aerospace Module 7 questions and shared visuals
+
+No database migration is required. Upload/register the seven Module 7 assets,
+then import the 100 draft questions and run linked security tests:
+
+```powershell
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:admodule7:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:admodule7
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expect seven registered 1448x1086 assets, then 100 inserted and zero failed or
+missing-asset warnings on first import. The quick-review asset is valid but has
+no supplied question mapping, so it will not appear in feedback. A safe rerun
+updates the stable IDs. Linked pgTAP should remain 471/471. Assign exact package
+`AD_M7_100` only to intended students after verification.
+
 ### Final-test review and Progress follow-up
 
 Apply migration `202608020035_latest_practice_topic_progress.sql` before checking

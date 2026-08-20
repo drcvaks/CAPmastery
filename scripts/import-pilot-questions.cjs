@@ -154,6 +154,8 @@ const AEROSPACE_MODULE_5_FILENAME =
   "Aerospace_Dimensions_Module_5_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_6_FILENAME =
   "Aerospace_Dimensions_Module_6_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_7_FILENAME =
+  "Aerospace_Dimensions_Module_7_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -474,9 +476,63 @@ const AEROSPACE_MODULE_6_CHAPTER_CONFIGS = new Map(
     },
   ]),
 );
+const AEROSPACE_MODULE_7_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M7_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M7",
+  volumeTitle: "Aerospace Dimensions, Module 7: Cyber Security",
+  volumeSortOrder: 70,
+  sourceExternalReference: "CAP:AD:M7:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 7: Cyber Security",
+  finalExamTagged: true,
+  moduleNumber: 7,
+  aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 24],
+    [2, 20],
+    [3, 20],
+    [4, 18],
+    [5, 18],
+  ]),
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "AD_M7_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+};
+const AEROSPACE_MODULE_7_CHAPTER_CONFIGS = new Map(
+  [
+    [1, "Introduction to Cyber Security"],
+    [2, "Common Cyberattacks: Beware of the Attack"],
+    [3, "Improving Your Personal Security"],
+    [4, "Protecting Your Digital Footprint"],
+    [5, "The Future of Cyber Security"],
+  ].map(([chapterNumber, chapterTitle]) => [
+    chapterNumber,
+    {
+      chapterCode: `AD_M7_C${chapterNumber}`,
+      chapterTitle,
+      chapterSortOrder: chapterNumber * 10,
+      topicCode: `AD_M7_C${chapterNumber}`,
+      topicTitle: `Aerospace Dimensions, Module 7, Chapter ${chapterNumber}: ${chapterTitle}`,
+      topicDescription: `Private Module 7 Chapter ${chapterNumber} Billy Mitchell Aerospace pilot content.`,
+      topicSortOrder: chapterNumber * 10,
+    },
+  ]),
+);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_7_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_7_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_7_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === AEROSPACE_MODULE_6_FILENAME) {
     return {
       ...AEROSPACE_MODULE_6_BASE_CONFIG,

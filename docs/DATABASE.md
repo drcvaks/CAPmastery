@@ -264,4 +264,10 @@ three ordered chapter/topic rows, governed learning metadata, and 100 draft
 questions in exact package `AD_M6_100`. Seven distinct `module6_*` objects reuse
 the existing private visual registry and answer-aware delivery policies.
 
+Module 7 needs no schema migration. Its operator import creates volume `AD_M7`,
+five ordered chapter/topic rows, governed learning metadata, and 100 draft
+questions in exact package `AD_M7_100`. Seven approved visual objects reuse the
+existing registry; one registered quick-review asset currently has no question
+mapping and consequently is never delivered to students.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.
