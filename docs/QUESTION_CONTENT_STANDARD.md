@@ -181,6 +181,19 @@ Module-5 import configuration maps only their equivalent meanings:
 strict for every other package and field. All 100 rows map to seven reviewed
 shared 1586x992 PNG assets.
 
+## Aerospace Dimensions Module 6 bank
+
+The owner-supplied Module 6 source is a UTF-8 BOM, comma-delimited 100-question,
+50-column bank in private package `AD_M6_100`. Its three chapters contain 40, 34,
+and 26 questions. It has 50 direct/50 application questions, 50 medium/50
+medium-hard rows, 50 recall/50 application rows, 50 paired families, 100 internal
+sibling links, 75 final-exam-eligible rows, and exactly 25 correct answers in each
+A-D position.
+
+Unlike Module 5, every Module 6 source label already matches the controlled
+database vocabulary, so no package-specific aliases are required. All 100 rows
+map to seven reviewed shared 1448x1086 PNG assets with safe private Storage paths.
+
 ## Initial content decision
 
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.

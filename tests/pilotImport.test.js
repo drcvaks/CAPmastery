@@ -196,6 +196,27 @@ const aerospaceModuleFiveAliases = {
   visual_priority: { recommended: "medium" },
   visual_display_mode: { optional_modal: "optional_after_answer" },
 };
+const aerospaceModuleSixDirectory = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Aerospace",
+  "Aerospace_Module_6",
+);
+const aerospaceModuleSixInputPath = path.join(
+  aerospaceModuleSixDirectory,
+  "Aerospace_Dimensions_Module_6_100_Questions_Complete_Support.csv",
+);
+const aerospaceModuleSixVisualManifestPath = path.join(
+  aerospaceModuleSixDirectory,
+  "Aerospace_Dimensions_Module_6_Visual_Asset_Manifest.csv",
+);
+const aerospaceModuleSixDefaults = {
+  pilot_batch: "AD_M6_100",
+  feedback_display_version: "1",
+  common_mistake: "",
+  source_status: "approved_source",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -1391,6 +1412,119 @@ describe("Aerospace Dimensions Module 5 validation and visual integration", () =
           fs.readFileSync(path.join(aerospaceModuleFiveDirectory, asset.visual_file_name)),
         ),
       ).toEqual({ width: 1586, height: 992 });
+    }
+  });
+});
+
+describe("Aerospace Dimensions Module 6 validation and visual integration", () => {
+  const inputBuffer = fs.readFileSync(aerospaceModuleSixInputPath);
+  const decodedInput = decodeImportBuffer(inputBuffer);
+  const rows = parseImport(decodedInput, aerospaceModuleSixDefaults);
+  const manifest = parseVisualManifest(fs.readFileSync(aerospaceModuleSixVisualManifestPath));
+
+  it("accepts the 50-column comma-delimited BOM source as one hundred unique drafts", () => {
+    expect(inputBuffer.subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]));
+    expect(
+      decodedInput
+        .replace(/^\uFEFF/, "")
+        .split(/\r?\n/, 1)[0]
+        .split(","),
+    ).toHaveLength(50);
+    expect(validateImport(rows, 100)).toEqual({ errors: [], warnings: [] });
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(
+      rows.every(
+        (row) =>
+          row.module_number === "6" &&
+          row.package_code === "AD_M6_100" &&
+          row.review_status === "draft",
+      ),
+    ).toBe(true);
+  });
+
+  it("preserves chapter, style, difficulty, cognition, eligibility, and answer balance", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+    expect(["1", "2", "3"].map((chapter) => count("chapter_number", chapter))).toEqual([
+      40, 34, 26,
+    ]);
+    expect(new Set(rows.map((row) => row.chapter_title))).toEqual(
+      new Set(["Unmanned Spacecraft", "Manned Spacecraft", "Living and Working in Space"]),
+    );
+    expect(count("question_style", "direct_exam_style")).toBe(50);
+    expect(count("question_style", "brief_application")).toBe(50);
+    expect(count("difficulty", "medium")).toBe(50);
+    expect(count("difficulty", "medium_hard")).toBe(50);
+    expect(count("cognitive_level", "recall")).toBe(50);
+    expect(count("cognitive_level", "application")).toBe(50);
+    expect(count("eligible_for_final_exam", "true")).toBe(75);
+    for (const letter of ["A", "B", "C", "D"]) expect(count("correct_letter", letter)).toBe(25);
+  });
+
+  it("uses the existing controlled metadata values without normalization", () => {
+    expect(new Set(rows.map((row) => row.content_origin))).toEqual(
+      new Set(["original_textbook_grounded"]),
+    );
+    expect(new Set(rows.map((row) => row.style_reference))).toEqual(
+      new Set(["Mitchell_Aerospace_sample_style_analysis"]),
+    );
+    expect(new Set(rows.map((row) => row.visual_priority))).toEqual(new Set(["high"]));
+    expect(new Set(rows.map((row) => row.visual_display_mode))).toEqual(
+      new Set(["optional_after_answer"]),
+    );
+  });
+
+  it("retains complete feedback, support, and paired sibling links", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    expect(new Set(rows.map((row) => row.question_family_code)).size).toBe(50);
+    for (const row of rows) {
+      expect(new Set(["a", "b", "c", "d"].map((key) => row[`choice_${key}`])).size).toBe(4);
+      for (const key of ["a", "b", "c", "d"]) {
+        expect(row[`choice_${key}_explanation`]).not.toBe("");
+      }
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      expect(row.show_visual_button).toBe("true");
+      for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
+        expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+      }
+    }
+  });
+
+  it("maps all questions exactly to seven valid 1448 by 1086 PNG assets", () => {
+    const actualCounts = Object.fromEntries(
+      manifest.map((asset) => [
+        asset.visual_asset_key,
+        rows.filter((row) => row.visual_asset_key === asset.visual_asset_key).length,
+      ]),
+    );
+    expect(actualCounts).toEqual({
+      module6_spacecraft_basics: 6,
+      module6_satellite_systems_subsystems: 6,
+      module6_unmanned_spacecraft_missions: 28,
+      module6_manned_spaceflight_timeline: 18,
+      module6_us_space_projects: 14,
+      module6_space_stations: 14,
+      module6_living_working_space: 14,
+    });
+    expect(Object.values(actualCounts).reduce((sum, count) => sum + count, 0)).toBe(100);
+    expect(
+      validateVisualManifest(manifest, aerospaceModuleSixDirectory, {
+        expectedAssetCount: 7,
+        expectedQuestionCount: null,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(
+          fs.readFileSync(path.join(aerospaceModuleSixDirectory, asset.visual_file_name)),
+        ),
+      ).toEqual({ width: 1448, height: 1086 });
     }
   });
 });

@@ -69,6 +69,8 @@ npm run content:upload:admodule4:visuals
 npm run content:import:admodule4
 npm run content:upload:admodule5:visuals
 npm run content:import:admodule5
+npm run content:upload:admodule6:visuals
+npm run content:import:admodule6
 npm run db:test:linked
 ```
 

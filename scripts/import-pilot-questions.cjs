@@ -152,6 +152,8 @@ const AEROSPACE_MODULE_4_FILENAME =
   "Aerospace_Dimensions_Module_4_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_5_FILENAME =
   "Aerospace_Dimensions_Module_5_100_Questions_Complete_Support.csv";
+const AEROSPACE_MODULE_6_FILENAME =
+  "Aerospace_Dimensions_Module_6_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -428,9 +430,59 @@ const AEROSPACE_MODULE_5_CHAPTER_CONFIGS = new Map(
     },
   ]),
 );
+const AEROSPACE_MODULE_6_BASE_CONFIG = {
+  expectedCount: 100,
+  importPackage: "AD_M6_100",
+  examId: "20000000-0000-4000-8000-000000000002",
+  courseId: "30000000-0000-4000-8000-000000000002",
+  volumeCode: "AD_M6",
+  volumeTitle: "Aerospace Dimensions, Module 6: Spacecraft",
+  volumeSortOrder: 60,
+  sourceExternalReference: "CAP:AD:M6:PILOT",
+  sourceTitle: "Aerospace Dimensions Module 6: Spacecraft",
+  finalExamTagged: true,
+  moduleNumber: 6,
+  aerospaceModule: true,
+  expectedChapterCounts: new Map([
+    [1, 40],
+    [2, 34],
+    [3, 26],
+  ]),
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "AD_M6_100",
+    feedback_display_version: "1",
+    common_mistake: "",
+    source_status: "approved_source",
+  },
+};
+const AEROSPACE_MODULE_6_CHAPTER_CONFIGS = new Map(
+  [
+    [1, "Unmanned Spacecraft"],
+    [2, "Manned Spacecraft"],
+    [3, "Living and Working in Space"],
+  ].map(([chapterNumber, chapterTitle]) => [
+    chapterNumber,
+    {
+      chapterCode: `AD_M6_C${chapterNumber}`,
+      chapterTitle,
+      chapterSortOrder: chapterNumber * 10,
+      topicCode: `AD_M6_C${chapterNumber}`,
+      topicTitle: `Aerospace Dimensions, Module 6, Chapter ${chapterNumber}: ${chapterTitle}`,
+      topicDescription: `Private Module 6 Chapter ${chapterNumber} Billy Mitchell Aerospace pilot content.`,
+      topicSortOrder: chapterNumber * 10,
+    },
+  ]),
+);
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === AEROSPACE_MODULE_6_FILENAME) {
+    return {
+      ...AEROSPACE_MODULE_6_BASE_CONFIG,
+      chapterConfigs: AEROSPACE_MODULE_6_CHAPTER_CONFIGS,
+    };
+  }
   if (filename === AEROSPACE_MODULE_5_FILENAME) {
     return {
       ...AEROSPACE_MODULE_5_BASE_CONFIG,

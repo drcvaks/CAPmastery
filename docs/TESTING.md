@@ -217,3 +217,9 @@ source-label aliases, UTF-8 BOM and 50-column comma contract, 100 unique
 package-bound drafts, 24/24/26/26 chapter organization, exact style/difficulty/
 cognition/eligibility/answer balance, complete support and sibling links, exact
 seven-asset mappings, and seven valid 1586x992 private PNG objects.
+
+The Module 6 actual-file suite adds five assertions covering its UTF-8 BOM and
+50-column comma contract, 100 unique package-bound drafts, 40/34/26 chapter
+organization, exact style/difficulty/cognition/eligibility/answer balance,
+controlled metadata compatibility without aliases, complete support and sibling
+links, exact seven-asset mappings, and seven valid 1448x1086 private PNG objects.

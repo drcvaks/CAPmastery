@@ -259,4 +259,9 @@ questions in exact package `AD_M5_100`. Seven distinct `module5_*` objects reuse
 the existing private visual registry. Package-specific source-label aliases are
 normalized before validation and storage; database constraints are unchanged.
 
+Module 6 needs no schema migration. Its operator import creates volume `AD_M6`,
+three ordered chapter/topic rows, governed learning metadata, and 100 draft
+questions in exact package `AD_M6_100`. Seven distinct `module6_*` objects reuse
+the existing private visual registry and answer-aware delivery policies.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.
