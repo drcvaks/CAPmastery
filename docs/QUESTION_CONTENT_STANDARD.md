@@ -214,3 +214,26 @@ explicitly maps questions to it.
 Checkpoint 3 seeds only the Leadership and Aerospace catalog structure. Database permission tests create synthetic questions inside a rolled-back transaction. No workspace PDF was opened or imported, and no real question will be published until the owner confirms source authorization/edition and supplies or approves a small human-reviewed bank that meets this standard.
 
 Technical testing may use a small clearly labeled sample, but adaptivity evaluation requires broad objective coverage and approximately 150–250 reviewed questions per exam, including difficulty and cognitive-level variety.
+
+## Wright Brothers Chapter 1 deep-study bank
+
+Package `LTL1_C1_100` contains 100 draft questions with stable IDs distinct from
+the earlier pilot/adaptive Chapter 1 IDs. The banks coexist so historical work is
+never destroyed. The supplied bank must remain Chapter 1-only, use 25 correct
+answers in each A-D position, retain the exact 75/25 exam-style and eligibility
+split, and reference exactly eight reviewed shared visuals. The pre-import
+upgrade retains every question byte, stable visual key, filename, and private
+Storage path while replacing the image contents with reviewed 1448x1086 PNGs.
+Manifest status `approved_upgrade` is normalized at the upload boundary to the
+existing governed `approved` state; it is not a new database status. Its family code is
+also the canonical objective/concept seed because the source has no separate
+objective or concept columns.
+
+The style label records that milestone samples informed difficulty/style only.
+It does not authorize recalled or copied protected exam questions. The old pilot
+bank may be archived from future selection only after the owner validates the new
+bank; archiving must not delete attempts, sessions, or mastery history.
+
+The ninth cadet-grade-insignia image is a supplemental reference, is absent from
+the question-linked manifest, and must not be registered or displayed until its
+exact insignia artwork is verified against a current official CAP reference.

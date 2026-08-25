@@ -11,7 +11,7 @@ const {
 } = require("./lib/visual-assets.cjs");
 
 const root = path.resolve(__dirname, "..");
-const aerospaceDirectory = path.join(root, "Content", "Aerospace");
+const contentDirectory = path.join(root, "Content");
 
 function positiveInteger(value, label) {
   if (!/^\d+$/.test(value) || Number(value) < 1) {
@@ -28,14 +28,14 @@ async function main() {
     manifestFileName.split(/[\\/]/).includes("..") ||
     !manifestFileName.endsWith(".csv")
   ) {
-    throw new Error("Provide a safe visual manifest path within Content/Aerospace.");
+    throw new Error("Provide a safe visual manifest path within Content.");
   }
   const expectedAssetCount = positiveInteger(process.argv[3] ?? "", "Expected asset count");
   const expectedQuestionCount =
     process.argv[4] === "manifest-only"
       ? null
       : positiveInteger(process.argv[4] ?? "", "Expected question mapping count");
-  const manifestPath = path.join(aerospaceDirectory, manifestFileName);
+  const manifestPath = path.join(contentDirectory, manifestFileName);
   const assetDirectory = path.dirname(manifestPath);
   const manifest = parseVisualManifest(await fs.readFile(manifestPath));
   const validationErrors = validateVisualManifest(manifest, assetDirectory, {

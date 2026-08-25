@@ -156,6 +156,43 @@ const AEROSPACE_MODULE_6_FILENAME =
   "Aerospace_Dimensions_Module_6_100_Questions_Complete_Support.csv";
 const AEROSPACE_MODULE_7_FILENAME =
   "Aerospace_Dimensions_Module_7_100_Questions_Complete_Support.csv";
+const WRIGHT_BROTHERS_CHAPTER_1_FILENAME =
+  "Learn_to_Lead_Vol1_Chapter_1_100_Questions_Complete_Support.csv";
+const WRIGHT_BROTHERS_CHAPTER_1_CONFIG = {
+  expectedCount: 100,
+  importPackage: "LTL1_C1_100",
+  examId: "20000000-0000-4000-8000-000000000003",
+  courseId: "30000000-0000-4000-8000-000000000003",
+  volumeCode: "LTL_V1",
+  volumeTitle: "Learn to Lead, Volume 1",
+  volumeSortOrder: 10,
+  chapterCode: "LTL_V1_C1",
+  chapterTitle: "Character and the Air Force Tradition",
+  chapterSortOrder: 10,
+  topicCode: "LTL1_C1",
+  topicTitle: "Learn to Lead, Volume 1, Chapter 1",
+  topicDescription: "Private Wright Brothers Chapter 1 study content.",
+  topicSortOrder: 10,
+  sourceExternalReference: "CAP:LTL:V1:C1:DEEP",
+  sourceTitle: "Learn to Lead, Volume 1: Personal Leadership",
+  finalExamTagged: true,
+  wrightBrothersChapter: true,
+  expectedEligibleCount: 75,
+  fieldDefaults: {
+    pilot_batch: "LTL1_C1_100",
+    objective_code: "LTL1_C1",
+    concept_code: "LTL1_C1",
+    feedback_display_version: "1",
+    common_mistake: "",
+    visual_priority: "high",
+    visual_type: "educational_infographic",
+    visual_display_mode: "optional_after_answer",
+    visual_brief: "Reviewed Learn to Lead Volume 1 Chapter 1 study visual.",
+    source_reference_text: "Learn to Lead Volume 1: Personal Leadership",
+    source_status: "approved_source",
+    final_exam_weight: "1.0",
+  },
+};
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
   expectedCount: 100,
   importPackage: "AD_M1_100",
@@ -527,6 +564,9 @@ const AEROSPACE_MODULE_7_CHAPTER_CONFIGS = new Map(
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === WRIGHT_BROTHERS_CHAPTER_1_FILENAME) {
+    return WRIGHT_BROTHERS_CHAPTER_1_CONFIG;
+  }
   if (filename === AEROSPACE_MODULE_7_FILENAME) {
     return {
       ...AEROSPACE_MODULE_7_BASE_CONFIG,
@@ -719,7 +759,8 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
       `update public.questions set
          module_number=$2, chapter_number=$3, exam_likeness=$4, distractor_difficulty=$5,
          eligible_for_final_exam=$6, final_exam_weight=$7,
-         content_origin=$8, style_reference=$9
+         content_origin=$8, style_reference=$9,
+         is_exam_style=coalesce($10, is_exam_style)
        where id=$1`,
       [
         existing.id,
@@ -731,6 +772,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
         Number(row.final_exam_weight),
         row.content_origin,
         row.style_reference,
+        config.wrightBrothersChapter ? row.exam_type_question === "yes" : null,
       ],
     );
     summary.updated += 1;
@@ -742,7 +784,8 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
         `update public.questions set
            module_number=$2, chapter_number=$3, exam_likeness=$4, distractor_difficulty=$5,
            eligible_for_final_exam=$6, final_exam_weight=$7,
-           content_origin=$8, style_reference=$9
+           content_origin=$8, style_reference=$9,
+           is_exam_style=coalesce($10, is_exam_style)
          where id=$1`,
         [
           existing.id,
@@ -754,6 +797,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
           Number(row.final_exam_weight),
           row.content_origin,
           row.style_reference,
+          config.wrightBrothersChapter ? row.exam_type_question === "yes" : null,
         ],
       );
       summary.updated += 1;
@@ -845,6 +889,13 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
       values,
     );
     summary.inserted += 1;
+  }
+
+  if (config.wrightBrothersChapter) {
+    await client.query(`update public.questions set is_exam_style=$2 where id=$1`, [
+      question.id,
+      row.exam_type_question === "yes",
+    ]);
   }
 
   const choiceIds = {};
@@ -981,12 +1032,57 @@ async function main() {
   if (!Number.isInteger(expectedCount) || expectedCount < 1) {
     throw new Error("Expected row count must be a positive integer.");
   }
-  const rows = parseImport(
+  const parsedRows = parseImport(
     decodeImportBuffer(await fs.readFile(inputPath)),
     config.fieldDefaults,
     config.valueAliases,
   );
+  const rows = config.wrightBrothersChapter
+    ? parsedRows.map((row) => ({
+        ...row,
+        objective_code: row.question_family_code,
+        concept_code: row.question_family_code,
+        source_reference_text: row.source_document,
+        final_exam_weight: row.eligible_for_final_exam === "true" ? "1.0" : "0",
+        visual_group: normalizeVisualAssetKey(row.visual_asset_key),
+      }))
+    : parsedRows;
   const validation = validateImport(rows, expectedCount);
+  if (config.wrightBrothersChapter) {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+    if (!rows.every((row) => row.chapter_number === "1")) {
+      validation.errors.push("Wright Brothers Chapter 1 import must contain only chapter 1 rows.");
+    }
+    if (!rows.every((row) => row.package_code === config.importPackage)) {
+      validation.errors.push(`Every row must use package_code ${config.importPackage}.`);
+    }
+    if (count("exam_type_question", "yes") !== 75 || count("exam_type_question", "no") !== 25) {
+      validation.errors.push(
+        "Wright Brothers Chapter 1 requires a 75/25 exam_type_question split.",
+      );
+    }
+    if (
+      count("eligible_for_final_exam", "true") !== 75 ||
+      count("eligible_for_final_exam", "false") !== 25 ||
+      rows.some(
+        (row) => (row.exam_type_question === "yes") !== (row.eligible_for_final_exam === "true"),
+      )
+    ) {
+      validation.errors.push(
+        "Wright Brothers exam-style and final-exam eligibility tags must match 75/25.",
+      );
+    }
+    for (const letter of ["A", "B", "C", "D"]) {
+      if (count("correct_letter", letter) !== 25) {
+        validation.errors.push(`Wright Brothers Chapter 1 requires exactly 25 ${letter} answers.`);
+      }
+    }
+    if (new Set(rows.map((row) => row.visual_asset_key)).size !== 8) {
+      validation.errors.push(
+        "Wright Brothers Chapter 1 must reference exactly eight visual assets.",
+      );
+    }
+  }
   if (validation.errors.length > 0) {
     throw new Error(`Import validation failed:\n${validation.errors.join("\n")}`);
   }
@@ -1109,6 +1205,26 @@ async function main() {
       if (totalEligible !== config.expectedEligibleCount) {
         throw new Error(
           `Post-import verification failed for Aerospace Module ${config.moduleNumber}: expected ${config.expectedEligibleCount} eligible questions.`,
+        );
+      }
+    }
+    if (config.wrightBrothersChapter) {
+      const counts = await one(
+        client,
+        `select count(*)::integer as total,
+           count(*) filter (where eligible_for_final_exam)::integer as eligible,
+           count(*) filter (where is_exam_style)::integer as exam_style
+         from public.questions
+         where exam_id=$1 and chapter_number=1 and import_package=$2`,
+        [config.examId, config.importPackage],
+      );
+      if (
+        counts.total !== config.expectedCount ||
+        counts.eligible !== config.expectedEligibleCount ||
+        counts.exam_style !== config.expectedEligibleCount
+      ) {
+        throw new Error(
+          "Post-import verification failed for Wright Brothers Chapter 1: expected 100 total and 75 exam-style eligible questions.",
         );
       }
     }

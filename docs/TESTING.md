@@ -240,3 +240,13 @@ metadata compatibility, complete support and sibling links, and seven valid
 1448x1086 PNG objects. Asset-count assertions explicitly preserve the supplied
 zero-question mapping for the quick-review visual while reconciling the remaining
 six mappings to all 100 questions.
+
+The Wright Brothers Chapter 1 actual-file suite adds four assertions covering
+100 unique stable drafts, Chapter/package consistency, exact A-D answer balance,
+the 75/25 exam-style eligibility split, complete feedback/memory/remediation,
+valid sibling reinforcement links, explicit `approved_upgrade` normalization,
+and eight upgraded 1448x1086 PNG assets. The supplemental insignia manifest is
+not part of the question-linked upload test or import requirement.
+`wright_brothers_content.test.sql` adds ten rollback-only assertions for the new
+track/course, catalog ordering, constrained provenance label, and identity-
+preserving rehome of the temporary Chapter 1 blueprint and its rules.

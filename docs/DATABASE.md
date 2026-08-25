@@ -288,4 +288,19 @@ questions in exact package `AD_M7_100`. Seven approved visual objects reuse the
 existing registry; one registered quick-review asset currently has no question
 mapping and consequently is never delivered to students.
 
+Migration `202608250046` creates exam `WRIGHT_BROTHERS` and course
+`WRIGHT_BROTHERS_LTL`, then rehomes the existing `LTL_V1` hierarchy, Chapter 1
+topic/questions/families, and temporary Chapter 1 practice blueprint. Existing
+row identifiers and learning history are preserved. It also extends the governed
+style-provenance check for the exact Wright Brothers sample-exam analysis label;
+this is provenance metadata, never permission to use recalled protected exam
+questions. No RLS policy or client privilege is broadened.
+
+The new Chapter 1 deep-study import creates or updates 100 stable draft rows in
+exact private package `LTL1_C1_100`. The importer derives objective/concept codes
+from each supplied family code, maps the supplied `exam_type_question` tag to
+`questions.is_exam_style`, preserves a matching 75-row eligibility classification,
+and rejects an incorrect package, chapter, answer balance, eligibility split, or
+visual count before connecting to PostgreSQL.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

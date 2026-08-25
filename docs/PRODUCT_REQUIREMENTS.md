@@ -9,7 +9,7 @@ The product teaches source-supported concepts, identifies weak objectives, sched
 ## Version 1 outcomes
 
 - Separate email/password accounts and database-backed roles.
-- Leadership and Aerospace exam content organized by program, exam, course, volume, chapter, section, topic, and objective.
+- Wright Brothers, Billy Mitchell Leadership, and Billy Mitchell Aerospace content organized by program, exam, course, volume, chapter, section, topic, and objective.
 - Recommended, quick, focus-area, missed-concept, remediation, practice-test, and private challenge sessions.
 - Multiple-choice and true/false questions with reviewed explanations and source citations.
 - Secure server-side grading, attempt history, mastery, spaced review, readiness, streaks, achievements, goals, and family coaching.

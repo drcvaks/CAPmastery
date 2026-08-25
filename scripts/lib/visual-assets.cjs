@@ -23,7 +23,10 @@ function parseVisualManifest(buffer) {
     return {
       ...source,
       visual_group: source.visual_group || source.visual_asset_key,
-      visual_status: source.visual_status || source.status,
+      visual_status:
+        (source.visual_status || source.status) === "approved_upgrade"
+          ? "approved"
+          : source.visual_status || source.status,
       visual_caption: source.visual_caption || source.visual_description,
       visual_alt_text: source.visual_alt_text || source.visual_description,
       question_count: source.question_count || "",

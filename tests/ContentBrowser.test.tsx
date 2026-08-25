@@ -50,12 +50,35 @@ describe("ContentBrowser", () => {
     jest.mocked(useContentCatalog).mockReturnValue({
       data: [
         {
+          id: "20000000-0000-4000-8000-000000000003",
+          program_id: "10000000-0000-4000-8000-000000000001",
+          code: "WRIGHT_BROTHERS",
+          title: "Wright Brothers",
+          description: null,
+          sort_order: 10,
+          topics: [
+            {
+              ...topic(1, 10),
+              id: "40000000-0000-4000-8000-000000000301",
+              exam_id: "20000000-0000-4000-8000-000000000003",
+              code: "LTL1_C1",
+              title: "Learn to Lead, Volume 1, Chapter 1",
+              volume: { ...topic(1, 10).volume, code: "LTL_V1", title: "Learn to Lead, Volume 1" },
+              chapter: {
+                ...topic(1, 10).chapter,
+                code: "LTL_V1_C1",
+                title: "Character and the Air Force Tradition",
+              },
+            },
+          ],
+        },
+        {
           id: "20000000-0000-4000-8000-000000000001",
           program_id: "10000000-0000-4000-8000-000000000001",
           code: "MITCHELL_LEADERSHIP",
           title: "Billy Mitchell Leadership",
           description: null,
-          sort_order: 10,
+          sort_order: 20,
           topics: [],
         },
         {
@@ -64,7 +87,7 @@ describe("ContentBrowser", () => {
           code: "MITCHELL_AEROSPACE",
           title: "Billy Mitchell Aerospace",
           description: null,
-          sort_order: 20,
+          sort_order: 30,
           topics: [topic(3, 30), topic(1, 10), topic(2, 20)],
         },
       ],
@@ -104,5 +127,12 @@ describe("ContentBrowser", () => {
     ]);
     expect(screen.queryByText("Aerospace content coming soon")).toBeNull();
     expect(screen.queryByText("Leadership content coming soon")).toBeNull();
+  });
+
+  it("shows Wright Brothers first and keeps Volume 1 Chapter 1 in that track", async () => {
+    await render(<ContentBrowser />);
+
+    expect(screen.getAllByText("Wright Brothers")).toHaveLength(2);
+    expect(screen.getByText("Learn to Lead, Volume 1, Chapter 1")).toBeTruthy();
   });
 });

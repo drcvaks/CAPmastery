@@ -1083,3 +1083,53 @@ Mitchell full-test usability follow-up:
   post-application migration-catalog cache refresh reported an authentication
   warning, but the migration completed and every linked rollback-only suite
   passed, including Aerospace full exam 31/31 and the complete aggregate 502/502.
+- Prepared the Wright Brothers Chapter 1 deep-study extension. Migration
+  `202608250046_wright_brothers_track.sql` creates a separate Wright Brothers
+  exam/course, places it before the two Mitchell tracks, rehomes the existing
+  Learn to Lead Volume 1 Chapter 1 hierarchy and temporary pilot test, and
+  preserves all question/session/attempt/mastery identities. The old questions
+  are retained; no historical data is deleted. The new package `LTL1_C1_100`
+  validates as 100 distinct drafts with 25 answers per letter, a matching 75/25
+  exam-style/eligibility split, complete learning support, and eight approved
+  visuals. The generic manifest uploader now accepts safe paths under
+  `Content` while all seven existing Aerospace commands retain their behavior.
+  Focused Jest validation passes 89/89. The complete local gate passes strict
+  TypeScript, Expo ESLint, repository formatting, all 26 Jest suites with
+  172/172 tests, Expo public configuration, and a 1,582-module web export. Expo
+  Doctor passes 20/21 checks and reports only five existing SDK 57 patch-level
+  mismatches. Linked pgTAP, migration application, visual upload, question
+  import, package assignment, and owner UI acceptance remain pending.
+- Before the first Supabase import, the owner replaced the eight Wright Brothers
+  visuals with a better scene-based 1448x1086 set. The question CSV is byte-for-
+  byte unchanged, and all eight stable asset keys, filenames, private paths, and
+  100 question mappings remain unchanged. The commands and actual-file tests now
+  use only the canonical `Chapter 1` directory and its updated manifest. Its explicit
+  `approved_upgrade` source label is narrowly normalized to the existing approved
+  registry state, so no schema migration or duplicate records are introduced.
+  The supplemental insignia guide remains excluded pending official verification.
+  Focused replacement-package validation passes 87/87, and the complete local
+  gate remains green with strict TypeScript, Expo ESLint, all 26 Jest suites at
+  172/172, and repository formatting. Credential-free dry runs validate both
+  replacement paths and stop at their expected process-only credential guards.
+- The first linked migration-046 attempt rolled back when the existing question
+  integrity trigger correctly rejected moving a Chapter 1 question before its
+  exam-owned family. Migration 046 now preflights against any family shared with
+  another topic, moves the exclusive Chapter 1 families first, and then moves the
+  questions. An added rollback-only assertion requires every question and family
+  to retain matching exam ownership. The owner applied the corrected migration;
+  `wright_brothers_content.test.sql` passed 11/11 and the complete linked pgTAP
+  aggregate passed 513/513. The owner then uploaded and registered all eight
+  upgraded 1448x1086 assets with their expected stable keys and private paths;
+  the supplemental insignia guide was correctly excluded. The first
+  `LTL1_C1_100` import then inserted all 100 drafts with zero updates, skips,
+  failures, or warnings. The complete linked pgTAP aggregate remained 513/513.
+  Package assignment and owner UI acceptance remain pending.
+- After the successful first import, the owner organized the accepted Wright
+  Brothers files under the canonical `Content/Wright Brothers/Chapter 1`
+  directory. Package scripts and actual-file tests now follow that location; the
+  prior materials remain outside the active import path under `old`. The bonus
+  cadet-grade image was reviewed but remains excluded: it includes an official
+  CAP mark and stylized insignia that are unsuitable as an exact uniform
+  reference. The current official CAPVA 60-100 Cadet Super Chart remains the
+  authoritative external reference pending an approved replacement and a secure
+  package-authorized reference-library flow.

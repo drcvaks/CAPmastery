@@ -185,6 +185,21 @@ owned session delivery releases an approved asset. Storage RLS independently
 requires an answered study question or a completed delayed-feedback session, so a
 known object path is not sufficient to fetch a visual early.
 
+### Wright Brothers study-track extension
+
+Migration `202608250046` adds Wright Brothers as a separate first-class exam
+track and moves the existing `LTL_V1` / `LTL1_C1` hierarchy into it. The move is
+an identity-preserving reclassification: questions, attempts, mastery rows, and
+historical session-question snapshots are not deleted or recreated. Learn to
+Lead Volume 2 remains under Billy Mitchell Leadership.
+
+The existing Chapter 1 pilot blueprint is also rehomed to Wright Brothers and
+remains an explicitly temporary ten-question test. When Chapters 2 and 3 are
+available, a later reviewed migration should add a three-chapter Wright Brothers
+practice blueprint and retire the Chapter 1-only launcher. The Study browser
+requires no Wright-specific client branch; its server-returned exam and topic
+hierarchy automatically renders the new accessible track.
+
 Missed-answer review for newly created Leadership and Aerospace 50-question tests is persistent
 and resumable. The result screen reads a protected review summary, starts at the
 first unreviewed missed answer, and records completion only when the cadet uses

@@ -592,3 +592,43 @@ passed 502/502. The Aerospace launcher
 appears only for a student who can access at least eight eligible question
 families in each of Modules 1–7. For the current draft banks, assign all exact
 packages `AD_M1_100` through `AD_M7_100` to the intended student.
+
+### Wright Brothers Chapter 1 deep-study package
+
+Apply migration `202608250046_wright_brothers_track.sql` before uploading or
+importing. It moves existing Learn to Lead Volume 1 Chapter 1 catalog content to
+Wright Brothers without deleting history. Then upload the eight reviewed images,
+import the 100 drafts, and run the linked suite:
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:ltl1c1:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:ltl1c1
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+The commands intentionally read only from the canonical `Chapter 1` package.
+Expect eight registered 1448x1086 upgraded assets and an initial import summary of 100
+inserted, zero failed, and zero missing-asset warnings. Assign exact private
+package `LTL1_C1_100` only to intended students. Owner decisions still required:
+which students receive the package; whether to archive the older Chapter 1 pilot
+questions after acceptance; and, after Chapters 2-3 arrive, approval of a new
+three-chapter Wright Brothers practice-test blueprint.
+
+Do not upload the older plain Chapter 1 image set in parallel. Do not register
+`c1_cadet_grade_insignia_guide.png` yet: it is supplemental, has no question
+mapping, uses an official CAP mark, and its stylized insignia do not provide the
+exact uniform reference required for an authoritative grade guide. Prefer a link
+to the current official CAPVA 60-100 Cadet Super Chart until an approved,
+accurate, unbranded replacement and a package-authorized reference-view flow are
+available.
