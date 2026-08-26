@@ -45,6 +45,8 @@
     "content:upload:ltl1c1:visuals": "node scripts/upload-aerospace-visuals.cjs \"Wright Brothers/Chapter 1/Learn_to_Lead_Vol1_Chapter_1_Visual_Asset_Manifest_UPDATED.csv\" 8 manifest-only",
     "content:import:ltl1c2": "node scripts/import-pilot-questions.cjs \"Content/Wright Brothers/Chapter 2/Learn_to_Lead_Vol1_Chapter_2_100_Questions_Complete_Support.csv\" 100",
     "content:upload:ltl1c2:visuals": "node scripts/upload-aerospace-visuals.cjs \"Wright Brothers/Chapter 2/Learn_to_Lead_Vol1_Chapter_2_Visual_Asset_Manifest.csv\" 8 manifest-only",
+    "content:import:ltl1c3": "node scripts/import-pilot-questions.cjs \"Content/Wright Brothers/Chapter 3/Learn_to_Lead_Vol1_Chapter_3_100_Questions_Complete_Support.csv\" 100",
+    "content:upload:ltl1c3:visuals": "node scripts/upload-aerospace-visuals.cjs \"Wright Brothers/Chapter 3/Learn_to_Lead_Vol1_Chapter_3_Visual_Asset_Manifest.csv\" 10 manifest-only",
     "db:lint": "supabase db lint --local --level error",
     "db:reset": "supabase db reset --local",
     "types:database": "supabase gen types typescript --linked --schema public > types/database.ts",

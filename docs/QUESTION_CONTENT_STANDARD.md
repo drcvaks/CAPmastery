@@ -250,3 +250,16 @@ The separate drill-command image is supplemental and is not part of the
 question-linked upload or import. It remains unavailable until CAP Mastery has a
 reviewed, package-authorized reference-library flow. The source's style label is
 stored as provenance only; it does not authorize recalled protected exam content.
+
+## Wright Brothers Chapter 3 deep-study bank
+
+Package `LTL1_C3_100` contains 100 Chapter 3 drafts with the original stable
+external IDs, exactly 50 reciprocal two-question families, 25 correct answers in
+each A-D position, and an aligned 75/25 exam-style/final-eligibility split. Every
+row includes complete choice feedback, explanation, memory aid, remediation, and
+a linked visual.
+
+The corrected primary manifest contains all ten referenced 1448x1086 assets,
+including the drill quick reference. The supplemental manifest is intentionally
+header-only. The prior superseded Chapter 3 package under `old` is not an import
+source and must not be uploaded in parallel.

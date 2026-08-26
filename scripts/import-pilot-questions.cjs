@@ -160,6 +160,8 @@ const WRIGHT_BROTHERS_CHAPTER_1_FILENAME =
   "Learn_to_Lead_Vol1_Chapter_1_100_Questions_Complete_Support.csv";
 const WRIGHT_BROTHERS_CHAPTER_2_FILENAME =
   "Learn_to_Lead_Vol1_Chapter_2_100_Questions_Complete_Support.csv";
+const WRIGHT_BROTHERS_CHAPTER_3_FILENAME =
+  "Learn_to_Lead_Vol1_Chapter_3_100_Questions_Complete_Support.csv";
 const WRIGHT_BROTHERS_CHAPTER_1_CONFIG = {
   expectedCount: 100,
   importPackage: "LTL1_C1_100",
@@ -181,6 +183,7 @@ const WRIGHT_BROTHERS_CHAPTER_1_CONFIG = {
   wrightBrothersChapter: true,
   chapterNumber: 1,
   expectedEligibleCount: 75,
+  expectedVisualAssetCount: 8,
   fieldDefaults: {
     pilot_batch: "LTL1_C1_100",
     objective_code: "LTL1_C1",
@@ -217,6 +220,7 @@ const WRIGHT_BROTHERS_CHAPTER_2_CONFIG = {
   wrightBrothersChapter: true,
   chapterNumber: 2,
   expectedEligibleCount: 75,
+  expectedVisualAssetCount: 8,
   fieldDefaults: {
     pilot_batch: "LTL1_C2_100",
     objective_code: "LTL1_C2",
@@ -227,6 +231,43 @@ const WRIGHT_BROTHERS_CHAPTER_2_CONFIG = {
     visual_type: "educational_infographic",
     visual_display_mode: "optional_after_answer",
     visual_brief: "Reviewed Learn to Lead Volume 1 Chapter 2 study visual.",
+    source_reference_text: "Learn to Lead Volume 1: Personal Leadership",
+    source_status: "approved_source",
+    final_exam_weight: "1.0",
+  },
+};
+const WRIGHT_BROTHERS_CHAPTER_3_CONFIG = {
+  expectedCount: 100,
+  importPackage: "LTL1_C3_100",
+  examId: "20000000-0000-4000-8000-000000000003",
+  courseId: "30000000-0000-4000-8000-000000000003",
+  volumeCode: "LTL_V1",
+  volumeTitle: "Learn to Lead, Volume 1",
+  volumeSortOrder: 10,
+  chapterCode: "LTL_V1_C3",
+  chapterTitle: "The Art & The Science",
+  chapterSortOrder: 30,
+  topicCode: "LTL1_C3",
+  topicTitle: "Learn to Lead, Volume 1, Chapter 3",
+  topicDescription: "Private Wright Brothers Chapter 3 study content.",
+  topicSortOrder: 30,
+  sourceExternalReference: "CAP:LTL:V1:C3:DEEP",
+  sourceTitle: "Learn to Lead, Volume 1: Personal Leadership",
+  finalExamTagged: true,
+  wrightBrothersChapter: true,
+  chapterNumber: 3,
+  expectedEligibleCount: 75,
+  expectedVisualAssetCount: 10,
+  fieldDefaults: {
+    pilot_batch: "LTL1_C3_100",
+    objective_code: "LTL1_C3",
+    concept_code: "LTL1_C3",
+    feedback_display_version: "1",
+    common_mistake: "",
+    visual_priority: "high",
+    visual_type: "educational_infographic",
+    visual_display_mode: "optional_after_answer",
+    visual_brief: "Reviewed Learn to Lead Volume 1 Chapter 3 study visual.",
     source_reference_text: "Learn to Lead Volume 1: Personal Leadership",
     source_status: "approved_source",
     final_exam_weight: "1.0",
@@ -603,6 +644,9 @@ const AEROSPACE_MODULE_7_CHAPTER_CONFIGS = new Map(
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === WRIGHT_BROTHERS_CHAPTER_3_FILENAME) {
+    return WRIGHT_BROTHERS_CHAPTER_3_CONFIG;
+  }
   if (filename === WRIGHT_BROTHERS_CHAPTER_2_FILENAME) {
     return WRIGHT_BROTHERS_CHAPTER_2_CONFIG;
   }
@@ -1123,9 +1167,9 @@ async function main() {
         );
       }
     }
-    if (new Set(rows.map((row) => row.visual_asset_key)).size !== 8) {
+    if (new Set(rows.map((row) => row.visual_asset_key)).size !== config.expectedVisualAssetCount) {
       validation.errors.push(
-        `Wright Brothers Chapter ${config.chapterNumber} must reference exactly eight visual assets.`,
+        `Wright Brothers Chapter ${config.chapterNumber} must reference exactly ${config.expectedVisualAssetCount} visual assets.`,
       );
     }
   }

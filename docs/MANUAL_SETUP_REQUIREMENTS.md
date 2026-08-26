@@ -662,3 +662,27 @@ inserted, zero failed, and zero missing-asset warnings. Do not upload the
 supplemental `drill_commands_cadet_quick_reference.png` through the question-
 linked command. Assign exact package `LTL1_C2_100` separately to each intended
 student after the import.
+
+### Wright Brothers Chapter 3 deep-study package
+
+No new schema migration is required after migration 047. Upload the ten primary
+visuals, import the corrected 100-row bank, and run the linked suite:
+
+```powershell
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:ltl1c3:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:ltl1c3
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expect ten registered 1448x1086 assets and an initial import summary of 100
+inserted, zero failed, and zero missing-asset warnings. The header-only
+supplemental manifest requires no upload. Do not use the superseded files under
+`Chapter 3/old`. Assign exact package `LTL1_C3_100` separately to each intended
+student after the import.

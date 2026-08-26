@@ -1155,3 +1155,25 @@ Mitchell full-test usability follow-up:
   only suite then passed `wright_brothers_content.test.sql` 12/12 and the full
   database aggregate 514/514. Package assignment and owner student-UI acceptance
   remain pending.
+- The owner replaced the initial Chapter 3 package after pre-import validation
+  found answer-position, eligibility, family-depth, and visual-manifest
+  inconsistencies. The corrected source preserves all 100 stable external IDs
+  and now validates at 25 answers per A-D position, an aligned 75/25 exam-style
+  eligibility split, 50 reciprocal two-question families, complete teaching
+  support, and ten primary 1448x1086 visuals covering every row. It reuses the
+  provenance label admitted by migration 047, so no schema or permission change
+  is required. The importer creates ordered Chapter 3 metadata and writes only
+  package `LTL1_C3_100`. Focused actual-file validation passes 95/95;
+  credential-free upload and import dry runs validate the corrected paths and
+  stop at the expected process-only credential guards. The complete local gate
+  passes strict TypeScript, Expo ESLint, all 26 Jest suites at 180/180,
+  repository formatting, public Expo configuration, and a 1,582-module web
+  export. Expo Doctor passes 20/21 checks and reports six SDK 57 patch-level
+  mismatches. Upload, import, linked pgTAP, package assignment, and owner UI
+  acceptance remain pending.
+- The owner uploaded the ten corrected Chapter 3 primary visuals and completed
+  the first `LTL1_C3_100` import. The import inserted 100 drafts with zero
+  updates, skips, failures, or warnings. The linked rollback-only suite then
+  passed `wright_brothers_content.test.sql` 12/12 and the complete database
+  aggregate 514/514. Package assignment and owner student-UI acceptance remain
+  pending.

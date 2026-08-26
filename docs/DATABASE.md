@@ -311,4 +311,11 @@ private visual registry, and package-assignment model. It creates Chapter/topic
 `LTL_V1_C2` / `LTL1_C2` and stores 100 drafts only in exact private package
 `LTL1_C2_100`.
 
+Chapter 3 requires no additional schema migration. Its supplied style provenance
+already satisfies migration 047, and the operator importer creates ordered
+chapter/topic `LTL_V1_C3` / `LTL1_C3` under the existing Wright Brothers exam,
+course, and Volume 1 hierarchy. The 100 drafts are isolated in exact package
+`LTL1_C3_100`; its 50 family codes and ten visual keys do not overlap Chapters
+1–2.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

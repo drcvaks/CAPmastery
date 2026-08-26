@@ -258,3 +258,10 @@ same-family reinforcement links, and eight valid 1586x992 upgraded PNG assets.
 The supplemental drill manifest is explicitly excluded. Migration 047 expands
 `wright_brothers_content.test.sql` to 12 assertions by requiring the exact
 Chapter 2 provenance label to remain constrained.
+
+The corrected Wright Brothers Chapter 3 actual-file suite adds four assertions
+covering 100 unique package-bound drafts, 50 reciprocal two-question families,
+exact A-D balance, the aligned 75/25 exam-style eligibility split, complete
+teaching support, and ten valid 1448x1086 question-linked assets. It also proves
+the drill visual is in the primary manifest and no question references an
+unregistered key.
