@@ -250,3 +250,11 @@ not part of the question-linked upload test or import requirement.
 `wright_brothers_content.test.sql` adds ten rollback-only assertions for the new
 track/course, catalog ordering, constrained provenance label, and identity-
 preserving rehome of the temporary Chapter 1 blueprint and its rules.
+
+The Wright Brothers Chapter 2 actual-file suite adds four assertions covering
+100 unique package-bound drafts, 50 canonical families, exact A-D balance, the
+aligned 75/25 exam-style eligibility split, complete feedback/memory/remediation,
+same-family reinforcement links, and eight valid 1586x992 upgraded PNG assets.
+The supplemental drill manifest is explicitly excluded. Migration 047 expands
+`wright_brothers_content.test.sql` to 12 assertions by requiring the exact
+Chapter 2 provenance label to remain constrained.

@@ -303,4 +303,12 @@ from each supplied family code, maps the supplied `exam_type_question` tag to
 and rejects an incorrect package, chapter, answer balance, eligibility split, or
 visual count before connecting to PostgreSQL.
 
+Migration `202608250047` extends only the controlled `style_reference` constraint
+for the exact Chapter 2 provenance label supplied by the owner. It does not add
+permissions, publish content, or weaken RLS. The Chapter 2 operator import reuses
+the existing Wright Brothers exam, Learn to Lead course, Volume 1 hierarchy,
+private visual registry, and package-assignment model. It creates Chapter/topic
+`LTL_V1_C2` / `LTL1_C2` and stores 100 drafts only in exact private package
+`LTL1_C2_100`.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

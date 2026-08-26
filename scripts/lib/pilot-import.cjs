@@ -304,6 +304,7 @@ function validateImport(rows, expectedCount = 10) {
           "Mitchell_sample_style_analysis",
           "Mitchell_Aerospace_sample_style_analysis",
           "Wright Brothers milestone sample exams used as style/difficulty reference only",
+          "Three Wright Brothers Milestone exam forms used as style/difficulty reference only",
         ]).has(row.style_reference)
       ) {
         errors.push(`${label}: invalid style_reference '${row.style_reference}'.`);

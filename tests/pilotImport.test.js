@@ -267,6 +267,35 @@ const wrightBrothersChapterOneDefaults = {
   source_status: "approved_source",
   final_exam_weight: "1.0",
 };
+const wrightBrothersChapterTwoDirectory = path.resolve(
+  __dirname,
+  "..",
+  "Content",
+  "Wright Brothers",
+  "Chapter 2",
+);
+const wrightBrothersChapterTwoInputPath = path.join(
+  wrightBrothersChapterTwoDirectory,
+  "Learn_to_Lead_Vol1_Chapter_2_100_Questions_Complete_Support.csv",
+);
+const wrightBrothersChapterTwoVisualManifestPath = path.join(
+  wrightBrothersChapterTwoDirectory,
+  "Learn_to_Lead_Vol1_Chapter_2_Visual_Asset_Manifest.csv",
+);
+const wrightBrothersChapterTwoDefaults = {
+  pilot_batch: "LTL1_C2_100",
+  objective_code: "LTL1_C2",
+  concept_code: "LTL1_C2",
+  feedback_display_version: "1",
+  common_mistake: "",
+  visual_priority: "high",
+  visual_type: "educational_infographic",
+  visual_display_mode: "optional_after_answer",
+  visual_brief: "Reviewed Learn to Lead Volume 1 Chapter 2 study visual.",
+  source_reference_text: "Learn to Lead Volume 1: Personal Leadership",
+  source_status: "approved_source",
+  final_exam_weight: "1.0",
+};
 
 describe("Chapter 1 pilot import validation", () => {
   const rows = parseImport(decodeImportBuffer(fs.readFileSync(inputPath)));
@@ -1770,6 +1799,90 @@ describe("Wright Brothers Chapter 1 deep-study bank", () => {
           fs.readFileSync(path.join(wrightBrothersChapterOneDirectory, asset.visual_file_name)),
         ),
       ).toEqual({ width: 1448, height: 1086 });
+    }
+  });
+});
+
+describe("Wright Brothers Chapter 2 deep-study bank", () => {
+  const rows = parseImport(
+    decodeImportBuffer(fs.readFileSync(wrightBrothersChapterTwoInputPath)),
+    wrightBrothersChapterTwoDefaults,
+  ).map((row) => ({
+    ...row,
+    objective_code: row.question_family_code,
+    concept_code: row.question_family_code,
+    source_reference_text: row.source_document,
+    final_exam_weight: row.eligible_for_final_exam === "true" ? "1.0" : "0",
+    visual_group: normalizeVisualAssetKey(row.visual_asset_key),
+  }));
+  const manifest = parseVisualManifest(fs.readFileSync(wrightBrothersChapterTwoVisualManifestPath));
+
+  it("validates one hundred unique Chapter 2 package-bound drafts", () => {
+    expect(validateImport(rows, 100)).toEqual({ errors: [], warnings: [] });
+    expect(rows).toHaveLength(100);
+    expect(new Set(rows.map((row) => row.external_id)).size).toBe(100);
+    expect(new Set(rows.map((row) => canonicalQuestionFamilyCode(row))).size).toBe(50);
+    expect(
+      rows.every(
+        (row) =>
+          row.chapter_number === "2" &&
+          row.package_code === "LTL1_C2_100" &&
+          row.review_status === "draft",
+      ),
+    ).toBe(true);
+  });
+
+  it("preserves balanced answers and aligned 75/25 exam eligibility", () => {
+    const count = (field, value) => rows.filter((row) => row[field] === value).length;
+    for (const letter of ["A", "B", "C", "D"]) expect(count("correct_letter", letter)).toBe(25);
+    expect(count("exam_type_question", "yes")).toBe(75);
+    expect(count("eligible_for_final_exam", "true")).toBe(75);
+    expect(
+      rows.every(
+        (row) => (row.exam_type_question === "yes") === (row.eligible_for_final_exam === "true"),
+      ),
+    ).toBe(true);
+  });
+
+  it("retains complete teaching support and same-family reinforcement links", () => {
+    const byId = new Map(rows.map((row) => [row.external_id, row]));
+    for (const row of rows) {
+      expect(row.short_explanation).not.toBe("");
+      expect(row.explanation).not.toBe("");
+      expect(row.memory_aid).not.toBe("");
+      expect(row.remediation_text).not.toBe("");
+      for (const target of splitReinforcementIds(row.reinforcement_question_ids)) {
+        expect(byId.get(target)?.question_family_code).toBe(row.question_family_code);
+      }
+    }
+  });
+
+  it("maps all questions to eight valid upgraded visuals and excludes the supplement", () => {
+    expect(new Set(rows.map((row) => row.visual_asset_key)).size).toBe(8);
+    const manifestByKey = new Map(manifest.map((asset) => [asset.visual_asset_key, asset]));
+    expect(manifestByKey.has("ltl1_c2_drill_reference")).toBe(false);
+    for (const row of rows) {
+      const asset = manifestByKey.get(row.visual_asset_key);
+      expect(asset?.visual_file_name).toBe(row.visual_file_name);
+      expect(normalizeStoragePath(asset?.visual_storage_path)).toBe(
+        normalizeStoragePath(row.visual_storage_path),
+      );
+    }
+    expect(
+      validateVisualManifest(manifest, wrightBrothersChapterTwoDirectory, {
+        expectedAssetCount: 8,
+        expectedQuestionCount: null,
+      }),
+    ).toEqual([]);
+    for (const asset of manifest) {
+      expect(normalizeStoragePath(asset.visual_storage_path)).toBe(
+        `assets/cap-visuals/${asset.visual_file_name}`,
+      );
+      expect(
+        readPngDimensions(
+          fs.readFileSync(path.join(wrightBrothersChapterTwoDirectory, asset.visual_file_name)),
+        ),
+      ).toEqual({ width: 1586, height: 992 });
     }
   });
 });

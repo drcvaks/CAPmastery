@@ -1133,3 +1133,25 @@ Mitchell full-test usability follow-up:
   reference. The current official CAPVA 60-100 Cadet Super Chart remains the
   authoritative external reference pending an approved replacement and a secure
   package-authorized reference-library flow.
+- Prepared the Wright Brothers Chapter 2 deep-study import. The supplied bank
+  validates as 100 unique drafts, 50 families, 25 answers per A-D position, an
+  aligned 75/25 exam-style eligibility split, complete teaching support, and
+  eight question-linked 1586x992 visuals. Forward migration 047 extends the
+  controlled style-provenance constraint for the source's exact Chapter 2 label
+  without changing RLS or client grants. The importer now creates the ordered
+  Chapter 2 hierarchy under the existing Wright Brothers track and writes only
+  exact package `LTL1_C2_100`. The separate drill visual remains supplemental
+  and excluded. Focused actual-file validation passes 91/91; credential-free
+  upload and import dry runs validate their files and stop at the expected
+  process-only credential guards. The complete local gate passes strict
+  TypeScript, Expo ESLint, all 26 Jest suites at 176/176, repository formatting,
+  public Expo configuration, and a 1,582-module web export. Expo Doctor passes
+  20/21 checks and reports only the five existing SDK 57 patch-level mismatches.
+  Migration application, linked pgTAP, upload, import, package assignment, and
+  owner UI acceptance remain pending.
+- The owner applied migration 047, uploaded the eight Chapter 2 question-linked
+  visuals, and completed the first `LTL1_C2_100` import. The import inserted 100
+  drafts with zero updates, skips, failures, or warnings. The linked rollback-
+  only suite then passed `wright_brothers_content.test.sql` 12/12 and the full
+  database aggregate 514/514. Package assignment and owner student-UI acceptance
+  remain pending.

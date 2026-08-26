@@ -632,3 +632,33 @@ exact uniform reference required for an authoritative grade guide. Prefer a link
 to the current official CAPVA 60-100 Cadet Super Chart until an approved,
 accurate, unbranded replacement and a package-authorized reference-view flow are
 available.
+
+### Wright Brothers Chapter 2 deep-study package
+
+Apply migration `202608250047_wright_brothers_chapter_2_provenance.sql` before
+importing. It admits the supplied controlled style-provenance label; it does not
+publish questions or alter student permissions. Then upload the eight
+question-linked visuals, import the 100 drafts, and run the linked suite:
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:ltl1c2:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:ltl1c2
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expect eight registered 1586x992 assets and an initial import summary of 100
+inserted, zero failed, and zero missing-asset warnings. Do not upload the
+supplemental `drill_commands_cadet_quick_reference.png` through the question-
+linked command. Assign exact package `LTL1_C2_100` separately to each intended
+student after the import.

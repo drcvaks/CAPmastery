@@ -237,3 +237,16 @@ bank; archiving must not delete attempts, sessions, or mastery history.
 The ninth cadet-grade-insignia image is a supplemental reference, is absent from
 the question-linked manifest, and must not be registered or displayed until its
 exact insignia artwork is verified against a current official CAP reference.
+
+## Wright Brothers Chapter 2 deep-study bank
+
+Package `LTL1_C2_100` contains 100 Chapter 2 drafts with unique stable IDs, 50
+families, exactly 25 correct answers in each A-D position, and an aligned 75/25
+exam-style/final-eligibility split. All reinforcement targets remain inside the
+same supplied family. Eight reviewed 1586x992 question-linked visuals cover all
+100 rows and retain their stable asset keys and private Storage paths.
+
+The separate drill-command image is supplemental and is not part of the
+question-linked upload or import. It remains unavailable until CAP Mastery has a
+reviewed, package-authorized reference-library flow. The source's style label is
+stored as provenance only; it does not authorize recalled protected exam content.
