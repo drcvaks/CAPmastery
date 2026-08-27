@@ -19,6 +19,19 @@ describe("practice-test option schema", () => {
     expect(practiceTestOptionSchema.parse(aerospaceOption)).toEqual(aerospaceOption);
   });
 
+  it("accepts an untimed Wright Brothers mock exam", () => {
+    const wrightOption = {
+      ...aerospaceOption,
+      blueprint_code: "WRIGHT_BROTHERS_MOCK_30",
+      selection_strategy: "wright_brothers_mock_exam",
+      question_count: 30,
+      time_limit_seconds: null,
+      allow_pause: false,
+    };
+
+    expect(practiceTestOptionSchema.parse(wrightOption)).toEqual(wrightOption);
+  });
+
   it("rejects an unknown client-selected strategy", () => {
     expect(() =>
       practiceTestOptionSchema.parse({ ...aerospaceOption, selection_strategy: "client_random" }),

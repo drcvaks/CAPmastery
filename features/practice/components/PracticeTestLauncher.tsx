@@ -44,16 +44,19 @@ export function PracticeTestLauncher({ examId }: { examId: string }) {
 function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
   const router = useRouter();
   const createTest = useCreatePracticeTest();
-  const [timed, setTimed] = useState(true);
-  const minutes = Math.ceil(option.time_limit_seconds / 60);
+  const [timed, setTimed] = useState(option.time_limit_seconds !== null);
+  const minutes = option.time_limit_seconds ? Math.ceil(option.time_limit_seconds / 60) : null;
   const isLeadershipFullExam = option.selection_strategy === "mitchell_full_exam";
   const isAerospaceFullExam = option.selection_strategy === "aerospace_full_exam";
-  const isFullExam = isLeadershipFullExam || isAerospaceFullExam;
-  const coverageLabel = isLeadershipFullExam
-    ? "Chapters 4–8 exam pool"
-    : isAerospaceFullExam
-      ? "Modules 1–7 exam pool"
-      : "Chapter 1 legacy pilot blueprint";
+  const isWrightMockExam = option.selection_strategy === "wright_brothers_mock_exam";
+  const isFullExam = isLeadershipFullExam || isAerospaceFullExam || isWrightMockExam;
+  const coverageLabel = isWrightMockExam
+    ? "Chapters 1–3 exam pool"
+    : isLeadershipFullExam
+      ? "Chapters 4–8 exam pool"
+      : isAerospaceFullExam
+        ? "Modules 1–7 exam pool"
+        : "Chapter 1 legacy pilot blueprint";
 
   return (
     <AppCard title={option.blueprint_name} description={option.description}>
@@ -73,13 +76,21 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
           questions, and avoids duplicate question families.
         </Text>
       ) : null}
+      {isWrightMockExam ? (
+        <Text style={styles.muted}>
+          Every form uses 10 questions from each Wright Brothers chapter, favors high exam-likeness
+          questions, and avoids duplicate question families.
+        </Text>
+      ) : null}
       {!isFullExam ? (
         <Text style={styles.muted}>
           This is the original Chapter 1 pilot. Chapters 4–8 are currently covered by the separate
           50-question Mitchell practice test.
         </Text>
       ) : null}
-      {option.allow_untimed ? (
+      {option.time_limit_seconds === null ? (
+        <Text style={styles.detail}>Untimed mock exam · No clock</Text>
+      ) : option.allow_untimed ? (
         <View style={styles.switchRow}>
           <View style={styles.switchCopy}>
             <Text style={styles.switchTitle}>Use {minutes}-minute timer</Text>
@@ -95,11 +106,13 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
       ) : (
         <Text style={styles.detail}>Time limit: {minutes} minutes</Text>
       )}
-      <Text style={styles.muted}>
-        {option.allow_pause
-          ? "This blueprint allows pausing."
-          : "Pausing is not available for this blueprint."}
-      </Text>
+      {option.time_limit_seconds !== null ? (
+        <Text style={styles.muted}>
+          {option.allow_pause
+            ? "This blueprint allows pausing."
+            : "Pausing is not available for this blueprint."}
+        </Text>
+      ) : null}
       <AppButton
         label={`Start ${option.question_count}-question practice test`}
         loading={createTest.isPending}

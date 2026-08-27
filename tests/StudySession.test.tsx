@@ -162,6 +162,39 @@ describe("practice test session", () => {
     expect(navigation[3]).toHaveTextContent("Next");
   });
 
+  it("shows the 30-question Wright mock without a clock or chapter clues", async () => {
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        questionCount: 30,
+        timed: false,
+        timeLimitSeconds: null,
+        remainingSeconds: null,
+        questions: [
+          {
+            ...question,
+            question_count: 30,
+            timed: false,
+            time_limit_seconds: null,
+            remaining_seconds: null,
+          },
+        ],
+      },
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+
+    await render(<StudySessionView sessionId={activeSession.id} />);
+
+    expect(screen.queryByText(/Time remaining:/)).toBeNull();
+    expect(screen.queryByText("Untimed")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Pause test" })).toBeNull();
+    expect(screen.queryByText("Pausing is not available for this blueprint.")).toBeNull();
+    expect(screen.queryByText("Chapter 5: Brainpower for Leadership")).toBeNull();
+    expect(screen.getByRole("button", { name: "Flag question" })).toBeVisible();
+  });
+
   it("offers finishing only on the last full-exam question", async () => {
     jest.mocked(useStudySession).mockReturnValue({
       data: {

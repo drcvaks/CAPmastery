@@ -194,14 +194,16 @@ historical session-question snapshots are not deleted or recreated. Learn to
 Lead Volume 2 remains under Billy Mitchell Leadership.
 
 The existing Chapter 1 pilot blueprint is also rehomed to Wright Brothers and
-remains an explicitly temporary ten-question test. When Chapters 2 and 3 are
-available, a later reviewed migration should add a three-chapter Wright Brothers
-practice blueprint and retire the Chapter 1-only launcher. The Study browser
-requires no Wright-specific client branch; its server-returned exam and topic
-hierarchy automatically renders the new accessible track.
+remains an explicitly temporary ten-question test. Migration `202608260048`
+adds the separate three-chapter Wright Brothers mock blueprint. Its protected
+selector freezes 30 distinct question families—exactly 10 from each chapter—and
+always creates an untimed session. The Study browser requires no track-specific
+route; its server-returned exam, topics, and practice options render the
+accessible Wright content automatically.
 
-Missed-answer review for newly created Leadership and Aerospace 50-question tests is persistent
-and resumable. The result screen reads a protected review summary, starts at the
+Missed-answer review for newly created Wright Brothers 30-question, Leadership
+50-question, and Aerospace 50-question tests is persistent and resumable. The
+result screen reads a protected review summary, starts at the
 first unreviewed missed answer, and records completion only when the cadet uses
 Next missed answer or Finish review after seeing the released explanation. The
 latest-test Progress card presents the same reviewed/total percentage to the

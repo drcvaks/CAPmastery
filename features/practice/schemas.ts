@@ -4,6 +4,7 @@ export const practiceSelectionStrategySchema = z.enum([
   "fixed_blueprint",
   "mitchell_full_exam",
   "aerospace_full_exam",
+  "wright_brothers_mock_exam",
 ]);
 
 export type PracticeSelectionStrategy = z.infer<typeof practiceSelectionStrategySchema>;
@@ -18,7 +19,7 @@ export const practiceTestOptionSchema = z
     blueprint_name: z.string().min(1),
     description: z.string().min(1),
     question_count: z.number().int().positive(),
-    time_limit_seconds: z.number().int().positive(),
+    time_limit_seconds: z.number().int().positive().nullable(),
     allow_untimed: z.boolean(),
     allow_pause: z.boolean(),
   })

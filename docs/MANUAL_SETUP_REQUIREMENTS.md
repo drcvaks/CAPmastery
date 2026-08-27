@@ -686,3 +686,30 @@ inserted, zero failed, and zero missing-asset warnings. The header-only
 supplemental manifest requires no upload. Do not use the superseded files under
 `Chapter 3/old`. Assign exact package `LTL1_C3_100` separately to each intended
 student after the import.
+
+### Wright Brothers 30-question mock exam
+
+Apply migration `202608260048_wright_brothers_mock_exam.sql`, then run the linked
+rollback-only tests:
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+The launcher appears only when the signed-in student can access at least 10
+eligible high-likeness question families in every Wright chapter. With the
+current private draft banks, assign all three exact packages `LTL1_C1_100`,
+`LTL1_C2_100`, and `LTL1_C3_100` to that student. No new account, credential,
+environment variable, Storage action, or service-role key is required. After the
+linked suite passes, verify one student flow in web: the 30-question launcher is
+visible, no clock or pause control appears, chapter/topic labels stay hidden
+during the active exam, flags persist, feedback remains hidden until Finish, and
+missed-answer review plus Progress topic analysis work after completion.
+
+Migration 048 was applied to the linked development project and the complete
+rollback-only database suite passed 546/546. Its Docker catalog-cache warning was
+non-blocking and does not require Docker for linked-project testing. Only the
+owner student-flow acceptance above remains.

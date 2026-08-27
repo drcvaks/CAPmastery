@@ -318,4 +318,27 @@ course, and Volume 1 hierarchy. The 100 drafts are isolated in exact package
 `LTL1_C3_100`; its 50 family codes and ten visual keys do not overlap Chapters
 1–2.
 
+## Wright Brothers mock-exam extension
+
+Migration `202608260048` adds selection strategy
+`wright_brothers_mock_exam` and active blueprint `WRIGHT_BROTHERS_MOCK_30`.
+The blueprint's time limit is intentionally null; its creation RPC rejects a
+timed request and freezes `timed = false`, a null session time limit, and no pause
+permission. This requires `practice_test_blueprints.time_limit_seconds` to be
+nullable while the existing positive-range check continues to govern non-null
+timer values.
+
+`create_wright_brothers_mock_exam` requires an authenticated student and at
+least 10 accessible, eligible, high-likeness, positive-weight question families
+in each of Chapters 1–3. It selects one question per family, weighted by
+`final_exam_weight`, freezes exactly 10 from each chapter, and returns only the
+session identifier. Draft questions remain accessible only through exact pilot
+package assignments; correct choices and explanations remain private until
+server-side grading and test completion.
+
+The shared latest-topic and missed-answer-review functions now recognize all
+three dedicated comprehensive-test strategies. The option RPC hides the Wright
+mock until each chapter has enough accessible content, which prevents a student
+from seeing a launcher that cannot succeed.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

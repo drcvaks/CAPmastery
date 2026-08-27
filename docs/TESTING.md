@@ -178,6 +178,16 @@ completion, missed-answer review tracking, and latest-test analysis across all
 seven module topics. Client schema coverage accepts only the three known server
 selection strategies, including `aerospace_full_exam`.
 
+`wright_brothers_mock_exam.test.sql` declares 32 rollback-only assertions. It
+verifies the dedicated blueprint and protected RPC, a null timer and forced
+untimed session, hidden launcher before all three chapter packages are
+accessible, exactly 30 unique questions/families with 10 per chapter, flags,
+delayed secure grading, completion, wrong-answer review tracking, and three-topic
+Progress analysis. Component coverage verifies the 30-question active exam hides
+chapter/topic clues and renders no clock, untimed badge, pause button, or pause
+message while preserving question flags. The expected linked aggregate grows
+from 514/514 to 546/546 after migration 048 is applied.
+
 Migration 042 expands `mitchell_full_exam.test.sql` from 36 to 56 assertions. It
 checks the review columns and function grants, automatic tracking on new full
 tests, pre-completion denial, wrong-answer counting, cross-student denial,

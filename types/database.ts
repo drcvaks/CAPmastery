@@ -982,7 +982,7 @@ export type Database = {
           question_count: number;
           selection_strategy: string;
           status: string;
-          time_limit_seconds: number;
+          time_limit_seconds: number | null;
           updated_at: string;
         };
         Insert: {
@@ -997,7 +997,7 @@ export type Database = {
           question_count: number;
           selection_strategy?: string;
           status?: string;
-          time_limit_seconds: number;
+          time_limit_seconds?: number | null;
           updated_at?: string;
         };
         Update: {
@@ -1012,7 +1012,7 @@ export type Database = {
           question_count?: number;
           selection_strategy?: string;
           status?: string;
-          time_limit_seconds?: number;
+          time_limit_seconds?: number | null;
           updated_at?: string;
         };
         Relationships: [
@@ -2398,6 +2398,10 @@ export type Database = {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;
       };
+      create_wright_brothers_mock_exam: {
+        Args: { p_blueprint_id: string; p_timed?: boolean };
+        Returns: string;
+      };
       create_practice_test: {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;
@@ -2499,7 +2503,7 @@ export type Database = {
           exam_title: string;
           question_count: number;
           selection_strategy: string;
-          time_limit_seconds: number;
+          time_limit_seconds: number | null;
         }[];
       };
       get_practice_test_question_flags: {

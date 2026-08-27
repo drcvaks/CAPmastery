@@ -1177,3 +1177,21 @@ Mitchell full-test usability follow-up:
   passed `wright_brothers_content.test.sql` 12/12 and the complete database
   aggregate 514/514. Package assignment and owner student-UI acceptance remain
   pending.
+- Added the post-Checkpoint-9 Wright Brothers comprehensive mock exam. Migration
+  `202608260048_wright_brothers_mock_exam.sql` introduces a dedicated protected
+  strategy and active 30-question blueprint with no clock. The selector requires
+  accessible eligible content in Chapters 1–3, freezes exactly 10 distinct
+  families per chapter, and retains secure delayed feedback, server grading,
+  flags, wrong-only review, review tracking, and latest-topic Progress analysis.
+  The client now supports nullable blueprint timers and treats the 30-question
+  form as a comprehensive exam without showing chapter clues, a timer/untimed
+  badge, or pause controls. A new 32-assertion rollback-only SQL suite covers the
+  blueprint, package-aware visibility, balanced selection, immutable untimed
+  settings, authorization, flags, grading, completion, review tracking, and
+  Progress output. Local validation passes strict TypeScript, Expo ESLint,
+  repository formatting, all 26 Jest suites with 182/182 tests, and linked schema
+  lint with no warnings. The owner applied migration 048; Supabase CLI's optional
+  Docker-based catalog-cache refresh warned that Docker Desktop was unavailable,
+  but the push finished successfully. The new Wright mock suite passed 32/32 and
+  the complete linked pgTAP aggregate passed 546/546. Owner web acceptance
+  remains pending.

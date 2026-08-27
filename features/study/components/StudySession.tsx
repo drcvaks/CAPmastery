@@ -47,7 +47,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     sessionId,
     session?.mode === "practice_test" &&
       session.status === "completed" &&
-      session.questionCount === 50,
+      (session.questionCount === 50 || session.questionCount === 30),
   );
 
   useEffect(() => {
@@ -205,7 +205,9 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const delayedFeedbackActive =
     (session.mode === "practice_test" || session.mode === "challenge") &&
     session.status === "active";
-  const isFullPracticeExam = session.mode === "practice_test" && session.questionCount === 50;
+  const isFullPracticeExam =
+    session.mode === "practice_test" &&
+    (session.questionCount === 50 || session.questionCount === 30);
   const isLastQuestion = currentQuestion.question_position === session.questionCount;
 
   async function handleSubmit() {
@@ -306,9 +308,9 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               loading={setPaused.isPending}
               onPress={() => void setPaused.mutateAsync(!session.isPaused)}
             />
-          ) : (
+          ) : session.timed ? (
             <Text style={styles.muted}>Pausing is not available for this blueprint.</Text>
-          )}
+          ) : null}
         </AppCard>
       ) : null}
 
@@ -331,17 +333,13 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         <Text style={styles.progress}>
           Question {currentQuestion.question_position} of {session.questionCount}
         </Text>
-        {session.mode === "practice_test" ? (
+        {session.mode === "practice_test" && session.timed ? (
           <View style={styles.timerBadge}>
             <Text
-              accessibilityLabel={
-                session.timed
-                  ? `Time remaining ${formatTimer(remainingSeconds ?? 0)}`
-                  : "Untimed practice test"
-              }
+              accessibilityLabel={`Time remaining ${formatTimer(remainingSeconds ?? 0)}`}
               style={styles.timer}
             >
-              {session.timed ? `Time remaining: ${formatTimer(remainingSeconds ?? 0)}` : "Untimed"}
+              Time remaining: {formatTimer(remainingSeconds ?? 0)}
             </Text>
           </View>
         ) : null}
