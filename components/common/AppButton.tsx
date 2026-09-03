@@ -21,7 +21,9 @@ export function AppButton({
 
   return (
     <Pressable
+      accessibilityLabel={label}
       accessibilityRole="button"
+      accessibilityState={{ busy: loading, disabled: inactive }}
       disabled={inactive}
       onPress={onPress}
       style={({ pressed }) => [
@@ -33,6 +35,7 @@ export function AppButton({
     >
       {loading ? (
         <ActivityIndicator
+          accessibilityLabel={`${label}, loading`}
           color={variant === "primary" ? theme.colors.surface : theme.colors.primary}
         />
       ) : (

@@ -76,6 +76,12 @@ Audit role changes, link changes, publishing, imports, question deactivation/ver
 ## Threats to test
 
 ID substitution, guessed route/UUID access, changed role claims, direct REST queries, answer-table selection, duplicate answer submission, function calls on another session, draft-content reads, CSV injection/malformed input, unsafe logs, stale guardian links, and excessive admin grants.
+
+## Checkpoint 10 release hardening
+
+Migration 049 revokes inherited `PUBLIC` and anonymous execution from public and private functions, removes every API-role grant from private tables, and applies the same defaults to future migration-owned objects. Client-facing RPCs must be explicitly granted to `authenticated`; new migrations cannot rely on PostgreSQL's function default. The global release-security pgTAP suite enumerates the catalogs to require RLS on every public table, no anonymous table/RPC access, no private table access, and an empty fixed search path for every CAP Mastery security-definer routine. The only exact exception is Supabase's platform-managed `rls_auto_enable()` helper with its restrictive `search_path=pg_catalog`; changing that helper would undermine rather than improve automatic RLS. The suite also repeats direct role, attempt, mastery, and answer-key privilege probes.
+
+The client credential scan examines tracked application/configuration sources for privileged Expo variables, Supabase secret keys, and JWT-like literals. Route error boundaries display no raw exception text, and the provider-neutral monitoring event contains only a fixed area, operation, and broad category. The full review and exceptions are recorded in `docs/SECURITY_REVIEW.md`.
 ## Checkpoint 6 progress access
 
 - A student can request only their own progress.

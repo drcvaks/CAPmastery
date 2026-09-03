@@ -1,18 +1,31 @@
+import { useEffect } from "react";
 import type { ErrorBoundaryProps } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { theme } from "../../lib/constants/theme";
+import { reportOperationalError } from "../../lib/monitoring";
 
 export function RouteErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    reportOperationalError(error, { area: "navigation", operation: "route-render" });
+  }, [error]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.panel}>
         <Text accessibilityRole="header" style={styles.title}>
           Something went wrong
         </Text>
-        <Text style={styles.message}>{error.message || "The page could not be displayed."}</Text>
-        <Pressable accessibilityRole="button" onPress={retry} style={styles.button}>
+        <Text style={styles.message}>
+          The page could not be displayed. Your account and saved work have not been changed.
+        </Text>
+        <Pressable
+          accessibilityLabel="Try loading the page again"
+          accessibilityRole="button"
+          onPress={retry}
+          style={styles.button}
+        >
           <Text style={styles.buttonLabel}>Try again</Text>
         </Pressable>
       </View>

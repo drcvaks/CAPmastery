@@ -4,6 +4,8 @@
 
 From Checkpoint 1 onward, every checkpoint runs the configured TypeScript check, lint, unit/component/integration tests, and an Expo startup/config validation. Database checkpoints also replay migrations and run SQL/RLS tests. Report the exact command, exit code, counts, and any skipped/non-applicable check.
 
+Checkpoint 10 adds `npm run security:client-secrets` and the aggregate `npm run release:check`. Release validation also requires clean web and Android exports, linked migration/lint status, the full linked pgTAP runner, and the manual role/device flows in `PILOT_RELEASE_CHECKLIST.md`.
+
 ## Configured tools
 
 - TypeScript 6 compiler in strict mode with unchecked indexed access.
@@ -275,3 +277,5 @@ exact A-D balance, the aligned 75/25 exam-style eligibility split, complete
 teaching support, and ten valid 1448x1086 question-linked assets. It also proves
 the drill visual is in the primary manifest and no question references an
 unregistered key.
+
+The Checkpoint 10 release-security suite adds 13 global catalog/privilege assertions. It does not sample tables: it requires RLS on every public table, no anonymous public-table or application-RPC grant, no API-role private-table grant, no inherited `PUBLIC` security-definer execution, and a fixed empty search path on every CAP Mastery public/private security-definer function. Supabase's exact platform helper `rls_auto_enable()` is allowed only with `search_path=pg_catalog`. Direct answer-key reads and role/attempt/mastery writes are denied. Jest adds malformed/oversized CSV, safe-monitoring, and shared-control accessibility coverage.

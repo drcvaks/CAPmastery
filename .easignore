@@ -1,0 +1,35 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated Expo output
+node_modules/
+.expo/
+dist/
+web-build/
+android/
+ios/
+
+# Development-only project material
+Content/
+docs/
+supabase/
+tests/
+coverage/
+*.bak
+*.log
+*.pdf
+*.zip
+*.xlsx
+*.doc
+check.txt
+
+# Editor and operating-system files
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+expo-env.d.ts

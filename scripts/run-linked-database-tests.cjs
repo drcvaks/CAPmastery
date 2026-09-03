@@ -12,7 +12,7 @@ function collectTapLines(queryResult) {
   return results.flatMap((result) =>
     result.rows.flatMap((row) =>
       Object.values(row).filter(
-        (value) => typeof value === "string" && /^(ok|not ok|1\.\.)/.test(value),
+        (value) => typeof value === "string" && /^(# |ok|not ok|1\.\.)/.test(value),
       ),
     ),
   );
@@ -58,6 +58,7 @@ async function main() {
       const sql = await fs.readFile(path.join(testsDirectory, testFile), "utf8");
       const tapLines = collectTapLines(await client.query(sql));
       const failures = tapLines.filter((line) => line.startsWith("not ok"));
+      const diagnostics = tapLines.filter((line) => line.startsWith("# "));
       const successes = tapLines.filter((line) => line.startsWith("ok"));
       const planLine = tapLines.find((line) => /^1\.\.\d+$/.test(line));
       const planned = planLine ? Number(planLine.slice(3)) : Number.NaN;
@@ -65,6 +66,9 @@ async function main() {
       if (!Number.isInteger(planned) || successes.length !== planned || failures.length > 0) {
         if (failures.length > 0) {
           process.stderr.write(`${failures.join("\n")}\n`);
+        }
+        if (diagnostics.length > 0) {
+          process.stderr.write(`${diagnostics.join("\n")}\n`);
         }
         throw new Error(
           `${testFile} did not pass: plan=${planLine ?? "missing"}, passed=${successes.length}, failed=${failures.length}`,

@@ -13,10 +13,11 @@ export function AppTextField({ error, label, ...inputProps }: AppTextFieldProps)
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
+        {...inputProps}
+        accessibilityHint={error || inputProps.accessibilityHint}
         accessibilityLabel={label}
         placeholderTextColor={theme.colors.muted}
         style={[styles.input, error && styles.inputError]}
-        {...inputProps}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>

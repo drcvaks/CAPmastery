@@ -19,6 +19,13 @@
     "plugins": ["expo-router", "expo-status-bar", "expo-font"],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "40186af9-064b-4d2f-acb8-aab2bd12a323"
+      }
+    },
+    "owner": "chaimvaks"
   }
 }

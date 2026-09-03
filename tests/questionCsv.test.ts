@@ -1,4 +1,6 @@
 import {
+  MAX_QUESTION_CSV_CHARACTERS,
+  MAX_QUESTION_CSV_ROWS,
   normalizePrompt,
   parseDelimitedText,
   QUESTION_CSV_HEADERS,
@@ -89,5 +91,46 @@ describe("question CSV workflow", () => {
     expect(result.rows).toHaveLength(2);
     expect(result.warnings[0]?.message).toContain("resembles row 2");
     expect(normalizePrompt(" One,  TWO! ")).toBe("one two");
+  });
+
+  it("rejects duplicate, unexpected, and missing header contracts", () => {
+    const duplicate = QUESTION_CSV_HEADERS.with(1, QUESTION_CSV_HEADERS[0]!).join(",");
+    const duplicateResult = validateQuestionCsv(`${duplicate}\n${validRow()}`);
+    expect(duplicateResult.errors.map((issue) => issue.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("Duplicate columns"),
+        expect.stringContaining("Missing required columns"),
+      ]),
+    );
+
+    const unexpected = `${QUESTION_CSV_TEMPLATE.trim()},answer_key`;
+    const unexpectedResult = validateQuestionCsv(`${unexpected}\n${validRow()},secret`);
+    expect(unexpectedResult.errors[0]?.message).toContain("Unexpected columns: answer_key");
+    expect(unexpectedResult.rows).toEqual([]);
+  });
+
+  it("bounds oversized CSV text and row counts before import", () => {
+    const oversizedText = "x".repeat(MAX_QUESTION_CSV_CHARACTERS + 1);
+    expect(validateQuestionCsv(oversizedText).errors[0]?.message).toContain(
+      "character safety limit",
+    );
+
+    const rows = Array.from({ length: MAX_QUESTION_CSV_ROWS + 1 }, (_, index) =>
+      validRow({ external_id: `CHECKPOINT10-Q${String(index).padStart(4, "0")}` }),
+    );
+    const result = validateQuestionCsv(`${QUESTION_CSV_TEMPLATE.trim()}\n${rows.join("\n")}`);
+    expect(result.errors[0]?.message).toContain("row safety limit");
+    expect(result.rows).toEqual([]);
+  });
+
+  it("warns about every common spreadsheet-formula prefix", () => {
+    for (const prefix of ["=", "+", "-", "@"]) {
+      const result = validateQuestionCsv(
+        `${QUESTION_CSV_TEMPLATE.trim()}\n${validRow({ memory_aid: `${prefix}formula` })}`,
+      );
+      expect(result.warnings.some((issue) => issue.message.includes("spreadsheet formula"))).toBe(
+        true,
+      );
+    }
   });
 });

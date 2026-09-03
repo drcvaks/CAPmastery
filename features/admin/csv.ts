@@ -53,6 +53,9 @@ export type CsvPreview = {
   warnings: CsvIssue[];
 };
 
+export const MAX_QUESTION_CSV_CHARACTERS = 5_000_000;
+export const MAX_QUESTION_CSV_ROWS = 2_000;
+
 const OPTIONAL_FIELDS = new Set<QuestionCsvHeader>([
   "pilot_batch",
   "short_explanation",
@@ -122,6 +125,18 @@ export function parseDelimitedText(text: string): string[][] {
 export function validateQuestionCsv(text: string): CsvPreview {
   const errors: CsvIssue[] = [];
   const warnings: CsvIssue[] = [];
+  if (text.length > MAX_QUESTION_CSV_CHARACTERS) {
+    return {
+      rows: [],
+      errors: [
+        {
+          row: 1,
+          message: `CSV content exceeds the ${MAX_QUESTION_CSV_CHARACTERS.toLocaleString()} character safety limit.`,
+        },
+      ],
+      warnings,
+    };
+  }
   let matrix: string[][];
   try {
     matrix = parseDelimitedText(text);
@@ -141,10 +156,39 @@ export function validateQuestionCsv(text: string): CsvPreview {
   }
 
   const headers = matrix[0] ?? [];
+  const duplicateHeaders = headers.filter((header, index) => headers.indexOf(header) !== index);
+  if (duplicateHeaders.length > 0) {
+    errors.push({
+      row: 1,
+      message: `Duplicate columns: ${[...new Set(duplicateHeaders)].join(", ")}.`,
+    });
+  }
+  const unexpectedHeaders = headers.filter(
+    (header) => !QUESTION_CSV_HEADERS.includes(header as QuestionCsvHeader),
+  );
+  if (unexpectedHeaders.length > 0) {
+    errors.push({
+      row: 1,
+      message: `Unexpected columns: ${unexpectedHeaders.join(", ")}.`,
+    });
+  }
   const missing = QUESTION_CSV_HEADERS.filter((header) => !headers.includes(header));
-  if (missing.length > 0) {
-    errors.push({ row: 1, message: `Missing required columns: ${missing.join(", ")}.` });
+  if (missing.length > 0 || duplicateHeaders.length > 0 || unexpectedHeaders.length > 0) {
+    if (missing.length > 0)
+      errors.push({ row: 1, message: `Missing required columns: ${missing.join(", ")}.` });
     return { rows: [], errors, warnings };
+  }
+  if (matrix.length - 1 > MAX_QUESTION_CSV_ROWS) {
+    return {
+      rows: [],
+      errors: [
+        {
+          row: 1,
+          message: `CSV contains more than the ${MAX_QUESTION_CSV_ROWS.toLocaleString()} row safety limit.`,
+        },
+      ],
+      warnings,
+    };
   }
   const rows: QuestionCsvRow[] = [];
   const externalIds = new Set<string>();
@@ -231,7 +275,7 @@ export function validateQuestionCsv(text: string): CsvPreview {
       normalizedPrompts.set(normalized, csvRow);
     }
     for (const value of Object.values(row)) {
-      if (/^[=+@]/.test(value)) {
+      if (/^[=+@-]/.test(value)) {
         warnings.push({
           row: csvRow,
           externalId,

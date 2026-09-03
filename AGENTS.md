@@ -37,6 +37,11 @@ CAP Mastery is a standalone Expo/React Native and Supabase application. Read `CA
 - Deferred AI design: `docs/FUTURE_AI_INTEGRATION.md`
 - mySCP audit: `docs/MYSCP_REUSE_REPORT.md`
 - Required owner inputs: `docs/MANUAL_SETUP_REQUIREMENTS.md`
+- Checkpoint 10 security review: `docs/SECURITY_REVIEW.md`
+- Pilot release checklist: `docs/PILOT_RELEASE_CHECKLIST.md`
+- Android internal build: `docs/ANDROID_INTERNAL_BUILD.md`
+- Backup and restore: `docs/BACKUP_AND_MIGRATION_RUNBOOK.md`
+- Monitoring and known limitations: `docs/ERROR_MONITORING.md`, `docs/KNOWN_LIMITATIONS.md`
 
 ## Checkpoint completion report
 

@@ -2,7 +2,7 @@
 
 CAP Mastery is a planned Android-first Expo application, with responsive web administration, that helps Civil Air Patrol cadets prepare for milestone examinations through adaptive study, explanations, progress tracking, and supportive private competition.
 
-The repository is implementing **Checkpoint 9: Achievements and Family Challenge**. The development project includes evidence-backed achievements, private two-student challenges with identical approved question sets, predefined encouragement, delayed supportive results, and progress-based scoring without public rankings. No production database exists.
+The repository is implementing **Checkpoint 10: Quality, Security, and Pilot Release**. The nonproduction development project now contains the complete study, practice-test, progress, family, challenge, achievement, and governed content-review pilot. Checkpoint 10 hardens global database grants, import boundaries, accessibility, release checks, monitoring guidance, backup/restore, and pilot operations. No production database exists.
 
 ## Repository boundaries
 
@@ -44,6 +44,8 @@ Useful commands:
 
 ```powershell
 npm run check
+npm run security:client-secrets
+npm run release:check
 npm run validate:expo
 npx expo-doctor
 npm run export:web
@@ -80,7 +82,7 @@ npm run db:test:linked
 
 Add the separate CAP Mastery development project URL and publishable key to ignored `.env.local`. With no valid client configuration, the app shows a safe setup screen rather than attempting a connection. Authenticated users are routed by database roles; client routing is not the authorization boundary.
 
-The physical Expo Go version currently available to the owner is incompatible with SDK 57. SDK 57 is intentionally retained; use web/production export checks for now and revisit Expo Go or a development build before physical-device testing.
+The physical Expo Go version previously available to the owner was incompatible with SDK 57. SDK 57 is intentionally retained; use the documented EAS internal APK for physical-device pilot testing.
 
 Vercel uses the checked-in `vercel.json` to build `dist/web` and rewrite every
 direct or refreshed application route to the single-page entry point. Keep the
@@ -89,7 +91,7 @@ service-role key.
 
 ## Documentation
 
-Begin with [AGENTS.md](AGENTS.md), then read [the architecture](docs/ARCHITECTURE.md), [the mySCP reuse audit](docs/MYSCP_REUSE_REPORT.md), [security requirements](docs/SECURITY_AND_PERMISSIONS.md), and [the checkpoint log](docs/CHECKPOINT_LOG.md).
+Begin with [AGENTS.md](AGENTS.md), then read [the architecture](docs/ARCHITECTURE.md), [security requirements](docs/SECURITY_AND_PERMISSIONS.md), [the Checkpoint 10 security review](docs/SECURITY_REVIEW.md), [the pilot checklist](docs/PILOT_RELEASE_CHECKLIST.md), and [the checkpoint log](docs/CHECKPOINT_LOG.md).
 
 ## Local status
 

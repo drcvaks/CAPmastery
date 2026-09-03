@@ -77,6 +77,15 @@ Checkpoint 8 requires no new account, environment variable, credential, Supabase
 - Pilot success thresholds, feedback collection method, support contact, backup/restore expectations, data retention, incident contact, and go/no-go approval.
 - Web admin hosting and Android distribution choice for pilot; later error-monitoring provider and privacy configuration.
 
+## Checkpoint 10 owner actions
+
+- Apply migration 049 to the linked nonproduction project and run the full linked pgTAP suite. Do not apply it first to an untested production project.
+- Complete the EAS setup and internal APK procedure in `ANDROID_INTERNAL_BUILD.md` using a new CAP Mastery EAS project and only client-safe Supabase values.
+- Complete and retain `PILOT_RELEASE_CHECKLIST.md` for Heshy, Avigail, Chaim, Rachel, web, and each Android pilot device.
+- Finalize source authorization, parental consent/privacy notice, retention/export/deletion, support and incident contacts, backup plan/retention, success thresholds, and the pilot go/no-go decision.
+- Perform the disposable-project restore rehearsal in `BACKUP_AND_MIGRATION_RUNBOOK.md` before treating collected pilot learning history as recoverable.
+- Decide whether the pilot remains on the development Supabase project or receives a separate production project. No production project is assumed by the repository.
+
 ## Checkpoint 1 manual action
 
 No secret, account creation, Supabase action, or production database action is required to review the shell. Before Checkpoint 2, choose/create the separate CAP Mastery development Supabase project and decide the pilot email-confirmation/account-creation approach. Do not create a production database yet.

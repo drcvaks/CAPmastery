@@ -472,7 +472,7 @@ Checkpoint 8 is complete. Stop here. Recommended next checkpoint after explicit 
 
 ## Checkpoint 9 — Achievements and Family Challenge
 
-Status: implementation and linked pgTAP complete; owner web acceptance pending. Date: 2026-07-24.
+Status: complete and owner-approved. Date: 2026-09-01 (implementation began 2026-07-24).
 
 Completed:
 
@@ -1195,3 +1195,106 @@ Mitchell full-test usability follow-up:
   but the push finished successfully. The new Wright mock suite passed 32/32 and
   the complete linked pgTAP aggregate passed 546/546. Owner web acceptance
   remains pending.
+
+## Checkpoint 10 — Quality, Security, and Pilot Release
+
+Status: implementation, migration, and automated validation complete; owner device/pilot acceptance pending. Date: 2026-09-01.
+
+Completed:
+
+- Reviewed the current schema by identity/access, catalog, question/review,
+  study/mastery, practice-test, motivation, and private-support table groups.
+  Added a global release-security suite so future tables and functions cannot
+  silently fall outside the review.
+- Added forward migration `202609010049_release_security_hardening.sql`. It
+  removes inherited anonymous/`PUBLIC` function execution, removes API-role
+  private-table access, and establishes secure default privileges for future
+  migration-owned functions and private tables. Existing authenticated RPCs
+  retain their explicit grants.
+- Hardened CSV validation with a 5,000,000-character/2,000-row ceiling, exact
+  header-set enforcement, duplicate/unexpected header rejection, and all common
+  spreadsheet-formula prefixes. Added regression coverage for every boundary.
+- Added a repeatable tracked-client credential scan and release-check command.
+  The scan rejects privileged Expo variable assignments, Supabase secret-key
+  values, and JWT-like credential literals in application/configuration sources.
+- Replaced raw route exception display with a stable recovery message and added
+  privacy-safe operational error classification. No remote monitoring provider,
+  DSN, student identifier, answer, token, message, or stack is introduced.
+- Improved shared button/text-field accessibility for stable names, loading/
+  disabled state, and validation guidance. Added component tests proving raw
+  route details stay hidden and retry remains accessible.
+- Added the EAS internal-APK profile plus security review, error-monitoring,
+  Android-build, pilot-checklist, backup/restore, and known-limitations runbooks.
+  The admin UI already supports CSV preview/import, correction, review, and
+  approval without editing SQL.
+- Updated the eight packages identified by Expo Doctor to their supported SDK 57
+  patches, including Expo 57.0.19 and React Native 0.86.3. A nonbreaking
+  `npm audit fix` reduced the report from 21 advisories (8 high) to 17
+  transitive advisories (4 high, 0 critical). The remaining high chain is
+  Metro's build-time image parser; npm's remaining suggested fixes require
+  incompatible Expo/Router downgrades and were not forced.
+
+Database changes:
+
+- Migration 049 is applied to the linked nonproduction database and
+  `release_security.test.sql` is versioned locally. The optional post-push
+  Docker catalog cache warned because Docker Desktop is not running; SQL
+  application itself completed. No production database,
+  service-role client credential, AI integration, or remote monitoring service
+  was added.
+
+Validation results:
+
+- Strict TypeScript, Expo ESLint, and repository formatting: passed.
+- Jest: 28/28 suites and 192/192 tests passed. The runner still requires its
+  documented `--forceExit` because an existing post-suite handle remains open.
+- Client credential scan: passed with no privileged client pattern found.
+- Expo public configuration: passed. Expo Doctor: 21/21 checks passed after the
+  supported patch updates.
+- Web production export: passed, 1,580 modules and a 3.6 MB bundle. Android
+  production export: passed, 1,710 modules and a 5.2 MB Hermes bundle; the
+  sandboxed first attempt could not execute `hermesc`, while the approved
+  out-of-sandbox retry passed.
+- Linked schema lint: passed with no warnings. Migration history matched through
+  048 with only 049 pending, then migration 049 applied successfully.
+- Linked pgTAP did not start because the runner correctly requires the
+  process-only `CAP_MASTERY_DB_PASSWORD`; no secret was read or stored by Codex.
+- The owner-run linked suite then passed 558/559 assertions. All anonymous,
+  table-grant, private-data, answer-key, role-escalation, forged-attempt, and
+  forged-mastery checks passed. One public security-definer function has a
+  nonempty or missing fixed `search_path`. The release test now prints the exact
+  function signature and current configuration so a narrow forward migration
+  can correct it without weakening the invariant or altering an applied
+  migration.
+- The enhanced diagnostic identified the sole result as Supabase's platform-
+  managed `rls_auto_enable()` helper with fixed `search_path=pg_catalog`. That
+  path is restrictive and intentional for the dashboard automatic-RLS feature;
+  it is not a CAP Mastery RPC and must not be rewritten to an empty path. The
+  global assertion now permits only that exact signature/configuration while
+  retaining the empty-path requirement for every CAP Mastery security-definer
+  function. No corrective database migration is required.
+- The owner reran the corrected global audit. `release_security.test.sql` passed
+  13/13, every existing feature suite remained green, and the complete linked
+  pgTAP aggregate passed 559/559. Migration 049, explicit RPC grants, RLS,
+  answer protection, grading, progress, challenges, all three comprehensive
+  exams, review tracking, and Wright Brothers content therefore pass together
+  on the linked nonproduction project.
+- Android Advanced Protection blocked the direct internal APK on the owner's
+  physical device. The EAS configuration now retains that APK profile for
+  ordinary devices and adds a `play-internal` store profile that produces an
+  auto-incremented `.aab` in the production EAS environment. A matching submit
+  profile targets Google Play Internal testing so protected pilot devices can
+  install privately through Google Play without weakening device security.
+
+Known limitations and exact owner actions:
+
+- Run linked pgTAP with the process-only database password. The expected
+  aggregate is 559/559 (the prior 546 plus 13 release-security assertions),
+  subject to the test runner reporting all suites.
+- Create/link a distinct CAP Mastery EAS project, build the internal APK, and
+  complete physical Android accessibility and pilot flows with Heshy and Avigail.
+- Complete the disposable-project restore rehearsal and finalize consent,
+  retention/deletion, source authorization, support/incident contacts, success
+  thresholds, and go/no-go record.
+- No subsequent checkpoint is defined. Stop after owner acceptance of Checkpoint
+  10; prioritize pilot findings as separately authorized maintenance work.
