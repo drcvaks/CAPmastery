@@ -722,3 +722,91 @@ Migration 048 was applied to the linked development project and the complete
 rollback-only database suite passed 546/546. Its Docker catalog-cache warning was
 non-blocking and does not require Docker for linked-project testing. Only the
 owner student-flow acceptance above remains.
+
+### Earhart Leadership Chapter 9 deep-study package
+
+Apply migration `202609140051_earhart_chapter_9_track.sql` before importing. It
+creates the separate Earhart Leadership track and admits the exact controlled
+style-provenance label; it does not publish questions or grant student access.
+Then upload the ten question-linked visuals, import the 100 drafts, and run the
+linked suite:
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:ltl3c9:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:ltl3c9
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expect ten registered 1600x950 assets and an initial import summary of 100
+inserted, zero failed, and zero missing-asset warnings. Do not upload the
+supplemental `ch9_overview_generated_visual.png`; no protected reference-library
+delivery path exists yet. Assign exact package `LTL3_C9_100` separately to each
+intended student after import. The Earhart practice area should remain
+unconfigured until Chapters 10 and 11 and a comprehensive blueprint are ready.
+
+### Earhart Leadership Chapter 10 deep-study package
+
+Apply migration `202609160052_earhart_chapter_10_provenance.sql` before the
+Chapter 10 import. Migration 051 and the Chapter 9 track must already be present.
+Then upload only the ten primary visuals, import the 100 drafts, and run linked
+pgTAP:
+
+```powershell
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npx.cmd supabase db push --linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:ltl3c10:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:ltl3c10
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expect ten registered 1600x950 assets and an initial import summary of 100
+inserted with zero failures or warnings. Do not upload
+`ch10_overview_generated_visual.png` or the unrelated alternative/source PNGs;
+they are outside the primary manifest and current delivery model. Assign exact
+package `LTL3_C10_100` only to intended students. The Earhart practice test
+remains intentionally unavailable until Chapter 11 and its comprehensive
+blueprint are ready.
+
+### Earhart Leadership Chapter 11 deep-study package
+
+No new migration is required. Migration 052 must already be applied. Upload only
+the nine primary visuals, import the 100 drafts, and rerun linked pgTAP:
+
+```powershell
+$env:CAP_MASTERY_ADMIN_EMAIL = Read-Host "Administrator email"
+$env:CAP_MASTERY_ADMIN_PASSWORD = Read-Host "Administrator password"
+npm.cmd run content:upload:ltl3c11:visuals
+Remove-Item Env:CAP_MASTERY_ADMIN_EMAIL -ErrorAction SilentlyContinue
+Remove-Item Env:CAP_MASTERY_ADMIN_PASSWORD -ErrorAction SilentlyContinue
+
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run content:import:ltl3c11
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expect nine registered 1448x1086 assets and an initial import summary of 100
+inserted with zero failures or warnings. Do not upload
+`ch11_overview_generated_visual.png`; it is supplemental and outside the current
+delivery model. Assign exact package `LTL3_C11_100` only to intended students.
+The Earhart comprehensive exam is a separate design and migration task.

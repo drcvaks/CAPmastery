@@ -1242,11 +1242,14 @@ Database changes:
   application itself completed. No production database,
   service-role client credential, AI integration, or remote monitoring service
   was added.
+- Migration 050 is applied to the linked nonproduction database. It updates only
+  the existing audited reviewer classification wrapper; it does not modify
+  content rows, RLS policies, or role grants.
 
 Validation results:
 
 - Strict TypeScript, Expo ESLint, and repository formatting: passed.
-- Jest: 28/28 suites and 192/192 tests passed. The runner still requires its
+- Jest: 29/29 suites and 198/198 tests passed. The runner still requires its
   documented `--forceExit` because an existing post-suite handle remains open.
 - Client credential scan: passed with no privileged client pattern found.
 - Expo public configuration: passed. Expo Doctor: 21/21 checks passed after the
@@ -1279,17 +1282,33 @@ Validation results:
   answer protection, grading, progress, challenges, all three comprehensive
   exams, review tracking, and Wright Brothers content therefore pass together
   on the linked nonproduction project.
+- Pilot admin review exposed a stale style-reference contract: the review client
+  and save wrapper still recognized only the first two Leadership labels even
+  though governed migrations had added Aerospace and Wright Brothers labels.
+  The client now accepts all five exact constrained values, and forward migration
+  `202609020050_content_review_style_references.sql` makes the table constraint
+  the save workflow's single source of truth. Existing question data and review
+  authorization are unchanged; client and linked SQL regressions cover opening
+  and saving the newer provenance values.
 - Android Advanced Protection blocked the direct internal APK on the owner's
   physical device. The EAS configuration now retains that APK profile for
   ordinary devices and adds a `play-internal` store profile that produces an
   auto-incremented `.aab` in the production EAS environment. A matching submit
   profile targets Google Play Internal testing so protected pilot devices can
   install privately through Google Play without weakening device security.
+- The first no-VCS EAS archive exposed Windows case-insensitive matching of the
+  unanchored `Content/` exclusion, which also removed runtime
+  `features/content/` modules. `.easignore` now root-anchors repository-only
+  directories. A fresh archive retained `ContentBrowser.tsx` and all five
+  runtime content files while excluding the large source-content directory; an
+  Android Hermes export from that exact 1.04 MB source archive passed with 1,710
+  modules and a 5.2 MB bundle.
 
 Known limitations and exact owner actions:
 
-- Run linked pgTAP with the process-only database password. The expected
-  aggregate is 559/559 (the prior 546 plus 13 release-security assertions),
+- The owner pushed migration 050 and ran linked pgTAP with the process-only
+  database password. `content_import_review.test.sql` passed 60/60 and every
+  existing suite remained green; the complete aggregate passed 560/560.
   subject to the test runner reporting all suites.
 - Create/link a distinct CAP Mastery EAS project, build the internal APK, and
   complete physical Android accessibility and pilot flows with Heshy and Avigail.
@@ -1298,3 +1317,123 @@ Known limitations and exact owner actions:
   thresholds, and go/no-go record.
 - No subsequent checkpoint is defined. Stop after owner acceptance of Checkpoint
   10; prioritize pilot findings as separately authorized maintenance work.
+
+## Post-Checkpoint 10 — Earhart Leadership Chapter 9 content extension
+
+Completed work:
+
+- Prepared a separate `EARHART_LEADERSHIP` / `EARHART_LTL` study track for Learn
+  to Lead Volume 3 without changing the three existing tracks or creating a
+  premature comprehensive-test blueprint.
+- Added package-aware importer support for `LTL3_C9_100`. The source bank remains
+  unchanged; the import boundary normalizes only `recall_understanding` to the
+  governed `understanding` vocabulary and derives dynamic family/visual metadata
+  in the same manner as the Wright Brothers banks.
+- Audited the supplied comma-delimited bank: 100 unique draft IDs, 50 reciprocal
+  families, 50 direct/50 application questions, 25 correct answers per letter,
+  75 eligible and 25 reinforcement rows, complete learning support, and no
+  external reinforcement targets.
+- Validated ten question-linked 1600x950 PNGs and their private paths. The valid
+  1536x1024 overview poster remains supplemental and excluded because the app has
+  no package-authorized reference-library delivery feature.
+
+Files and database changes:
+
+- Migration `202609140051_earhart_chapter_9_track.sql` creates the track/course,
+  preserves catalog order, and extends only the controlled provenance check.
+- `earhart_content.test.sql` covers the new catalog records, ordering, provenance,
+  family ownership, and absence of an unfinished Earhart blueprint.
+- Import/upload scripts, admin style-reference parsing, actual-file Jest coverage,
+  product/database/architecture/content/testing documentation, limitations, and
+  owner runbook were updated.
+
+Validation results:
+
+- Focused Jest suites passed: 3/3 suites and 109/109 tests. The complete Jest
+  suite passed 29/29 suites and 204/204 tests. One run performed concurrently
+  with lint hit the existing Progress test's five-second timeout; its immediate
+  isolated rerun passed 5/5, and the normal full-suite rerun passed cleanly.
+- Strict TypeScript, Expo ESLint, repository formatting, Expo public
+  configuration, and Android production export passed. The Android export
+  bundled 1,710 modules into a 5.2 MB Hermes bundle.
+- Migration push and linked pgTAP remain owner-run remote steps. After migration
+  051, the expected aggregate was 569/569 (the prior 560 plus nine Earhart track
+  assertions). The owner applied it and reported the complete 569/569 aggregate
+  passing.
+
+Known limitations and exact owner actions:
+
+- Human source/accuracy review is required before approving the imported drafts.
+- Apply migration 051, upload only the primary manifest, import Chapter 9, run
+  linked pgTAP, assign `LTL3_C9_100` only to intended students, and verify the
+  Earhart chapter study flow. Chapters 10–11 and the Earhart comprehensive exam
+  remain separate future work.
+
+## Post-Checkpoint 10 — Earhart Leadership Chapter 10 content extension
+
+Completed work:
+
+- Audited the supplied comma-delimited `LTL3_C10_100` bank as 100 unique drafts,
+  50 reciprocal families, 50 direct/50 application questions, 25 correct answers
+  per letter, an aligned 75/25 eligibility split, and complete learning support.
+- Added package-specific importer/upload commands that reuse the Earhart track
+  and create the ordered “The Staff Officer” Chapter 10 catalog entry. The generic
+  Study browser therefore exposes Chapters 9 and 10 without a new route or client
+  authorization rule.
+- Added migration `202609160052_earhart_chapter_10_provenance.sql` for the exact
+  controlled source label. No RLS policy, role grant, existing content row, or
+  grading behavior is changed.
+- Validated ten primary 1600x950 question-linked PNGs. The 1536x1024 overview and
+  alternative/source PNGs remain excluded from upload.
+
+Validation results:
+
+- Focused actual-file/admin/catalog Jest suites passed 3/3 suites and 114/114
+  tests. Credential-free upload and import dry runs validated their paths and
+  stopped at the expected process-only credential guards.
+- Strict TypeScript, Expo ESLint, repository formatting, all 29 Jest suites with
+  209/209 tests, public Expo configuration, and Android production export passed.
+  The Android export bundled 1,710 modules into a 5.2 MB Hermes bundle.
+- The owner applied migration 052 and ran the complete linked rollback-only
+  suite. `earhart_content.test.sql` passed 10/10, every existing suite remained
+  green, and the linked pgTAP aggregate passed 570/570.
+
+Known limitations and exact owner actions:
+
+- Human source/accuracy review is required before approving the drafts.
+- Upload the primary manifest, import Chapter 10, assign `LTL3_C10_100` only to
+  intended students, and verify the Chapter 10 study flow. Chapter 11 and an
+  Earhart comprehensive exam remain separate future work.
+
+## Post-Checkpoint 10 — Earhart Leadership Chapter 11 content extension
+
+Completed work:
+
+- Audited `LTL3_C11_100` as 100 unique drafts, 50 reciprocal families, 50
+  direct/50 application questions, 25 correct answers per letter, aligned 75/25
+  eligibility, complete teaching support, and nine primary visual mappings.
+- Added package-specific importer/upload commands that reuse the existing Earhart
+  track and create the ordered “The Leader as Commander” Chapter 11 catalog entry.
+  The shared Study browser now renders Chapters 9–11 together.
+- Normalized the source's capitalized `True`/`False` values only at the Chapter 11
+  import boundary. The CSV remains unchanged. Migration 052 already admits the
+  exact provenance label, so no new migration, grant, RLS, or constraint change
+  is required.
+- Validated nine 1448x1086 question-linked PNGs. The same-size overview remains
+  supplemental and excluded from upload.
+
+Validation results:
+
+- Focused actual-file/catalog Jest suites passed 2/2 suites and 110/110 tests.
+- Strict TypeScript, Expo ESLint, repository formatting, client credential scan,
+  all 29 Jest suites with 213/213 tests, public Expo configuration, and Android
+  production export passed. The Android export bundled 1,710 modules into a 5.2
+  MB Hermes bundle. The owner reran the complete linked database suite after the
+  Chapter 11 import: `earhart_content.test.sql` passed 10/10, every existing suite
+  remained green, and the pgTAP aggregate remained 570/570.
+
+Known limitations and exact owner actions:
+
+- Human source/accuracy review is required before approving the drafts.
+- Assign `LTL3_C11_100` only to intended students and verify the Chapter 11 study
+  flow. The Earhart comprehensive exam remains a separate authorized task.

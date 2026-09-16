@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(59);
+select plan(60);
 
 select has_table('public', 'csv_import_jobs', 'CSV import jobs exist');
 select has_column('public', 'questions', 'question_mode', 'question delivery mode is preserved');
@@ -205,13 +205,17 @@ select throws_ok(
 
 select set_config('request.jwt.claim.sub', '81111111-1111-4111-8111-111111111111', true);
 select lives_ok(
-  $$select public.reviewer_save_question(
+  $$select public.reviewer_save_question_with_classification(
     (select id from public.questions where external_id = 'CHECKPOINT8-IMPORTED'),
     jsonb_build_object(
       'question_text', 'What must a reviewer verify before approval?',
       'difficulty', 'medium', 'cognitive_level', 'understanding',
       'source_reference', 'Checkpoint 8 authorized fixture, page 1',
       'source_page_start', '1', 'source_page_end', '1', 'estimated_time_seconds', '30',
+      'chapter_number', '1', 'exam_likeness', 'high',
+      'distractor_difficulty', 'close', 'eligible_for_final_exam', true,
+      'final_exam_weight', '1', 'content_origin', 'original_textbook_grounded',
+      'style_reference', 'Three Wright Brothers Milestone exam forms used as style/difficulty reference only',
       'correct_letter', 'A', 'explanation', 'Review accuracy, clarity, and source alignment.',
       'common_mistake', 'Treating import as approval.', 'remediation', 'Review every field.',
       'choices', jsonb_build_array(
@@ -222,9 +226,14 @@ select lives_ok(
       )
     ), ''
   )$$,
-  'reviewer corrects imported draft'
+  'reviewer corrects imported draft with a current governed style reference'
 );
 select is((select question_text from public.questions where external_id = 'CHECKPOINT8-IMPORTED'), 'What must a reviewer verify before approval?', 'draft correction is saved');
+select is(
+  (select style_reference from public.questions where external_id = 'CHECKPOINT8-IMPORTED'),
+  'Three Wright Brothers Milestone exam forms used as style/difficulty reference only',
+  'current governed style reference is saved through the reviewer workflow'
+);
 select is((select version from public.questions where external_id = 'CHECKPOINT8-IMPORTED'), 1, 'draft correction does not create a false historical version');
 select lives_ok(
   $$select public.reviewer_submit_question_review(

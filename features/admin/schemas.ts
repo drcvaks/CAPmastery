@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+export const questionStyleReferenceSchema = z.enum([
+  "pre_sample_bank_review",
+  "Mitchell_sample_style_analysis",
+  "Mitchell_Aerospace_sample_style_analysis",
+  "Wright Brothers milestone sample exams used as style/difficulty reference only",
+  "Three Wright Brothers Milestone exam forms used as style/difficulty reference only",
+  "Three Earhart Milestone Leadership exam forms used as style/difficulty reference only; no milestone question copied",
+  "Three Earhart Milestone Leadership exam forms used only as style/difficulty references; no milestone question copied",
+]);
+
+export type QuestionStyleReference = z.infer<typeof questionStyleReferenceSchema>;
+
 export const importIssueSchema = z.object({
   row: z.number().int().positive().optional(),
   external_id: z.string().optional(),
@@ -62,9 +74,7 @@ export const reviewQuestionSchema = z.object({
       eligible_for_final_exam: z.boolean(),
       final_exam_weight: z.number().nonnegative(),
       content_origin: z.enum(["existing_original_bank", "original_textbook_grounded"]).nullable(),
-      style_reference: z
-        .enum(["pre_sample_bank_review", "Mitchell_sample_style_analysis"])
-        .nullable(),
+      style_reference: questionStyleReferenceSchema.nullable(),
       review_status: z.enum(["draft", "in_review", "approved", "rejected", "archived"]),
       version: z.number().int().positive(),
     })
@@ -98,7 +108,7 @@ export type ReviewEditPayload = {
   eligible_for_final_exam: boolean;
   final_exam_weight: string;
   content_origin: "" | "existing_original_bank" | "original_textbook_grounded";
-  style_reference: "" | "pre_sample_bank_review" | "Mitchell_sample_style_analysis";
+  style_reference: "" | QuestionStyleReference;
   choices: { key: string; text: string; feedback: string }[];
   correct_letter: string;
   explanation: string;

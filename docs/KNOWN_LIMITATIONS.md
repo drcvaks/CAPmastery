@@ -9,4 +9,5 @@
 - Practice blueprints and some pilot scoring/achievement/challenge thresholds are provisional rather than official CAP exam specifications.
 - No offline study synchronization, push notifications, challenge cancellation UI, public rankings/chat, automated retention/deletion/export portal, or AI feature exists.
 - Visuals and question banks require ongoing human source/accuracy/accessibility review. The app is a study aid, not an official CAP product or guarantee of exam results.
+- Supplemental visuals that are not linked to a question cannot yet be delivered through a package-authorized reference library. They remain local and excluded from upload until that protected flow exists.
 - `npm audit fix` reduced the dependency report to 17 transitive advisories (13 moderate, 4 high, 0 critical). The remaining high chain is Metro's build-time `image-size` parser; the remaining moderate chains are Expo tooling/router dependencies. npm offers only incompatible Expo/Router downgrades for most remaining paths. Do not use `--force`; recheck supported SDK 57 patches before each build and avoid feeding untrusted files to build tooling.

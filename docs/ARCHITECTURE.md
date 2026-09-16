@@ -209,3 +209,18 @@ Next missed answer or Finish review after seeing the released explanation. The
 latest-test Progress card presents the same reviewed/total percentage to the
 student or an authorized linked guardian. Historical sessions are explicitly
 shown as untracked instead of inferring review from page visits.
+
+### Earhart Leadership study-track extension
+
+Migration `202609140051` adds Earhart Leadership as a separate first-class exam
+track after the existing Wright Brothers and Mitchell tracks. Chapters 9–11 use the
+same chapter-based Study browser and exact private-package access boundary as
+Wright Brothers; no track-specific route or client-side authorization rule is
+introduced. The importer creates the Volume 3 chapter/topic hierarchy only for
+the exact `LTL3_C9_100`, `LTL3_C10_100`, or `LTL3_C11_100` package selected by
+the operator.
+
+No Earhart practice blueprint is created yet. The Study page identifies the track
+as study content without inventing an unreviewed exam design. A future separately
+authorized migration may add the comprehensive exam after the Chapter 11 import
+is accepted and its selection rules are specified.

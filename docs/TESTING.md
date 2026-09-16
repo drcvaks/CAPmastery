@@ -21,6 +21,12 @@ Unit: mastery, spaced dates, adaptive selection, readiness, practice blueprints,
 
 Checkpoint 8 adds pure parser/validator tests and reviewer-workspace component tests. `content_import_review.test.sql` covers grants, RLS, reviewer authorization, duplicate preview, all-or-nothing invalid imports, draft-only delivery, correction and review decisions, complete approved snapshots, version increments, and preservation of an attempt's original `question_version`. The linked aggregate is expected to increase from 240 to 290 assertions after the owner-run database gate.
 
+The Checkpoint 10 pilot regression suite also verifies that the admin client accepts
+every exact style-provenance label governed by the database constraint and rejects
+unknown labels. The linked import-review suite saves the latest Wright Brothers
+label through the audited classification wrapper, preventing the client schema,
+save RPC, and table constraint from drifting independently.
+
 Integration: session lifecycle, answer submission, linked-parent access, question approval, challenge lifecycle, and unauthorized content access.
 
 RLS: Student A versus Student B, linked versus unrelated adult, reviewer versus private records, role escalation, draft/deactivated content, answer-key reads, and public-client calls to server-only operations.
@@ -277,5 +283,27 @@ exact A-D balance, the aligned 75/25 exam-style eligibility split, complete
 teaching support, and ten valid 1448x1086 question-linked assets. It also proves
 the drill visual is in the primary manifest and no question references an
 unregistered key.
+
+The Earhart Leadership Chapter 9 actual-file suite adds four assertions covering
+100 unique package-bound drafts, 50 reciprocal families, the exact A-D and
+direct/application balance, aligned 75/25 exam eligibility, complete teaching
+support, ten valid 1600x950 question-linked assets, and explicit exclusion of the
+supplemental overview poster. `earhart_content.test.sql` adds nine rollback-only
+assertions for the new track/course, stable catalog ordering, constrained
+provenance, family ownership, and the deliberate absence of an incomplete
+Earhart exam blueprint.
+
+The Chapter 10 actual-file suite adds four more assertions for 100 unique
+package-bound drafts, 50 reciprocal pairs, exact answer/style/eligibility
+balance, complete learning support, ten registered 1600x950 primary visuals,
+and exclusion of its supplemental overview. The Earhart SQL suite now contains
+ten rollback-only assertions and verifies both exact controlled provenance labels.
+
+The Chapter 11 actual-file suite adds four assertions for 100 unique package-bound
+drafts, 50 reciprocal pairs, exact answer/style/eligibility balance, complete
+learning support, nine registered 1448x1086 primary visuals, and exclusion of its
+supplemental overview. Catalog coverage confirms Chapters 9–11 appear in order
+under the one Earhart Leadership track. The SQL plan remains 10 assertions because
+Chapter 11 needs no schema migration.
 
 The Checkpoint 10 release-security suite adds 13 global catalog/privilege assertions. It does not sample tables: it requires RLS on every public table, no anonymous public-table or application-RPC grant, no API-role private-table grant, no inherited `PUBLIC` security-definer execution, and a fixed empty search path on every CAP Mastery public/private security-definer function. Supabase's exact platform helper `rls_auto_enable()` is allowed only with `search_path=pg_catalog`. Direct answer-key reads and role/attempt/mastery writes are denied. Jest adds malformed/oversized CSV, safe-monitoring, and shared-control accessibility coverage.

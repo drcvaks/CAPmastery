@@ -311,6 +311,13 @@ private visual registry, and package-assignment model. It creates Chapter/topic
 `LTL_V1_C2` / `LTL1_C2` and stores 100 drafts only in exact private package
 `LTL1_C2_100`.
 
+Migration `202609020050` synchronizes the reviewer save workflow with the complete
+governed `questions.style_reference` constraint. The table constraint is now the
+single database source of truth for accepted provenance labels, preventing the
+review RPC from drifting behind newly migrated Aerospace or Wright Brothers
+labels. Authorization, versioning, audit behavior, and existing question rows are
+unchanged.
+
 Chapter 3 requires no additional schema migration. Its supplied style provenance
 already satisfies migration 047, and the operator importer creates ordered
 chapter/topic `LTL_V1_C3` / `LTL1_C3` under the existing Wright Brothers exam,
@@ -340,5 +347,39 @@ The shared latest-topic and missed-answer-review functions now recognize all
 three dedicated comprehensive-test strategies. The option RPC hides the Wright
 mock until each chapter has enough accessible content, which prevents a student
 from seeing a launcher that cannot succeed.
+
+## Earhart Leadership Chapter 9 extension
+
+Migration `202609140051` creates exam `EARHART_LEADERSHIP` and course
+`EARHART_LTL` with stable identifiers and catalog sort order 40. It also admits
+the exact owner-supplied Earhart sample-form style-provenance label to the
+governed `questions.style_reference` constraint. The label documents style and
+difficulty influence only and expressly records that no milestone question was
+copied. No permission, RLS, answer-delivery, or grading rule is broadened.
+
+The operator importer creates Volume 3 and ordered Chapter/topic
+`LTL_V3_C9` / `LTL3_C9`, then upserts 100 drafts only in exact private package
+`LTL3_C9_100`. The bank's `recall_understanding` label is normalized to the
+existing `understanding` database vocabulary, while its external IDs, source
+references, family pairs, and exam classifications remain intact.
+
+## Earhart Leadership Chapter 10 extension
+
+Migration `202609160052` extends only the governed
+`questions.style_reference` constraint for the exact Chapter 10 provenance
+wording. It does not add grants, relax RLS, publish content, or change existing
+question rows. The operator importer reuses the existing Earhart exam/course,
+creates ordered hierarchy `LTL_V3_C10` / `LTL3_C10`, and upserts only exact
+private package `LTL3_C10_100`. It applies the same governed cognitive-level
+normalization and server-side answer protection as Chapter 9.
+
+## Earhart Leadership Chapter 11 extension
+
+Chapter 11 requires no migration. Its exact style-provenance value is already
+governed by migration 052, and the Chapter 9 migration already created the
+Earhart exam/course. The operator importer creates ordered hierarchy
+`LTL_V3_C11` / `LTL3_C11` and upserts only private package `LTL3_C11_100`. Two
+capitalized Boolean source values are normalized at this package boundary; no
+RLS policy, grant, database constraint, or existing row changes.
 
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

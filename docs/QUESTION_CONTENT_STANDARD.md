@@ -263,3 +263,51 @@ The corrected primary manifest contains all ten referenced 1448x1086 assets,
 including the drill quick reference. The supplemental manifest is intentionally
 header-only. The prior superseded Chapter 3 package under `old` is not an import
 source and must not be uploaded in parallel.
+
+## Earhart Leadership Chapter 9 deep-study bank
+
+Package `LTL3_C9_100` contains 100 Chapter 9 drafts with unique stable IDs and
+exactly 50 reciprocal two-question families. It has 50 direct and 50 application
+questions, 25 correct answers in each A–D position, and an aligned 75/25
+exam-style/future-exam eligibility split. Every row includes four choice-specific
+explanations, a short and full explanation, memory aid, remediation, source
+pages, and one approved visual mapping.
+
+The ten question-linked 1600x950 PNG assets cover all 100 questions and use safe
+private Storage paths. The separate 1536x1024 overview poster is supplemental,
+not question-linked, and must not be uploaded through the current visual command.
+CAP Mastery does not yet have a package-authorized reference-library delivery
+path; registering the poster now would not make it safely available to students.
+The Earhart style label is provenance only and never authorizes copied or recalled
+protected exam content. Human source and wording review is still required before
+approval or broader publication.
+
+## Earhart Leadership Chapter 10 deep-study bank
+
+Package `LTL3_C10_100` contains 100 Chapter 10 drafts with unique stable IDs and
+exactly 50 reciprocal two-question families. It has 50 direct and 50 application
+questions, 25 correct answers in each A–D position, and an aligned 75/25
+exam-style/future-exam eligibility split. Every row includes complete teaching
+support and one of ten approved question-linked visuals.
+
+The ten primary PNGs are 1600x950 and cover all 100 questions. The separate
+1536x1024 overview is supplemental and must remain local until a
+package-authorized reference-library flow exists. Images outside the two supplied
+manifests are not part of this import. The exact Chapter 10 style-provenance label
+records influence only; it does not authorize copied or recalled protected exam
+questions. Human review remains required before approval.
+
+## Earhart Leadership Chapter 11 deep-study bank
+
+Package `LTL3_C11_100` contains 100 Chapter 11 drafts with unique stable IDs and
+50 reciprocal two-question families. It has 50 direct and 50 application
+questions, 25 correct answers in each A–D position, and an aligned 75/25
+exam-style/future-exam eligibility split. Every row includes complete teaching
+support and one of nine approved question-linked visuals.
+
+All nine primary PNGs are 1448x1086 and cover every question. The separate
+1448x1086 overview is supplemental and remains excluded until a secure
+package-authorized reference-library flow exists. The supplied capitalized
+Boolean values are normalized only at import. The exact Chapter 10/11 provenance
+label is already governed by migration 052 and remains a style reference, not
+authorization for copied or recalled protected exam questions.
