@@ -49,14 +49,18 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
   const isLeadershipFullExam = option.selection_strategy === "mitchell_full_exam";
   const isAerospaceFullExam = option.selection_strategy === "aerospace_full_exam";
   const isWrightMockExam = option.selection_strategy === "wright_brothers_mock_exam";
-  const isFullExam = isLeadershipFullExam || isAerospaceFullExam || isWrightMockExam;
+  const isEarhartFullExam = option.selection_strategy === "earhart_full_exam";
+  const isFullExam =
+    isLeadershipFullExam || isAerospaceFullExam || isWrightMockExam || isEarhartFullExam;
   const coverageLabel = isWrightMockExam
     ? "Chapters 1–3 exam pool"
     : isLeadershipFullExam
       ? "Chapters 4–8 exam pool"
       : isAerospaceFullExam
         ? "Modules 1–7 exam pool"
-        : "Chapter 1 legacy pilot blueprint";
+        : isEarhartFullExam
+          ? "Chapters 9–11 exam pool"
+          : "Chapter 1 legacy pilot blueprint";
 
   return (
     <AppCard title={option.blueprint_name} description={option.description}>
@@ -80,6 +84,12 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
         <Text style={styles.muted}>
           Every form uses 10 questions from each Wright Brothers chapter, favors high exam-likeness
           questions, and avoids duplicate question families.
+        </Text>
+      ) : null}
+      {isEarhartFullExam ? (
+        <Text style={styles.muted}>
+          Every form balances Chapters 9–11, favors high exam-likeness questions, and avoids
+          duplicate question families.
         </Text>
       ) : null}
       {!isFullExam ? (

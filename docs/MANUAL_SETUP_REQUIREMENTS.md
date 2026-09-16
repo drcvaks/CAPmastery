@@ -809,4 +809,22 @@ Expect nine registered 1448x1086 assets and an initial import summary of 100
 inserted with zero failures or warnings. Do not upload
 `ch11_overview_generated_visual.png`; it is supplemental and outside the current
 delivery model. Assign exact package `LTL3_C11_100` only to intended students.
-The Earhart comprehensive exam is a separate design and migration task.
+
+### Earhart Leadership 50-question full practice exam
+
+After Chapters 9–11 are imported and assigned, apply migration 053 and run the
+linked rollback-only suite:
+
+```powershell
+npx.cmd supabase db push
+$env:CAP_MASTERY_DB_PASSWORD = Read-Host "Development database password"
+npm.cmd run db:test:linked
+Remove-Item Env:CAP_MASTERY_DB_PASSWORD -ErrorAction SilentlyContinue
+```
+
+Expected new database coverage is `earhart_full_exam.test.sql: 35/35`; with the
+current suites the expected aggregate is 605/605. A student must have access to
+all three chapter packages (`LTL3_C9_100`, `LTL3_C10_100`, and `LTL3_C11_100`) for
+the launcher to appear. Verify one timed run shows 60:00 and pause/resume, contains
+50 questions across all three chapters, withholds feedback until completion, and
+updates only the Earhart readiness card and latest chapter analysis.

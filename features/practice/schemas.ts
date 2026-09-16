@@ -5,6 +5,7 @@ export const practiceSelectionStrategySchema = z.enum([
   "mitchell_full_exam",
   "aerospace_full_exam",
   "wright_brothers_mock_exam",
+  "earhart_full_exam",
 ]);
 
 export type PracticeSelectionStrategy = z.infer<typeof practiceSelectionStrategySchema>;

@@ -220,7 +220,14 @@ introduced. The importer creates the Volume 3 chapter/topic hierarchy only for
 the exact `LTL3_C9_100`, `LTL3_C10_100`, or `LTL3_C11_100` package selected by
 the operator.
 
-No Earhart practice blueprint is created yet. The Study page identifies the track
-as study content without inventing an unreviewed exam design. A future separately
-authorized migration may add the comprehensive exam after the Chapter 11 import
-is accepted and its selection rules are specified.
+Migration `202609170053` adds the separately authorized comprehensive Earhart
+practice exam after all three chapters were accepted. Its protected selector
+freezes 50 distinct eligible question families across Chapters 9–11: one
+deterministically rotated chapter contributes 16 and the other two contribute 17.
+The shared full-exam experience supplies a 60-minute timer, server-authoritative
+pause, delayed feedback, flags, wrong-answer review tracking, and chapter analysis.
+
+Earhart readiness remains a separate exam result because every practice session
+and progress query carries the Earhart exam ID. Completed Earhart tests therefore
+contribute to the Earhart readiness card without changing Wright Brothers or
+Billy Mitchell readiness.

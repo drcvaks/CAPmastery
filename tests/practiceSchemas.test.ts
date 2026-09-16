@@ -32,6 +32,19 @@ describe("practice-test option schema", () => {
     expect(practiceTestOptionSchema.parse(wrightOption)).toEqual(wrightOption);
   });
 
+  it("accepts the timed Earhart full-exam selection strategy", () => {
+    const earhartOption = {
+      ...aerospaceOption,
+      blueprint_code: "EARHART_FULL_50",
+      selection_strategy: "earhart_full_exam",
+      exam_id: "20000000-0000-4000-8000-000000000004",
+      exam_title: "Earhart Leadership",
+      blueprint_name: "Full Earhart Leadership Practice Exam",
+    };
+
+    expect(practiceTestOptionSchema.parse(earhartOption)).toEqual(earhartOption);
+  });
+
   it("rejects an unknown client-selected strategy", () => {
     expect(() =>
       practiceTestOptionSchema.parse({ ...aerospaceOption, selection_strategy: "client_random" }),

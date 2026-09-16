@@ -1,35 +1,36 @@
 # Environment and secrets
-.env
-.env.*
-!.env.example
+/.env
+/.env.*
+!/.env.example
 
 # Dependencies and generated Expo output
 node_modules/
-.expo/
-dist/
-web-build/
-android/
-ios/
+/.expo/
+/dist/
+/web-build/
+/android/
+/ios/
 
 # Development-only project material
-Content/
-docs/
-supabase/
-tests/
-coverage/
+/Content/
+/docs/
+/supabase/
+/tests/
+/coverage/
 *.bak
 *.log
 *.pdf
 *.zip
 *.xlsx
 *.doc
-check.txt
+/check.txt
 
 # Editor and operating-system files
-.git/
-.github/
-.vscode/
-.idea/
+/.git/
+/.github/
+/.agents/
+/.vscode/
+/.idea/
 .DS_Store
 Thumbs.db
 expo-env.d.ts

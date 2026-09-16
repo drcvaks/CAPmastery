@@ -382,4 +382,21 @@ Earhart exam/course. The operator importer creates ordered hierarchy
 capitalized Boolean source values are normalized at this package boundary; no
 RLS policy, grant, database constraint, or existing row changes.
 
+## Earhart full practice-exam extension
+
+Migration `202609170053` adds selection strategy `earhart_full_exam`, active
+blueprint `EARHART_FULL_50`, and protected creation RPC
+`create_earhart_full_practice_exam`. A student sees the option only when each of
+Chapters 9–11 has at least 17 distinct accessible eligible high-likeness families.
+Creation independently repeats that access check, selects one question per
+family, and freezes a 16/17/17 chapter distribution for exactly 50 questions.
+
+Timed sessions freeze a 3,600-second limit and permit the existing
+server-authoritative pause flow; the blueprint also permits an explicitly chosen
+untimed practice run. Existing completion-gated feedback, question flags,
+missed-answer review tracking, and latest-topic analysis now recognize the
+Earhart strategy. `get_progress_dashboard(student_id, exam_id)` already isolates
+practice evidence by exam ID, so completed Earhart results affect only the
+Earhart readiness calculation.
+
 Checkpoint 3 adds seven forward migrations (`202607200004` through `202607200010`) for hierarchy, question storage, RLS/delivery functions, a catalog-only seed, approval/integrity hardening, learning metadata, and strict metadata/feedback approval gates. The seed contains track names and explicit pending-content placeholders only—no source text, questions, answers, scores, or timing claims. SQL tests use synthetic transaction-only content and roll it back.

@@ -113,6 +113,11 @@ The client credential scan examines tracked application/configuration sources fo
 - The server enforces blueprint balance, time expiry, and pause policy. Client countdowns and hidden controls are usability aids only.
 - Correctness, correct-choice IDs, explanations, remediation, memory support, and aggregate scores remain null during an active test, including immediately after answer submission.
 - Completion releases feedback only for answered questions. Practice attempts cannot write normal mastery state and are excluded from normal recent-accuracy/trend calculations.
+- The Earhart 50-question selector applies the same boundary: authenticated
+  students receive only a frozen owned session, while package access and chapter
+  pool sufficiency are rechecked inside the security-definer RPC. The function
+  has an empty search path, is granted only to `authenticated`, and returns no
+  answer-key data.
 
 ## Aerospace module private access
 

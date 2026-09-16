@@ -58,12 +58,13 @@ select ok(
 );
 select is(
   (
-    select count(*)::integer
+    select selection_strategy
     from public.practice_test_blueprints
-    where exam_id = '20000000-0000-4000-8000-000000000004'
+    where code = 'EARHART_FULL_50'
+      and exam_id = '20000000-0000-4000-8000-000000000004'
   ),
-  0,
-  'an Earhart exam is not exposed before its comprehensive blueprint is reviewed'
+  'earhart_full_exam',
+  'the Earhart comprehensive blueprint is configured after all three chapters'
 );
 select is(
   (

@@ -306,4 +306,12 @@ supplemental overview. Catalog coverage confirms Chapters 9–11 appear in order
 under the one Earhart Leadership track. The SQL plan remains 10 assertions because
 Chapter 11 needs no schema migration.
 
+`earhart_full_exam.test.sql` adds 35 rollback-only assertions for the dedicated
+50-question blueprint and selector. It verifies the 60-minute timer and pause
+snapshot, package-gated option visibility, a 16/17/17 Chapter 9–11 distribution,
+unique families, cross-student denial, server flags, delayed completion and
+missed-answer review tracking, three-topic analysis, and an Earhart-specific
+progress/readiness record. The existing Earhart content suite now validates the
+new strategy instead of the former deliberate blueprint absence.
+
 The Checkpoint 10 release-security suite adds 13 global catalog/privilege assertions. It does not sample tables: it requires RLS on every public table, no anonymous public-table or application-RPC grant, no API-role private-table grant, no inherited `PUBLIC` security-definer execution, and a fixed empty search path on every CAP Mastery public/private security-definer function. Supabase's exact platform helper `rls_auto_enable()` is allowed only with `search_path=pg_catalog`. Direct answer-key reads and role/attempt/mastery writes are denied. Jest adds malformed/oversized CSV, safe-monitoring, and shared-control accessibility coverage.

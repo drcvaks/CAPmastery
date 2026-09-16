@@ -27,6 +27,7 @@ export async function createPracticeTest(
   const functionName = (
     {
       aerospace_full_exam: "create_aerospace_full_practice_exam",
+      earhart_full_exam: "create_earhart_full_practice_exam",
       fixed_blueprint: "create_practice_test",
       mitchell_full_exam: "create_mitchell_full_practice_exam",
       wright_brothers_mock_exam: "create_wright_brothers_mock_exam",

@@ -1437,3 +1437,33 @@ Known limitations and exact owner actions:
 - Human source/accuracy review is required before approving the drafts.
 - Assign `LTL3_C11_100` only to intended students and verify the Chapter 11 study
   flow. The Earhart comprehensive exam remains a separate authorized task.
+
+## Post-Checkpoint 10 — Earhart 50-question full practice exam
+
+Completed work:
+
+- Added migration `202609170053_earhart_full_practice_exam.sql` with dedicated
+  `earhart_full_exam` selection, active `EARHART_FULL_50` blueprint, 60-minute
+  timer, pause support, and an owner-only server selector.
+- The selector freezes 50 distinct families across Chapters 9–11 in a rotating
+  16/17/17 distribution and independently enforces approved content or exact
+  assigned-package access.
+- Extended the shared launcher, typed service/schema, topic analysis, flags, and
+  missed-answer review flow. Earhart test evidence remains isolated to the
+  Earhart readiness calculation by its exam ID.
+- Added 35 rollback-only database assertions and a client schema regression.
+
+Validation and owner actions:
+
+- Focused schema Jest passed 4/4; the complete suite passed 29/29 suites and
+  214/214 tests. Strict TypeScript, Expo ESLint, repository formatting, client
+  credential scan, public Expo configuration, and Android production export all
+  passed. The Android export bundled 1,710 modules into a 5.2 MB Hermes bundle.
+- Expo Doctor passed 20/21 checks and reported only available SDK 57 patch updates
+  for Expo, Constants, Font, Linking, and Router. The current locked versions
+  exported successfully; upgrading them remains separate dependency maintenance.
+- The owner applied migration 053 and ran the complete linked rollback-only suite.
+  `earhart_full_exam.test.sql` passed 35/35, every existing suite remained green,
+  and the linked pgTAP aggregate passed 605/605.
+- No question reimport is required. Students need all three exact Earhart chapter
+  assignments before the practice option is shown.

@@ -32,6 +32,11 @@ The first Play submission and policy declarations are owner actions. After a Goo
 
 If EAS fails before upload with a local `git clone --no-checkout --no-hardlinks --depth 1` error, use EAS's no-VCS archive mode for that build. The repository's `.easignore` keeps development-only content, tests, documentation, and database files out of the app archive.
 
+Keep repository-only exclusions root-anchored (for example, `/Content/`). On
+Windows, an unanchored `Content/` rule can match the runtime
+`features/content/` directory case-insensitively and make the remote Metro build
+fail with a missing `ContentBrowser` module.
+
 ```powershell
 $env:EAS_NO_VCS = "1"
 npx.cmd eas-cli build --platform android --profile play-internal

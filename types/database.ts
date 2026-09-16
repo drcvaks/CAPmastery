@@ -2398,6 +2398,10 @@ export type Database = {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;
       };
+      create_earhart_full_practice_exam: {
+        Args: { p_blueprint_id: string; p_timed?: boolean };
+        Returns: string;
+      };
       create_wright_brothers_mock_exam: {
         Args: { p_blueprint_id: string; p_timed?: boolean };
         Returns: string;

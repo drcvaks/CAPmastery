@@ -162,6 +162,12 @@ const WRIGHT_BROTHERS_CHAPTER_2_FILENAME =
   "Learn_to_Lead_Vol1_Chapter_2_100_Questions_Complete_Support.csv";
 const WRIGHT_BROTHERS_CHAPTER_3_FILENAME =
   "Learn_to_Lead_Vol1_Chapter_3_100_Questions_Complete_Support.csv";
+const EARHART_CHAPTER_9_FILENAME =
+  "Learn_to_Lead_Vol3_Chapter_9_100_Questions_Complete_Support.csv";
+const EARHART_CHAPTER_10_FILENAME =
+  "Learn_to_Lead_Vol3_Chapter_10_100_Questions_Complete_Support.csv";
+const EARHART_CHAPTER_11_FILENAME =
+  "Learn_to_Lead_Vol3_Chapter_11_100_Questions_Complete_Support.csv";
 const WRIGHT_BROTHERS_CHAPTER_1_CONFIG = {
   expectedCount: 100,
   importPackage: "LTL1_C1_100",
@@ -271,6 +277,128 @@ const WRIGHT_BROTHERS_CHAPTER_3_CONFIG = {
     source_reference_text: "Learn to Lead Volume 1: Personal Leadership",
     source_status: "approved_source",
     final_exam_weight: "1.0",
+  },
+};
+const EARHART_CHAPTER_9_CONFIG = {
+  expectedCount: 100,
+  importPackage: "LTL3_C9_100",
+  examId: "20000000-0000-4000-8000-000000000004",
+  courseId: "30000000-0000-4000-8000-000000000004",
+  volumeCode: "LTL_V3",
+  volumeTitle: "Learn to Lead, Volume 3",
+  volumeSortOrder: 30,
+  chapterCode: "LTL_V3_C9",
+  chapterTitle: "The Cadet Officer",
+  chapterSortOrder: 90,
+  topicCode: "LTL3_C9",
+  topicTitle: "Learn to Lead, Volume 3, Chapter 9",
+  topicDescription: "Private Earhart Leadership Chapter 9 study content.",
+  topicSortOrder: 90,
+  sourceExternalReference: "CAP:LTL:V3:C9:DEEP",
+  sourceTitle: "Learn to Lead, Volume 3: Indirect Leadership",
+  finalExamTagged: true,
+  earhartChapter: true,
+  chapterNumber: 9,
+  expectedEligibleCount: 75,
+  expectedVisualAssetCount: 10,
+  fieldDefaults: {
+    pilot_batch: "LTL3_C9_100",
+    objective_code: "LTL3_C9",
+    concept_code: "LTL3_C9",
+    feedback_display_version: "1",
+    common_mistake: "",
+    visual_priority: "high",
+    visual_type: "educational_infographic",
+    visual_display_mode: "optional_after_answer",
+    visual_brief: "Reviewed Learn to Lead Volume 3 Chapter 9 study visual.",
+    source_reference_text: "Learn to Lead Volume 3: Indirect Leadership",
+    source_status: "approved_source",
+    final_exam_weight: "1.0",
+  },
+  valueAliases: {
+    cognitive_level: { recall_understanding: "understanding" },
+  },
+};
+const EARHART_CHAPTER_10_CONFIG = {
+  expectedCount: 100,
+  importPackage: "LTL3_C10_100",
+  examId: "20000000-0000-4000-8000-000000000004",
+  courseId: "30000000-0000-4000-8000-000000000004",
+  volumeCode: "LTL_V3",
+  volumeTitle: "Learn to Lead, Volume 3",
+  volumeSortOrder: 30,
+  chapterCode: "LTL_V3_C10",
+  chapterTitle: "The Staff Officer",
+  chapterSortOrder: 100,
+  topicCode: "LTL3_C10",
+  topicTitle: "Learn to Lead, Volume 3, Chapter 10",
+  topicDescription: "Private Earhart Leadership Chapter 10 study content.",
+  topicSortOrder: 100,
+  sourceExternalReference: "CAP:LTL:V3:C10:DEEP",
+  sourceTitle: "Learn to Lead, Volume 3: Indirect Leadership",
+  finalExamTagged: true,
+  earhartChapter: true,
+  chapterNumber: 10,
+  expectedEligibleCount: 75,
+  expectedVisualAssetCount: 10,
+  fieldDefaults: {
+    pilot_batch: "LTL3_C10_100",
+    objective_code: "LTL3_C10",
+    concept_code: "LTL3_C10",
+    feedback_display_version: "1",
+    common_mistake: "",
+    visual_priority: "high",
+    visual_type: "educational_infographic",
+    visual_display_mode: "optional_after_answer",
+    visual_brief: "Reviewed Learn to Lead Volume 3 Chapter 10 study visual.",
+    source_reference_text: "Learn to Lead Volume 3: Indirect Leadership",
+    source_status: "approved_source",
+    final_exam_weight: "1.0",
+  },
+  valueAliases: {
+    cognitive_level: { recall_understanding: "understanding" },
+  },
+};
+const EARHART_CHAPTER_11_CONFIG = {
+  expectedCount: 100,
+  importPackage: "LTL3_C11_100",
+  examId: "20000000-0000-4000-8000-000000000004",
+  courseId: "30000000-0000-4000-8000-000000000004",
+  volumeCode: "LTL_V3",
+  volumeTitle: "Learn to Lead, Volume 3",
+  volumeSortOrder: 30,
+  chapterCode: "LTL_V3_C11",
+  chapterTitle: "The Leader as Commander",
+  chapterSortOrder: 110,
+  topicCode: "LTL3_C11",
+  topicTitle: "Learn to Lead, Volume 3, Chapter 11",
+  topicDescription: "Private Earhart Leadership Chapter 11 study content.",
+  topicSortOrder: 110,
+  sourceExternalReference: "CAP:LTL:V3:C11:DEEP",
+  sourceTitle: "Learn to Lead, Volume 3: Indirect Leadership",
+  finalExamTagged: true,
+  earhartChapter: true,
+  chapterNumber: 11,
+  expectedEligibleCount: 75,
+  expectedVisualAssetCount: 9,
+  fieldDefaults: {
+    pilot_batch: "LTL3_C11_100",
+    objective_code: "LTL3_C11",
+    concept_code: "LTL3_C11",
+    feedback_display_version: "1",
+    common_mistake: "",
+    visual_priority: "high",
+    visual_type: "educational_infographic",
+    visual_display_mode: "optional_after_answer",
+    visual_brief: "Reviewed Learn to Lead Volume 3 Chapter 11 study visual.",
+    source_reference_text: "Learn to Lead Volume 3: Indirect Leadership",
+    source_status: "approved_source",
+    final_exam_weight: "1.0",
+  },
+  valueAliases: {
+    cognitive_level: { recall_understanding: "understanding" },
+    eligible_for_final_exam: { True: "true", False: "false" },
+    show_visual_button: { True: "true", False: "false" },
   },
 };
 const AEROSPACE_MODULE_1_BASE_CONFIG = {
@@ -644,6 +772,15 @@ const AEROSPACE_MODULE_7_CHAPTER_CONFIGS = new Map(
 
 function importConfigForPath(inputPath) {
   const filename = path.basename(inputPath);
+  if (filename === EARHART_CHAPTER_11_FILENAME) {
+    return EARHART_CHAPTER_11_CONFIG;
+  }
+  if (filename === EARHART_CHAPTER_10_FILENAME) {
+    return EARHART_CHAPTER_10_CONFIG;
+  }
+  if (filename === EARHART_CHAPTER_9_FILENAME) {
+    return EARHART_CHAPTER_9_CONFIG;
+  }
   if (filename === WRIGHT_BROTHERS_CHAPTER_3_FILENAME) {
     return WRIGHT_BROTHERS_CHAPTER_3_CONFIG;
   }
@@ -858,7 +995,9 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
         Number(row.final_exam_weight),
         row.content_origin,
         row.style_reference,
-        config.wrightBrothersChapter ? row.exam_type_question === "yes" : null,
+        config.wrightBrothersChapter || config.earhartChapter
+          ? row.exam_type_question === "yes"
+          : null,
       ],
     );
     summary.updated += 1;
@@ -883,7 +1022,9 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
           Number(row.final_exam_weight),
           row.content_origin,
           row.style_reference,
-          config.wrightBrothersChapter ? row.exam_type_question === "yes" : null,
+          config.wrightBrothersChapter || config.earhartChapter
+            ? row.exam_type_question === "yes"
+            : null,
         ],
       );
       summary.updated += 1;
@@ -977,7 +1118,7 @@ async function importQuestion(client, row, actorId, topicId, sourceId, config, s
     summary.inserted += 1;
   }
 
-  if (config.wrightBrothersChapter) {
+  if (config.wrightBrothersChapter || config.earhartChapter) {
     await client.query(`update public.questions set is_exam_style=$2 where id=$1`, [
       question.id,
       row.exam_type_question === "yes",
@@ -1123,7 +1264,8 @@ async function main() {
     config.fieldDefaults,
     config.valueAliases,
   );
-  const rows = config.wrightBrothersChapter
+  const milestoneLeadershipChapter = config.wrightBrothersChapter || config.earhartChapter;
+  const rows = milestoneLeadershipChapter
     ? parsedRows.map((row) => ({
         ...row,
         objective_code: row.question_family_code,
@@ -1134,11 +1276,12 @@ async function main() {
       }))
     : parsedRows;
   const validation = validateImport(rows, expectedCount);
-  if (config.wrightBrothersChapter) {
+  if (milestoneLeadershipChapter) {
+    const trackName = config.earhartChapter ? "Earhart Leadership" : "Wright Brothers";
     const count = (field, value) => rows.filter((row) => row[field] === value).length;
     if (!rows.every((row) => row.chapter_number === String(config.chapterNumber))) {
       validation.errors.push(
-        `Wright Brothers Chapter ${config.chapterNumber} import must contain only chapter ${config.chapterNumber} rows.`,
+        `${trackName} Chapter ${config.chapterNumber} import must contain only chapter ${config.chapterNumber} rows.`,
       );
     }
     if (!rows.every((row) => row.package_code === config.importPackage)) {
@@ -1146,7 +1289,7 @@ async function main() {
     }
     if (count("exam_type_question", "yes") !== 75 || count("exam_type_question", "no") !== 25) {
       validation.errors.push(
-        `Wright Brothers Chapter ${config.chapterNumber} requires a 75/25 exam_type_question split.`,
+        `${trackName} Chapter ${config.chapterNumber} requires a 75/25 exam_type_question split.`,
       );
     }
     if (
@@ -1157,19 +1300,19 @@ async function main() {
       )
     ) {
       validation.errors.push(
-        "Wright Brothers exam-style and final-exam eligibility tags must match 75/25.",
+        `${trackName} exam-style and final-exam eligibility tags must match 75/25.`,
       );
     }
     for (const letter of ["A", "B", "C", "D"]) {
       if (count("correct_letter", letter) !== 25) {
         validation.errors.push(
-          `Wright Brothers Chapter ${config.chapterNumber} requires exactly 25 ${letter} answers.`,
+          `${trackName} Chapter ${config.chapterNumber} requires exactly 25 ${letter} answers.`,
         );
       }
     }
     if (new Set(rows.map((row) => row.visual_asset_key)).size !== config.expectedVisualAssetCount) {
       validation.errors.push(
-        `Wright Brothers Chapter ${config.chapterNumber} must reference exactly ${config.expectedVisualAssetCount} visual assets.`,
+        `${trackName} Chapter ${config.chapterNumber} must reference exactly ${config.expectedVisualAssetCount} visual assets.`,
       );
     }
   }
@@ -1298,7 +1441,7 @@ async function main() {
         );
       }
     }
-    if (config.wrightBrothersChapter) {
+    if (milestoneLeadershipChapter) {
       const counts = await one(
         client,
         `select count(*)::integer as total,
@@ -1314,7 +1457,7 @@ async function main() {
         counts.exam_style !== config.expectedEligibleCount
       ) {
         throw new Error(
-          `Post-import verification failed for Wright Brothers Chapter ${config.chapterNumber}: expected 100 total and 75 exam-style eligible questions.`,
+          `Post-import verification failed for ${config.earhartChapter ? "Earhart Leadership" : "Wright Brothers"} Chapter ${config.chapterNumber}: expected 100 total and 75 exam-style eligible questions.`,
         );
       }
     }

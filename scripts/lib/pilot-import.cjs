@@ -305,6 +305,8 @@ function validateImport(rows, expectedCount = 10) {
           "Mitchell_Aerospace_sample_style_analysis",
           "Wright Brothers milestone sample exams used as style/difficulty reference only",
           "Three Wright Brothers Milestone exam forms used as style/difficulty reference only",
+          "Three Earhart Milestone Leadership exam forms used as style/difficulty reference only; no milestone question copied",
+          "Three Earhart Milestone Leadership exam forms used only as style/difficulty references; no milestone question copied",
         ]).has(row.style_reference)
       ) {
         errors.push(`${label}: invalid style_reference '${row.style_reference}'.`);

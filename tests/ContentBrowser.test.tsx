@@ -90,6 +90,63 @@ describe("ContentBrowser", () => {
           sort_order: 30,
           topics: [topic(3, 30), topic(1, 10), topic(2, 20)],
         },
+        {
+          id: "20000000-0000-4000-8000-000000000004",
+          program_id: "10000000-0000-4000-8000-000000000001",
+          code: "EARHART_LEADERSHIP",
+          title: "Earhart Leadership",
+          description: null,
+          sort_order: 40,
+          topics: [
+            {
+              ...topic(9, 90),
+              id: "40000000-0000-4000-8000-000000000409",
+              exam_id: "20000000-0000-4000-8000-000000000004",
+              code: "LTL3_C9",
+              title: "Learn to Lead, Volume 3, Chapter 9",
+              volume: { ...topic(9, 90).volume, code: "LTL_V3", title: "Learn to Lead, Volume 3" },
+              chapter: {
+                ...topic(9, 90).chapter,
+                code: "LTL_V3_C9",
+                title: "The Cadet Officer",
+              },
+            },
+            {
+              ...topic(10, 100),
+              id: "40000000-0000-4000-8000-000000000410",
+              exam_id: "20000000-0000-4000-8000-000000000004",
+              code: "LTL3_C10",
+              title: "Learn to Lead, Volume 3, Chapter 10",
+              volume: {
+                ...topic(10, 100).volume,
+                code: "LTL_V3",
+                title: "Learn to Lead, Volume 3",
+              },
+              chapter: {
+                ...topic(10, 100).chapter,
+                code: "LTL_V3_C10",
+                title: "The Staff Officer",
+              },
+            },
+            {
+              ...topic(11, 110),
+              id: "40000000-0000-4000-8000-000000000411",
+              exam_id: "20000000-0000-4000-8000-000000000004",
+              code: "LTL3_C11",
+              title: "Learn to Lead, Volume 3, Chapter 11",
+              volume: {
+                ...topic(11, 110).volume,
+                code: "LTL_V3",
+                title: "Learn to Lead, Volume 3",
+              },
+              chapter: {
+                ...topic(11, 110).chapter,
+                code: "LTL_V3_C11",
+                title: "The Leader as Commander",
+              },
+            },
+          ],
+        },
       ],
       isPending: false,
       isError: false,
@@ -134,5 +191,17 @@ describe("ContentBrowser", () => {
 
     expect(screen.getAllByText("Wright Brothers")).toHaveLength(2);
     expect(screen.getByText("Learn to Lead, Volume 1, Chapter 1")).toBeTruthy();
+  });
+
+  it("shows Earhart Leadership as its own chapter-based study track", async () => {
+    const user = userEvent.setup();
+    await render(<ContentBrowser />);
+
+    await user.press(screen.getByText("Earhart Leadership"));
+
+    expect(screen.getAllByText("Earhart Leadership")).toHaveLength(2);
+    expect(screen.getByText("Learn to Lead, Volume 3, Chapter 9")).toBeTruthy();
+    expect(screen.getByText("Learn to Lead, Volume 3, Chapter 10")).toBeTruthy();
+    expect(screen.getByText("Learn to Lead, Volume 3, Chapter 11")).toBeTruthy();
   });
 });
