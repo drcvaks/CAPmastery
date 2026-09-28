@@ -68,6 +68,11 @@ The post-Checkpoint 4 feedback refinement adds pure tests for correct/incorrect 
 
 The complete learning-support sample updates actual-file validation for `short_explanation`, display version, memory aids, and coherent visual metadata. Component tests verify reviewed short feedback is the default, Memory trick and Explain more remain collapsed, and Show visual is absent without an approved asset. `learning_support.test.sql` checks private storage and privilege denial; the expanded study suite checks pre-answer withholding, post-answer memory delivery, and missing-asset suppression.
 
+The post-release visual-viewer regression opens an approved poster from the
+answer result, verifies the full-screen modal and accessible Close/Zoom controls,
+advances from 100% to 150%, and confirms that closing removes the modal. Android
+and web production exports remain the cross-platform compile gates.
+
 Checkpoint 5 adds pure deterministic tests for difficulty/cognitive/confidence coefficients, score clamping, repeated-miss status, spaced intervals, injected-time retention decay, exact bucket allocation, weakness frequency, seeded replay, recent duplicate avoidance, exhausted-bucket fallback, and sparse-bank errors. `adaptive_mastery.test.sql` verifies both mastery tables and RLS, server-only writes, the 40/20/20/10/10 composition, unique session questions, atomic mastery updates, next-day miss scheduling, idempotent retry, same-session related remediation, repeated misses, and cross-student isolation.
 
 Checkpoint 6 adds pure readiness formula/cap tests and shared dashboard component tests for student metrics, weak-topic guidance, trends, the unofficial disclaimer, compact Home behavior, and switching between two linked children. `progress_readiness.test.sql` verifies all four progress RPCs, low-evidence caps, topic/trend output, parent access to two linked students, unrelated-user denial, lack of direct mastery-table access, and trend-range validation.

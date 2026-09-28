@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
 import { theme } from "../../../lib/constants/theme";
 import { buildAnswerFeedback, explanationsOverlap } from "../feedback";
+import { VisualAidViewer } from "./VisualAidViewer";
 
 type AnswerResultCardProps = {
   explanation: string | null;
@@ -123,21 +124,13 @@ export function AnswerResultCard({
             />
             {showVisual ? (
               <View style={styles.supportPanel}>
-                <Image
-                  accessibilityLabel={availableVisual.altText}
-                  accessible
-                  onError={() => {
+                <VisualAidViewer
+                  onImageError={() => {
                     setVisualFailed(true);
                     setShowVisual(false);
                   }}
-                  resizeMode="contain"
-                  source={{ uri: availableVisual.uri }}
-                  style={[
-                    styles.visual,
-                    { aspectRatio: availableVisual.width / availableVisual.height },
-                  ]}
+                  visual={availableVisual}
                 />
-                <Text style={styles.visualCaption}>{availableVisual.caption}</Text>
               </View>
             ) : null}
           </View>
@@ -195,6 +188,4 @@ const styles = StyleSheet.create({
   },
   supportText: { color: theme.colors.ink, fontSize: 15, lineHeight: 23 },
   source: { color: theme.colors.muted, fontSize: 12, lineHeight: 17 },
-  visual: { alignSelf: "flex-start", maxHeight: 320, width: "100%" },
-  visualCaption: { color: theme.colors.muted, fontSize: 13, lineHeight: 19 },
 });

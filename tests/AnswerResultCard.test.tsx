@@ -39,4 +39,43 @@ describe("AnswerResultCard", () => {
     expect(screen.getByText("Extra remediation guidance.")).toBeVisible();
     expect(screen.getByRole("button", { name: "Hide explanation" })).toBeVisible();
   });
+
+  it("opens a full-screen visual with accessible zoom controls", async () => {
+    await render(
+      <AnswerResultCard
+        explanation="A fuller explanation."
+        isCorrect
+        memoryAid={null}
+        nextLabel="Next question"
+        onNext={jest.fn()}
+        remediation={null}
+        selectedChoiceFeedback="A concise explanation."
+        shortExplanation="The short reviewed explanation."
+        sourceReference="Learn to Lead, page 7"
+        visual={{
+          altText: "A detailed leadership poster",
+          caption: "Leadership concepts poster",
+          height: 1086,
+          uri: "https://example.test/leadership-poster.png",
+          width: 1448,
+        }}
+      />,
+    );
+
+    await act(() => fireEvent.press(screen.getByRole("button", { name: "Show visual" })));
+    expect(screen.getByTestId("visual-aid-image")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Open visual full screen" })).toBeVisible();
+
+    await act(() =>
+      fireEvent.press(screen.getByRole("button", { name: "Open visual full screen" })),
+    );
+    expect(screen.getByTestId("full-screen-visual-viewer")).toBeVisible();
+    expect(screen.getByText("100%")).toBeVisible();
+
+    await act(() => fireEvent.press(screen.getByRole("button", { name: "Zoom in" })));
+    expect(screen.getByText("150%")).toBeVisible();
+
+    await act(() => fireEvent.press(screen.getByRole("button", { name: "Close visual" })));
+    expect(screen.queryByTestId("full-screen-visual-viewer")).toBeNull();
+  });
 });

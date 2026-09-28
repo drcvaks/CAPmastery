@@ -185,6 +185,12 @@ owned session delivery releases an approved asset. Storage RLS independently
 requires an answered study question or a completed delayed-feedback session, so a
 known object path is not sufficient to fetch a visual early.
 
+The shared result viewer renders a larger inline preview and can open every
+approved visual in a near-full-screen modal on Android and web. Explicit
+100%–300% zoom, reset, close, and two-direction scrolling controls keep large
+posters readable without adding a platform-specific image library or changing
+the protected signed-URL delivery boundary.
+
 ### Wright Brothers study-track extension
 
 Migration `202608250046` adds Wright Brothers as a separate first-class exam

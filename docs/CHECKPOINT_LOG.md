@@ -1467,3 +1467,23 @@ Validation and owner actions:
   and the linked pgTAP aggregate passed 605/605.
 - No question reimport is required. Students need all three exact Earhart chapter
   assignments before the practice option is shown.
+
+## Post-Checkpoint 10 — Full-screen visual-aid viewer
+
+Completed work:
+
+- Increased the inline visual preview height and added a shared near-full-screen
+  viewer for all approved study images on Android and web.
+- Added explicit 100%–300% Zoom in, Zoom out, Reset, and Close controls, plus
+  horizontal and vertical scrolling for detailed posters. Image failures still
+  close and suppress the visual through the existing safe fallback.
+- Added an accessible component regression covering open, zoom, and close. No
+  database, Storage policy, signed-URL, content, or authorization change was
+  required.
+
+Validation:
+
+- Focused `AnswerResultCard` Jest passed 2/2 tests; the complete suite passed
+  29/29 suites and 215/215 tests. Strict TypeScript, Expo ESLint, repository
+  formatting, and the client credential scan passed. Web and Android production
+  exports passed; Android bundled 1,711 modules into a 5.2 MB Hermes bundle.
