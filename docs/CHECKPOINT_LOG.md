@@ -1,5 +1,12 @@
 # Checkpoint Log
 
+## Post-checkpoint maintenance — Expo Go Supabase auth lock compatibility
+
+- Removed the explicit Supabase Auth `processLock` option from the shared client configuration. The installed `@supabase/auth-js` version deprecates that custom lock path and coordinates refresh-token work internally; retaining it caused zero-millisecond lock-acquisition warnings during Expo Go startup.
+- Kept native AsyncStorage session persistence and foreground/background auto-refresh behavior unchanged.
+- No database migration or hosted Supabase setting change is required.
+- Validation passed: strict TypeScript, Expo ESLint, Prettier, client credential scan, public Expo configuration, 31/31 Jest suites and 219/219 tests, and the Android production export (1,712 modules; 5.2 MB Hermes bundle). The first sandboxed Android export attempt could not write Hermes' temporary bytecode file; the same export passed outside that Windows sandbox.
+
 ## Checkpoint 0 — Repository and mySCP review
 
 Status: complete and owner-approved. Date: 2026-07-19.
@@ -1487,3 +1494,30 @@ Validation:
   29/29 suites and 215/215 tests. Strict TypeScript, Expo ESLint, repository
   formatting, and the client credential scan passed. Web and Android production
   exports passed; Android bundled 1,711 modules into a 5.2 MB Hermes bundle.
+
+## Post-Checkpoint 10 — Self-service account creation
+
+Completed work:
+
+- Added Create account navigation from Sign in and a responsive sign-up form for
+  first name, optional last name, email, and matching strong passwords.
+- Added a typed Supabase Auth sign-up service with normalized safe profile
+  metadata and web/native `/sign-in` confirmation redirects. The existing Auth
+  trigger creates the profile; no client code grants a role or package.
+- Enabled local email sign-up while retaining required email confirmation, and
+  documented the matching hosted Supabase settings and controlled-pilot limits.
+- Added schema, screen, and service regressions for validation, metadata, and the
+  administrator-approval message.
+
+Validation and owner actions:
+
+- Focused authentication Jest passed 3/3 suites and 7/7 tests; the complete suite
+  passed 31/31 suites and 219/219 tests. Strict TypeScript, Expo ESLint,
+  repository formatting, client credential scanning, and public Expo
+  configuration passed. Web and Android production exports passed; Android
+  bundled 1,712 modules into a 5.2 MB Hermes bundle. No database migration is
+  required.
+- The owner must enable hosted email sign-up, retain email confirmation, add the
+  exact hosted and `capmastery://sign-in` redirect URLs, and test confirmation.
+  Newly confirmed accounts intentionally have no workspace until an administrator
+  assigns a role and packages.

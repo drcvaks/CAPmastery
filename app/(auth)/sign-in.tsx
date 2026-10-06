@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Href } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { useState } from "react";
 
@@ -34,7 +35,7 @@ export default function SignInScreen() {
     <AppScreen
       eyebrow="CAP Mastery"
       title="Sign in"
-      description="Use the email and password from your private CAP Mastery invitation."
+      description="Use your CAP Mastery email and password, or create a new account."
     >
       <AppCard title="Account access" description={requestError ?? undefined}>
         <Controller
@@ -71,6 +72,7 @@ export default function SignInScreen() {
         />
         <AppButton label="Sign in" loading={isSubmitting} onPress={() => void submit()} />
         <AppLinkButton href="/forgot-password" label="Forgot password?" variant="secondary" />
+        <AppLinkButton href={"/sign-up" as Href} label="Create account" variant="secondary" />
       </AppCard>
     </AppScreen>
   );

@@ -15,7 +15,7 @@ Use Expo SDK 57 and Expo Router for Android and responsive web, with React Nativ
 
 ## State strategy
 
-- Supabase Auth session: `AuthProvider` restores the session, loads the RLS-filtered profile/roles, handles recovery deep links, and manages native foreground refresh. AsyncStorage persists native sessions; web uses the browser storage adapter.
+- Supabase Auth session: `AuthProvider` restores the session, loads the RLS-filtered profile/roles, handles recovery deep links, and manages native foreground refresh. AsyncStorage persists native sessions; web uses the browser storage adapter. The client relies on the installed Supabase Auth library's built-in refresh coordination instead of opting into its deprecated React Native `processLock` compatibility path.
 - Same-user signed-in/token-refresh events update the token without clearing the already-authorized access context. This keeps the active Expo Router navigator and study route mounted when web focus or native foregrounding refreshes authentication.
 - Server state: TanStack Query is approved for caching, invalidation, loading, and retry when Supabase integration begins. It is not installed before it is used.
 - Form state: React Hook Form plus Zod.
@@ -32,7 +32,9 @@ Question delivery uses the typed `contentService`, narrow TanStack Query keys, a
 
 ## Navigation
 
-- `(auth)`: email/password sign-in, reset request, and recovery password update.
+- `(auth)`: email/password sign-in, self-service account creation, reset request,
+  and recovery password update. Sign-up creates only the Auth identity and profile;
+  it never assigns a workspace role or content package.
 - `(student)`: authenticated users with the global `student` role; Home and Progress consume the protected progress projection.
 - The Study tab owns a nested stack containing the catalog and active session. Switching to Progress/Home preserves that stack, so returning to Study resumes the same question rather than targeting the catalog or creating another session.
 - `(parent)`: authenticated users with a global `parent` or `coach` role; the family dashboard can select only students returned by the linked-progress projection.

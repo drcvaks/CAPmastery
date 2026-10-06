@@ -94,7 +94,19 @@ No secret, account creation, Supabase action, or production database action is r
 
 Completed by the owner on 2026-07-20: created the separate nonproduction CAP Mastery Supabase project. Dashboard security choices are Data API enabled, automatic new-table exposure disabled, and automatic RLS enabled.
 
-Approved development authentication defaults: invitation/admin-created accounts only, public email sign-up disabled, email confirmation enabled, password recovery enabled, and passwords at least 10 characters with letters and numbers. Local redirect targets are `http://localhost:8081/reset-password` and `capmastery://reset-password`; equivalent hosted dashboard redirect allowlists must be configured before recovery testing.
+The original invitation-only default was replaced on 2026-10-05 by controlled
+self-service email sign-up. Email confirmation remains enabled, password recovery
+remains enabled, and passwords require at least 10 characters with letters and
+numbers. Registration creates no role or package assignment.
+
+In the hosted Supabase Dashboard, enable new-user and Email-provider sign-up while
+keeping Confirm email enabled. Under Authentication URL Configuration, retain the
+existing recovery targets and allow the exact deployed web `/sign-in` URL plus
+`capmastery://sign-in`. Local configuration allows
+`http://localhost:8081/sign-in`; add the actual hosted origin rather than a
+guessed domain. Test one disposable account on both web and Android. After
+confirmation it should reach No workspace assigned until an administrator grants
+the Student role and packages through audited functions.
 
 Completed by the owner and Codex:
 

@@ -19,6 +19,11 @@ Checkpoint 10 adds `npm run security:client-secrets` and the aggregate `npm run 
 
 Unit: mastery, spaced dates, adaptive selection, readiness, practice blueprints, CSV validation, duplicate detection, role helpers.
 
+The self-service sign-up regression validates trimmed email/name input, strong
+matching passwords, confirmation-state messaging, the exact safe Auth metadata,
+and the absence of any client role or package assignment call. Manual hosted
+testing must also confirm delivery and both web/native confirmation redirects.
+
 Checkpoint 8 adds pure parser/validator tests and reviewer-workspace component tests. `content_import_review.test.sql` covers grants, RLS, reviewer authorization, duplicate preview, all-or-nothing invalid imports, draft-only delivery, correction and review decisions, complete approved snapshots, version increments, and preservation of an attempt's original `question_version`. The linked aggregate is expected to increase from 240 to 290 assertions after the owner-run database gate.
 
 The Checkpoint 10 pilot regression suite also verifies that the admin client accepts
@@ -56,7 +61,9 @@ Checkpoint 2 adds environment-validation, password-validation, and role-routing 
 
 Checkpoint 3 adds safe-projection parsing tests and `content_permissions.test.sql`. The SQL suite checks the content tables/RLS, private-table privilege denial, reviewer-only answer/approval entrypoints, draft hiding, safe approved-question delivery, self-owned reports, and reviewer visibility. The linked runner now discovers every `*.test.sql` file, validates each declared TAP plan, and reports per-file plus aggregate results.
 
-Physical Expo Go on the owner's Android device is currently incompatible with this SDK 57 project. The owner chose to retain SDK 57. Web and Android production exports remain required compile gates, but physical interaction awaits a compatible Expo Go release or a later development-build decision.
+Physical Expo Go testing requires an Android Expo Go release compatible with SDK 57. The owner's updated client can now load the project; web and Android production exports remain required compile gates in addition to device testing.
+
+When testing authentication in Expo Go or a development build, startup and foreground transitions should not emit a Supabase `processLock` acquisition-timeout warning. CAP Mastery intentionally uses Supabase Auth's built-in refresh coordination; native session persistence remains backed by AsyncStorage.
 
 Checkpoint 4 adds pure parsing/error-message tests and `study_sessions.test.sql`. The SQL suite creates ten synthetic approved questions inside a transaction, completes a 10-question session, verifies correct and incorrect server grading, checks idempotent retry and changed-answer rejection, confirms feedback is withheld before submission, proves direct correctness/score writes are denied, and tests cross-student session/attempt isolation. All synthetic study data rolls back.
 

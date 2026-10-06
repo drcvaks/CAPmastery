@@ -1,4 +1,4 @@
-import { signInSchema, updatePasswordSchema } from "../features/auth/schemas";
+import { signInSchema, signUpSchema, updatePasswordSchema } from "../features/auth/schemas";
 
 describe("authentication validation", () => {
   it("requires a valid email for sign in", () => {
@@ -23,6 +23,30 @@ describe("authentication validation", () => {
       updatePasswordSchema.safeParse({
         confirmPassword: "different2",
         password: "securepass1",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("validates a new account without requiring a last name", () => {
+    expect(
+      signUpSchema.safeParse({
+        confirmPassword: "securepass1",
+        email: "cadet@example.com",
+        firstName: "Cadet",
+        lastName: "",
+        password: "securepass1",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("requires matching strong passwords for a new account", () => {
+    expect(
+      signUpSchema.safeParse({
+        confirmPassword: "different2",
+        email: "cadet@example.com",
+        firstName: "Cadet",
+        lastName: "Example",
+        password: "onlyletters",
       }).success,
     ).toBe(false);
   });

@@ -35,6 +35,20 @@ Server-side secrets, if later required, belong in Supabase Function secrets or a
 - The first administrator is bootstrapped once through the hosted SQL editor after account creation; subsequent changes use the audited function.
 - The application requires a database role before entering a workspace. Student and admin route guards improve UX, while database policies remain authoritative against direct API calls.
 
+## Self-service account creation
+
+Public email sign-up creates a Supabase Auth identity and invokes the existing
+`handle_new_auth_user` trigger to create a minimal active profile. Client-supplied
+metadata is limited to display, first, and optional last name; the trigger clamps
+stored lengths. Sign-up cannot write `user_roles`, guardian links, package
+assignments, organizations, audit records, or learning data. A confirmed account
+with no role routes only to the No workspace assigned screen.
+
+Email confirmation remains required. Hosted Auth must allow only the approved web
+and `capmastery://sign-in` redirect targets. Supabase's Auth rate limit applies;
+CAPTCHA and a formal parental-consent/privacy workflow remain required decisions
+before opening registration beyond the controlled cadet group.
+
 ## Answer protection
 
 Checkpoint 3 makes answer leakage structurally difficult: public questions and choices have no correctness fields. Answer keys, explanations, remediation, choice feedback, and source passages are private-schema tables with no `anon` or `authenticated` table grants. The student-safe `get_approved_questions` function is security-invoker and RLS-filtered; drafts and source-document records are hidden from students.

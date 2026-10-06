@@ -11,6 +11,35 @@ export async function signInWithPassword(email: string, password: string): Promi
   }
 }
 
+export async function signUpWithPassword(input: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}): Promise<{ requiresEmailConfirmation: boolean }> {
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  const displayName = [firstName, lastName].filter(Boolean).join(" ").slice(0, 100);
+  const { data, error } = await getSupabaseClient().auth.signUp({
+    email: input.email.trim().toLowerCase(),
+    password: input.password,
+    options: {
+      data: {
+        display_name: displayName,
+        first_name: firstName,
+        last_name: lastName || null,
+      },
+      emailRedirectTo: Linking.createURL("/sign-in"),
+    },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return { requiresEmailConfirmation: data.session === null };
+}
+
 export async function signOut(): Promise<void> {
   const { error } = await getSupabaseClient().auth.signOut();
   if (error) {
@@ -95,6 +124,9 @@ export function getSafeAuthMessage(error: unknown): string {
 
   if (message.includes("invalid login credentials")) {
     return "The email or password is incorrect.";
+  }
+  if (message.includes("already registered") || message.includes("already exists")) {
+    return "An account may already use this email. Try signing in or resetting the password.";
   }
   if (message.includes("rate limit")) {
     return "Too many attempts. Please wait before trying again.";
