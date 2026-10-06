@@ -1,5 +1,33 @@
 import { z } from "zod";
 
+export const adminAccessPacketSchema = z.object({
+  import_package: z.string().regex(/^[A-Z0-9][A-Z0-9_-]{2,119}$/),
+  exam_title: z.string().min(1),
+  topic_titles: z.array(z.string().min(1)),
+  question_count: z.number().int().positive(),
+});
+
+export const adminAccessUserSchema = z.object({
+  user_id: z.uuid(),
+  email: z.string().email().nullable(),
+  display_name: z.string().min(1),
+  status: z.enum(["active", "disabled"]),
+  created_at: z.string(),
+  roles: z.array(
+    z.enum(["student", "parent", "coach", "content_reviewer", "squadron_leader", "admin"]),
+  ),
+  assigned_packages: z.array(z.string().regex(/^[A-Z0-9][A-Z0-9_-]{2,119}$/)),
+});
+
+export const adminUserAccessOverviewSchema = z.object({
+  users: z.array(adminAccessUserSchema),
+  packages: z.array(adminAccessPacketSchema),
+});
+
+export type AdminAccessPacket = z.infer<typeof adminAccessPacketSchema>;
+export type AdminAccessUser = z.infer<typeof adminAccessUserSchema>;
+export type AdminUserAccessOverview = z.infer<typeof adminUserAccessOverviewSchema>;
+
 export const questionStyleReferenceSchema = z.enum([
   "pre_sample_bank_review",
   "Mitchell_sample_style_analysis",

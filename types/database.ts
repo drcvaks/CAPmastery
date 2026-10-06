@@ -2341,6 +2341,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_get_user_access_overview: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       admin_reset_student_learning_progress: {
         Args: { p_confirm?: boolean; p_reason: string; p_student_id: string };
         Returns: Json;
@@ -2382,6 +2386,14 @@ export type Database = {
           p_role: Database["public"]["Enums"]["app_role"];
           p_scope_id?: string;
           p_scope_type?: Database["public"]["Enums"]["role_scope_type"];
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
+      admin_update_student_access: {
+        Args: {
+          p_import_packages?: string[];
+          p_student_enabled: boolean;
           p_user_id: string;
         };
         Returns: undefined;

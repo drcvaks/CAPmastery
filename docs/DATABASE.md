@@ -18,6 +18,8 @@
 - `audit_log`: append-only safe summaries; readable only by administrators.
 - `private.has_role` and `private.can_view_profile`: non-exposed security-definer policy helpers with empty `search_path`.
 - `admin_set_user_role` and `admin_set_guardian_link`: authenticated but internally admin-authorized, audited mutation entrypoints.
+- `admin_get_user_access_overview`: admin-only projection joining Auth identities to profiles, global roles, current pilot-package assignments, and assignable package metadata without exposing `auth.users` directly.
+- `admin_update_student_access`: admin-only atomic replacement of one account's global Student role and selected study-package assignments. It normalizes and validates package codes and writes a safe audit summary.
 
 All primary keys are UUIDs except the identity audit sequence. Enums and checks constrain status, role, scope, organization type, and relationship state. Foreign keys use deliberate cascade, restrict, or null behavior.
 
@@ -75,6 +77,8 @@ Clients cannot select answer-key columns or write `question_attempts.is_correct`
 ## Migration workflow
 
 Checkpoint 4 migration `202607200013` adds import identity/provenance fields and private pilot package assignments. The import itself is deliberately an idempotent operator action, not a migration, so replaying migrations never inserts licensed or reviewable question content automatically.
+
+Post-Checkpoint 10 migration `202610060054` adds the protected administrator user-access projection and atomic Student/package update workflow. It introduces no table, direct client write grant, or broader profile policy; registered email visibility remains inside the administrator-only security-definer projection.
 
 Post-Checkpoint 4 migration `202607210014` adds the private learning-support and visual-asset tables and extends owned session delivery with post-attempt-only short feedback, memory aids, and approved-visual metadata. No production database or Storage bucket is created.
 

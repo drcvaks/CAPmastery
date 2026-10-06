@@ -4,7 +4,7 @@
 - Remote error monitoring is deliberately not configured; pilot support relies on privacy-safe user reports and existing Supabase audit records.
 - Android production export is automated, but a signed EAS internal APK and physical-device accessibility/acceptance pass require owner Expo credentials and devices.
 - SDK 57 is intentionally retained; Expo Doctor may report current patch mismatches or fail remote directory/schema checks when Expo services are unavailable.
-- Admin question CSV import, correction, review, and approval are available in the UI. Email account creation is self-service, but global role/family-link administration, package assignment, and exceptional learning-history reset still require protected operator workflows/SQL; they are not exposed to students or parents.
+- Admin question CSV import, correction, review, approval, registered-user listing, global Student-role management, and study-packet assignment are available in the UI. Other global roles, family links, profile disabling, and exceptional learning-history reset still require protected operator workflows/SQL; none are exposed to students or parents.
 - Self-service registration still depends on hosted Supabase email delivery and redirect configuration. CAPTCHA and a formal parental-consent/privacy workflow are not yet built, so registration should remain limited to the controlled cadet group.
 - Package content remains private draft content until exact assignment or governed approval. Assignment to one chapter/module does not imply access to another.
 - Practice blueprints and some pilot scoring/achievement/challenge thresholds are provisional rather than official CAP exam specifications.

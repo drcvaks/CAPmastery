@@ -1,5 +1,19 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Administrator user access workspace
+
+Completed work:
+
+- Added a searchable User access panel as the default Administration view. It lists every registered profile with email, account status, global roles, and current packet codes, then opens a focused editor for one user.
+- Added Student workspace control, study packets grouped by exam, individual packet switches, Select all/Clear all actions, and one explicit save action. Turning Student access off visibly warns that assignments will be removed.
+- Added migration `202610060054_admin_user_access_workspace.sql`. Its admin-only read projection keeps `auth.users` private, while its atomic update RPC grants/revokes only the global Student role, replaces the complete packet selection, validates packet codes against existing questions, and audits each successful save.
+- Added typed schemas, service and TanStack Query boundaries, generated-type declarations, component/schema regressions, and 22 rollback-only pgTAP assertions. No direct client write grant or broader RLS policy was added.
+
+Validation and owner actions:
+
+- Focused administrator Jest passed 3/3 suites and 15/15 tests; the complete suite passed 32/32 suites and 224/224 tests. Strict TypeScript, Expo ESLint, repository formatting, client credential scanning, and public Expo configuration passed. Web and Android production exports passed; Android bundled 1,715 modules into a 5.3 MB Hermes bundle.
+- The owner applied migration 054 and ran the complete linked rollback-only suite. `admin_user_access.test.sql` passed 22/22, every existing suite remained green, and the pgTAP aggregate passed 627/627. The remaining manual acceptance is to open Administration → User access and verify one grant, packet change, and revoke using a test account. The migration changes no existing assignment until an administrator presses Save.
+
 ## Post-checkpoint maintenance — Expo Go Supabase auth lock compatibility
 
 - Removed the explicit Supabase Auth `processLock` option from the shared client configuration. The installed `@supabase/auth-js` version deprecates that custom lock path and coordinates refresh-token work internally; retaining it caused zero-millisecond lock-acquisition warnings during Expo Go startup.

@@ -32,6 +32,7 @@ Server-side secrets, if later required, belong in Supabase Function secrets or a
 - Ordinary clients have no insert, update, or delete privilege on roles, relationships, organizations, memberships, or audit rows.
 - A user reads their own profile/roles. An active guardian with `can_view_progress` reads the linked student's profile. An administrator reads identity/access and audit rows.
 - Global administrator role changes and guardian-link changes use named functions that re-check `auth.uid()`, call a private role helper, validate input, use an empty `search_path`, and append safe audit summaries.
+- Registered-user email, global-role, and packet-assignment administration uses an admin-only projection rather than granting the client access to `auth.users`. Student-role and packet selections are saved atomically by a second admin-only function, which validates every package against actual question content and records the before/after assignment summary.
 - The first administrator is bootstrapped once through the hosted SQL editor after account creation; subsequent changes use the audited function.
 - The application requires a database role before entering a workspace. Student and admin route guards improve UX, while database policies remain authoritative against direct API calls.
 
@@ -66,6 +67,8 @@ Authenticated clients receive select-only grants on their own sessions, session 
 Correct choices and teaching feedback are joined from private tables only after an owned attempt exists. A lost-response retry with the same choice returns the existing result without another attempt or count increment; a retry with a different choice is rejected.
 
 Draft pilot delivery is package-scoped. Students cannot directly insert assignments and normal question RLS still returns no draft prompts. An audited administrator function assigns a package; the security-definer session function checks that assignment internally. It returns choices but withholds the private answer key and all teaching feedback until submission, exactly as it does for approved content.
+
+The administration UI can replace a student's complete package selection through the same protected database boundary. Turning off the global Student role also removes that user's package assignments in the same transaction; it does not delete learning history.
 
 Short explanations, memory aids, internal visual briefs, and the visual-asset registry live in the private schema with no client table grants. Owned session delivery returns short explanations and memory aids only after an attempt. It never returns `visual_brief`; visual key/caption/alt/storage metadata remain null unless a separately registered asset has approved status. The client also hides the visual control if a signed image cannot be resolved, preventing broken-image disclosure.
 

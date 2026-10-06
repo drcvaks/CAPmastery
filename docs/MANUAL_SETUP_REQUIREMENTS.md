@@ -79,6 +79,8 @@ Checkpoint 8 requires no new account, environment variable, credential, Supabase
 
 ## Checkpoint 10 owner actions
 
+After applying migration `202610060054_admin_user_access_workspace.sql`, an existing global administrator can use Administration → User access to grant or remove the Student role and replace a user's complete study-packet selection. Run the linked pgTAP suite before relying on the screen. Removing Student access also clears packet assignments but intentionally preserves prior learning history.
+
 - Apply migration 049 to the linked nonproduction project and run the full linked pgTAP suite. Do not apply it first to an untested production project.
 - Complete the EAS setup and internal APK procedure in `ANDROID_INTERNAL_BUILD.md` using a new CAP Mastery EAS project and only client-safe Supabase values.
 - Complete and retain `PILOT_RELEASE_CHECKLIST.md` for Heshy, Avigail, Chaim, Rachel, web, and each Android pilot device.

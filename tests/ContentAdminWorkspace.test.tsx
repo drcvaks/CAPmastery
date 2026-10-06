@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { ContentAdminWorkspace } from "../features/admin/components/ContentAdminWorkspace";
 import * as adminHooks from "../features/admin/hooks/useContentAdmin";
+import * as userAccessHooks from "../features/admin/hooks/useAdminUserAccess";
 
 jest.mock("../features/admin/hooks/useContentAdmin", () => ({
   useDuplicateCheck: jest.fn(),
@@ -10,6 +11,10 @@ jest.mock("../features/admin/hooks/useContentAdmin", () => ({
   useReviewQuestion: jest.fn(),
   useSaveReviewQuestion: jest.fn(),
   useSubmitQuestionReview: jest.fn(),
+}));
+jest.mock("../features/admin/hooks/useAdminUserAccess", () => ({
+  useAdminUserAccessOverview: jest.fn(),
+  useUpdateAdminStudentAccess: jest.fn(),
 }));
 jest.mock("../features/auth/components/SignOutButton", () => ({
   SignOutButton: () => null,
@@ -36,6 +41,12 @@ function mutation(data?: unknown) {
 }
 
 beforeEach(() => {
+  jest.mocked(userAccessHooks.useAdminUserAccessOverview).mockReturnValue({
+    data: { users: [], packages: [] },
+    isPending: false,
+    isError: false,
+  } as never);
+  jest.mocked(userAccessHooks.useUpdateAdminStudentAccess).mockReturnValue(mutation());
   jest.mocked(adminHooks.useDuplicateCheck).mockReturnValue(mutation());
   jest.mocked(adminHooks.useQuestionCsvImport).mockReturnValue(mutation());
   jest.mocked(adminHooks.useReviewQueue).mockReturnValue({
@@ -94,6 +105,7 @@ beforeEach(() => {
 describe("ContentAdminWorkspace", () => {
   it("loads the canonical template and reports invalid pasted CSV before import", async () => {
     await render(<ContentAdminWorkspace />);
+    await act(() => fireEvent.press(screen.getByText("CSV import")));
     await act(() => fireEvent.press(screen.getByText("Load blank template")));
     expect(screen.getByLabelText("CSV content").props.value).toContain("external_id,pilot_batch");
     await act(() =>

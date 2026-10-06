@@ -17,17 +17,19 @@ import {
   useSubmitQuestionReview,
 } from "../hooks/useContentAdmin";
 import type { ReviewEditPayload, ReviewQuestion } from "../schemas";
+import { UserAccessAdmin } from "./UserAccessAdmin";
 
 export function ContentAdminWorkspace() {
-  const [panel, setPanel] = useState<"import" | "review">("import");
+  const [panel, setPanel] = useState<"import" | "review" | "users">("users");
   return (
     <AppScreen
       actions={<SignOutButton />}
-      description="Validate and preview CSVs, import drafts, and complete human review before students receive content."
+      description="Manage registered-user access and administer reviewed study content."
       eyebrow="Administration"
       title="Content workspace"
     >
       <View style={styles.row}>
+        <Tab active={panel === "users"} label="User access" onPress={() => setPanel("users")} />
         <Tab active={panel === "import"} label="CSV import" onPress={() => setPanel("import")} />
         <Tab
           active={panel === "review"}
@@ -35,7 +37,9 @@ export function ContentAdminWorkspace() {
           onPress={() => setPanel("review")}
         />
       </View>
-      {panel === "import" ? <ImportPanel onReview={() => setPanel("review")} /> : <ReviewPanel />}
+      {panel === "users" ? <UserAccessAdmin /> : null}
+      {panel === "import" ? <ImportPanel onReview={() => setPanel("review")} /> : null}
+      {panel === "review" ? <ReviewPanel /> : null}
     </AppScreen>
   );
 }
