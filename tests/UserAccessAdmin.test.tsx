@@ -39,19 +39,49 @@ beforeEach(() => {
           status: "active",
           created_at: "2026-10-05T12:00:00Z",
           roles: ["student"],
-          assigned_packages: ["LTL1_C1_100"],
+          assigned_packages: ["LTL3_C9_100", "LTL3_C10_100", "LTL3_C11_100"],
         },
       ],
       packages: [
         {
+          import_package: "LTL3_C9_100",
+          exam_title: "Earhart Leadership",
+          topic_titles: ["Learn to Lead, Volume 3, Chapter 9"],
+          question_count: 100,
+        },
+        {
+          import_package: "LTL3_C10_100",
+          exam_title: "Earhart Leadership",
+          topic_titles: ["Learn to Lead, Volume 3, Chapter 10"],
+          question_count: 100,
+        },
+        {
+          import_package: "LTL3_C11_100",
+          exam_title: "Earhart Leadership",
+          topic_titles: ["Learn to Lead, Volume 3, Chapter 11"],
+          question_count: 100,
+        },
+        {
+          import_package: "AD_M1_100",
+          exam_title: "Billy Mitchell Aerospace",
+          topic_titles: ["Aerospace Dimensions, Module 1"],
+          question_count: 100,
+        },
+        {
           import_package: "LTL1_C1_100",
-          exam_title: "Wright Brothers Leadership",
+          exam_title: "Wright Brothers",
           topic_titles: ["Learn to Lead, Volume 1, Chapter 1"],
           question_count: 100,
         },
         {
+          import_package: "LTL2_C4_75",
+          exam_title: "Billy Mitchell Leadership",
+          topic_titles: ["Learn to Lead, Volume 2, Chapter 4"],
+          question_count: 75,
+        },
+        {
           import_package: "LTL1_C2_100",
-          exam_title: "Wright Brothers Leadership",
+          exam_title: "Wright Brothers",
           topic_titles: ["Learn to Lead, Volume 1, Chapter 2"],
           question_count: 100,
         },
@@ -66,16 +96,19 @@ beforeEach(() => {
 describe("UserAccessAdmin", () => {
   it("shows registered users with existing roles and packet assignments", async () => {
     await render(<UserAccessAdmin />);
-    expect(screen.getByText("2 registered · 1 students · 2 study packets")).toBeVisible();
+    expect(screen.getByText("2 registered · 1 students · 7 study packets")).toBeVisible();
     expect(screen.getByText("new-cadet@example.test")).toBeVisible();
     expect(screen.getByText("No workspace role")).toBeVisible();
-    expect(screen.getByText("1 assigned: LTL1_C1_100")).toBeVisible();
+    expect(screen.getByText("3 assigned packets")).toBeVisible();
+    expect(screen.getByText("Earhart · Chapters 9–11")).toBeVisible();
+    expect(screen.queryByText(/LTL3_C9_100/)).toBeNull();
   });
 
   it("grants Student access and saves the selected packets together", async () => {
     await render(<UserAccessAdmin />);
     await act(() => fireEvent.press(screen.getByLabelText("Manage access for New Cadet")));
     expect(screen.getByText("Study packets")).toBeVisible();
+    await act(() => fireEvent.press(screen.getByLabelText("Wright Brothers packets")));
     expect(screen.getByLabelText("Assign LTL1_C1_100")).toBeDisabled();
 
     await act(() =>
@@ -89,6 +122,38 @@ describe("UserAccessAdmin", () => {
       studentEnabled: true,
       importPackages: ["LTL1_C1_100"],
     });
+  });
+
+  it("orders exam groups and expands only the requested packet menu", async () => {
+    await render(<UserAccessAdmin />);
+    await act(() => fireEvent.press(screen.getByLabelText("Manage access for New Cadet")));
+
+    const groupLabels = [
+      "Wright Brothers packets",
+      "Billy Mitchell Leadership packets",
+      "Billy Mitchell Aerospace packets",
+      "Earhart packets",
+    ];
+    expect(
+      screen
+        .getAllByRole("button")
+        .map((element) => element.props.accessibilityLabel)
+        .filter((label) => groupLabels.includes(label)),
+    ).toEqual(groupLabels);
+    expect(screen.getByLabelText("Wright Brothers packets").props.accessibilityState).toEqual({
+      expanded: false,
+    });
+    expect(
+      screen.getByLabelText("Billy Mitchell Leadership packets").props.accessibilityState,
+    ).toEqual({ expanded: false });
+    expect(screen.queryByLabelText("Assign LTL1_C1_100")).toBeNull();
+    expect(screen.queryByLabelText("Assign LTL2_C4_75")).toBeNull();
+
+    await act(() => fireEvent.press(screen.getByLabelText("Wright Brothers packets")));
+    expect(screen.getByLabelText("Assign LTL1_C1_100")).toBeVisible();
+    await act(() => fireEvent.press(screen.getByLabelText("Billy Mitchell Leadership packets")));
+    expect(screen.getByLabelText("Assign LTL2_C4_75")).toBeVisible();
+    expect(screen.getByText("Select all Billy Mitchell Leadership")).toBeVisible();
   });
 
   it("filters by email and returns to the complete list", async () => {

@@ -1,5 +1,13 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Collapsible administrator packet selector
+
+- Replaced the long flat study-packet list with four ordered milestone menus: Wright Brothers, Billy Mitchell Leadership, Billy Mitchell Aerospace, and Earhart. Unknown future exams remain available after those governed groups instead of being hidden.
+- Every milestone group is collapsed by default; each header reports its selected/total count and exposes an accessible expanded state. Expanded groups show human-readable chapter/module titles, package codes, question counts, individual switches, and group-level Select/Clear controls.
+- Registered-user cards no longer print internal package-code lists. They show the total and at most one compact line per assigned milestone, such as “Earhart · Chapters 9–11” or “Billy Mitchell Aerospace · Modules 1–7”; unresolved future package codes fall back to a short additional-packet count.
+- The existing Student-role behavior, complete-selection save payload, audited atomic RPC, and database permissions are unchanged. No migration or Supabase action is required.
+- Focused component coverage passed 1/1 suite and 4/4 tests; the complete suite passed 32/32 suites and 225/225 tests. Strict TypeScript, Expo ESLint, repository formatting, client credential scanning, and public Expo configuration passed. Web and Android production exports passed; Android bundled 1,715 modules into a 5.3 MB Hermes bundle.
+
 ## Post-Checkpoint 10 — Administrator user access workspace
 
 Completed work:
