@@ -19,21 +19,38 @@ const workspaces: Workspace[] = [
   { area: "admin", href: "/admin", icon: "settings-outline", label: "Admin" },
 ];
 
-export function WorkspaceSwitcher({ vertical }: { vertical: boolean }) {
+export function WorkspaceSwitcher({
+  hideSingle = false,
+  tone = "light",
+  vertical,
+}: {
+  hideSingle?: boolean;
+  tone?: "dark" | "light";
+  vertical: boolean;
+}) {
   const auth = useOptionalAuth();
   const pathname = usePathname();
   const available = auth?.access
     ? workspaces.filter((workspace) => canAccessArea(auth.access?.roles ?? [], workspace.area))
     : [];
 
-  if (auth?.status !== "signed_in" || available.length === 0) return null;
+  if (
+    auth?.status !== "signed_in" ||
+    available.length === 0 ||
+    (hideSingle && available.length === 1)
+  )
+    return null;
 
   return (
     <View
       accessibilityLabel="Available workspaces"
-      style={[styles.container, vertical ? styles.containerVertical : styles.containerHorizontal]}
+      style={[
+        styles.container,
+        vertical ? styles.containerVertical : styles.containerHorizontal,
+        tone === "dark" && styles.containerDark,
+      ]}
     >
-      <Text style={styles.heading}>Workspaces</Text>
+      <Text style={[styles.heading, tone === "dark" && styles.headingDark]}>Workspaces</Text>
       <View style={[styles.links, vertical ? styles.linksVertical : styles.linksHorizontal]}>
         {available.map((workspace) => {
           const active = isWorkspaceActive(pathname, workspace.area);
@@ -42,14 +59,32 @@ export function WorkspaceSwitcher({ vertical }: { vertical: boolean }) {
               <Pressable
                 accessibilityRole="link"
                 accessibilityState={{ selected: active }}
-                style={StyleSheet.flatten([styles.link, active && styles.linkActive])}
+                style={StyleSheet.flatten([
+                  styles.link,
+                  tone === "dark" && styles.linkDark,
+                  active && (tone === "dark" ? styles.linkActiveDark : styles.linkActive),
+                ])}
               >
                 <Ionicons
-                  color={active ? theme.colors.surface : theme.colors.primary}
+                  color={
+                    tone === "dark"
+                      ? active
+                        ? theme.colors.primary
+                        : "#D8E6F0"
+                      : active
+                        ? theme.colors.surface
+                        : theme.colors.primary
+                  }
                   name={workspace.icon}
                   size={18}
                 />
-                <Text style={[styles.linkText, active && styles.linkTextActive]}>
+                <Text
+                  style={[
+                    styles.linkText,
+                    tone === "dark" && styles.linkTextDark,
+                    active && (tone === "dark" ? styles.linkTextActiveDark : styles.linkTextActive),
+                  ]}
+                >
                   {workspace.label}
                 </Text>
               </Pressable>
@@ -83,6 +118,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.sm,
   },
+  containerDark: { backgroundColor: "transparent", borderColor: "#365169" },
   containerVertical: {
     borderRightWidth: 1,
     minWidth: 152,
@@ -96,6 +132,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.7,
     textTransform: "uppercase",
   },
+  headingDark: { color: "#8FB1C8" },
   link: {
     alignItems: "center",
     borderRadius: theme.radius.sm,
@@ -105,8 +142,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   linkActive: { backgroundColor: theme.colors.primary },
+  linkActiveDark: { backgroundColor: theme.colors.surface },
+  linkDark: { minHeight: 44 },
   linkText: { color: theme.colors.primary, fontSize: 14, fontWeight: "800" },
   linkTextActive: { color: theme.colors.surface },
+  linkTextActiveDark: { color: theme.colors.primary },
+  linkTextDark: { color: "#D8E6F0" },
   links: { gap: theme.spacing.xs },
   linksHorizontal: { flexDirection: "row", flexWrap: "wrap" },
   linksVertical: { alignItems: "stretch" },

@@ -59,6 +59,8 @@ No `package.json`, TypeScript source, Expo application, tests, migrations, or ba
 
 Checkpoint 1 includes a component contract test and a Router navigation test. Browser smoke testing verifies landing, student, and admin routes. A production bundle validates Metro/Hermes compilation but does not replace a later physical-device test.
 
+The post-Checkpoint 10 responsive-navigation regression verifies the wide-web sidebar's Home, Study, Progress, and Challenge tabs, selected state, profile identity, and tab-event navigation. Existing Router coverage continues to prove that tab changes preserve the nested Study session. Workspace-switcher coverage verifies that a single Student workspace is not redundantly repeated inside the student sidebar while authorized Family/Admin destinations remain database-role filtered.
+
 Checkpoint 2 adds environment-validation, password-validation, and role-routing tests. `supabase/tests/identity_access_rls.test.sql` contains pgTAP coverage for all six API tables, profile creation, self/linked/admin reads, and direct/function-based role escalation denial. The linked runner executes the file in a rolled-back transaction and never persists its synthetic users.
 
 Checkpoint 3 adds safe-projection parsing tests and `content_permissions.test.sql`. The SQL suite checks the content tables/RLS, private-table privilege denial, reviewer-only answer/approval entrypoints, draft hiding, safe approved-question delivery, self-owned reports, and reviewer visibility. The linked runner now discovers every `*.test.sql` file, validates each declared TAP plan, and reports per-file plus aggregate results.

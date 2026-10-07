@@ -1,5 +1,16 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Responsive wide-web student sidebar
+
+- Added an original persistent left navigation sidebar for student routes on web viewports at least 900 pixels wide. It presents CAP Mastery branding, colorful icon tiles, clear active states, Home/Study/Progress/Challenge destinations, the signed-in identity, and authorized multi-role workspace links.
+- Android and narrow web still use the native bottom-tab pattern. Wide web hides the duplicate tab header and page-level workspace rail while retaining `AppScreen` page titles and content widths.
+- The sidebar emits normal tab navigation events instead of replacing URLs, preserving the active nested Study stack when visiting Progress, Home, or Challenge. Role-filtered workspace navigation remains a usability layer over the existing route guards and database authorization.
+- No database, Supabase, content, or permission change is required.
+
+Validation:
+
+- Focused shell coverage passed 4/4 suites and 7/7 tests; the complete suite passed 33/33 suites and 227/227 tests. Strict TypeScript, Expo ESLint, repository formatting, client credential scanning, and public Expo configuration passed. Web and Android production exports passed; Android bundled 1,716 modules into a 5.3 MB Hermes bundle.
+
 ## Post-Checkpoint 10 — Collapsible administrator packet selector
 
 - Replaced the long flat study-packet list with four ordered milestone menus: Wright Brothers, Billy Mitchell Leadership, Billy Mitchell Aerospace, and Earhart. Unknown future exams remain available after those governed groups instead of being hidden.

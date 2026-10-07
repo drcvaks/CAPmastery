@@ -37,6 +37,7 @@ Question delivery uses the typed `contentService`, narrow TanStack Query keys, a
   it never assigns a workspace role or content package.
 - `(student)`: authenticated users with the global `student` role; Home and Progress consume the protected progress projection.
 - The Study tab owns a nested stack containing the catalog and active session. Switching to Progress/Home preserves that stack, so returning to Study resumes the same question rather than targeting the catalog or creating another session.
+- Student navigation is platform-responsive: Android and narrow web retain native bottom tabs, while web viewports at least 900 pixels wide render the same tab navigator through a persistent left sidebar. The custom sidebar uses tab-navigation events rather than direct route replacement, so the active nested Study stack remains preserved. It also incorporates authorized multi-role workspace links, avoiding a duplicate page-level workspace rail.
 - `(parent)`: authenticated users with a global `parent` or `coach` role; the family dashboard can select only students returned by the linked-progress projection.
 - `(admin)`: authenticated users with the global `admin` role. The responsive workspace defaults to searchable registered-user access management and also provides CSV import and question review. User emails, roles, and packet assignments arrive through one admin-only projection; role/package saves use one audited atomic RPC. Packet controls are grouped into ordered, accessible collapsible milestone menus so a growing bank remains manageable on Android and web.
 - Every authenticated `AppScreen` includes a role-aware workspace switcher. It renders as a left rail on wide screens and a compact top row on smaller screens, and offers only Student, Family, or Admin destinations authorized by the loaded database roles. Route-group guards still independently recheck each destination.
@@ -45,7 +46,7 @@ The root restores the session and routes to `/admin`, `/home`, or `/unauthorized
 
 ## UI foundation
 
-The shell uses a clean, encouraging navy/red visual direction without official CAP marks. `AppScreen`, `AppCard`, `AppLinkButton`, `RouteErrorBoundary`, shared theme tokens, safe-area handling, and responsive content widths form the initial component foundation. Source imports are explicit relative paths because the current Expo ESLint resolver does not reliably share TypeScript 6 path aliases.
+The shell uses a clean, encouraging navy/red visual direction without official CAP marks. Wide-web student navigation adds original colored icon tiles and active-state treatments within that system; it is inspired by familiar study-product information architecture without copying another product's branding or artwork. `AppScreen`, `AppCard`, `AppLinkButton`, `RouteErrorBoundary`, shared theme tokens, safe-area handling, and responsive content widths form the initial component foundation. Source imports are explicit relative paths because the current Expo ESLint resolver does not reliably share TypeScript 6 path aliases.
 
 ## Repository and delivery
 

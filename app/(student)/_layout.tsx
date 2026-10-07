@@ -1,14 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { Platform, useWindowDimensions } from "react-native";
 
 import { RequireRole } from "../../features/auth/components/RequireRole";
+import { WebStudentSidebar } from "../../features/shell/components/WebStudentSidebar";
 import { theme } from "../../lib/constants/theme";
 
 export default function StudentLayout() {
+  const { width } = useWindowDimensions();
+  const useWebSidebar = Platform.OS === "web" && width >= 900;
+
   return (
     <RequireRole area="student">
       <Tabs
+        tabBar={useWebSidebar ? (props) => <WebStudentSidebar {...props} /> : undefined}
         screenOptions={{
+          headerShown: !useWebSidebar,
           headerStyle: { backgroundColor: theme.colors.surface },
           headerTintColor: theme.colors.primary,
           headerTitleStyle: { fontWeight: "800" },
@@ -18,6 +25,7 @@ export default function StudentLayout() {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.border,
           },
+          tabBarPosition: useWebSidebar ? "left" : "bottom",
         }}
       >
         <Tabs.Screen

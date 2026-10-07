@@ -47,4 +47,15 @@ describe("workspace switcher", () => {
     expect(screen.queryByText("Family")).toBeNull();
     expect(screen.queryByText("Student")).toBeNull();
   });
+
+  it("hides a redundant workspace section in the student sidebar", async () => {
+    jest.mocked(useOptionalAuth).mockReturnValue({
+      access: { ...access, roles: ["student"] },
+      status: "signed_in",
+    } as never);
+
+    await render(<WorkspaceSwitcher hideSingle tone="dark" vertical />);
+
+    expect(screen.queryByLabelText("Available workspaces")).toBeNull();
+  });
 });

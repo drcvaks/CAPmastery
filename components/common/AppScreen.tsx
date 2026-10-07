@@ -1,6 +1,7 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { usePathname } from "expo-router";
 
 import { useOptionalAuth } from "../../features/auth/AuthContext";
 import { WorkspaceSwitcher } from "../../features/auth/components/WorkspaceSwitcher";
@@ -15,8 +16,16 @@ type AppScreenProps = PropsWithChildren<{
 
 export function AppScreen({ eyebrow, title, description, actions, children }: AppScreenProps) {
   const auth = useOptionalAuth();
+  const pathname = usePathname();
   const { width } = useWindowDimensions();
   const wide = width >= 768;
+  const hasStudentWebSidebar =
+    Platform.OS === "web" &&
+    width >= 900 &&
+    (pathname === "/home" ||
+      pathname.startsWith("/study") ||
+      pathname.startsWith("/progress") ||
+      pathname.startsWith("/challenge"));
   const profile = auth?.status === "signed_in" ? auth.access?.profile : null;
   const firstName =
     profile?.first_name?.trim() || profile?.display_name?.trim().split(/\s+/)[0] || null;
@@ -24,7 +33,7 @@ export function AppScreen({ eyebrow, title, description, actions, children }: Ap
   return (
     <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       <View style={[styles.shell, wide && styles.shellWide]}>
-        <WorkspaceSwitcher vertical={wide} />
+        {!hasStudentWebSidebar ? <WorkspaceSwitcher vertical={wide} /> : null}
         <ScrollView
           contentContainerStyle={[styles.scrollContent, wide && styles.scrollContentWide]}
           keyboardShouldPersistTaps="handled"
