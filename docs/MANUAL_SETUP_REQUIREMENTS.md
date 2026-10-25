@@ -79,6 +79,10 @@ Checkpoint 8 requires no new account, environment variable, credential, Supabase
 
 ## Checkpoint 10 owner actions
 
+For always-visible mission track selection and chapter/module coverage, push `202610160056_mission_track_coverage.sql`, then run linked pgTAP with the process-only database password (expected 659/659). Start Aerospace, return Home, select Leadership and start it, then switch back and confirm each Continue action resumes its own saved session. Inspect the selected track's chapters and expandable Aerospace modules; coverage counts unique questions answered, not mastery. Daily and weekly mission totals continue to combine all tracks.
+
+For Student Home missions, apply `202610150055_student_missions.sql` with `npx.cmd supabase db push`, then run `npm.cmd run db:test:linked` using the existing process-only database password. The expected aggregate is 645/645. No content reimport, role reassignment, or new service credential is required. Verify Today’s Mission, a saved weekly target after reloading another device, Continue Mission, and 5/10/20-question study feedback. Weekly totals use the device's IANA timezone and Monday–Sunday calendar boundaries.
+
 After applying migration `202610060054_admin_user_access_workspace.sql`, an existing global administrator can use Administration → User access to grant or remove the Student role and replace a user's complete study-packet selection. Run the linked pgTAP suite before relying on the screen. Removing Student access also clears packet assignments but intentionally preserves prior learning history.
 
 - Apply migration 049 to the linked nonproduction project and run the full linked pgTAP suite. Do not apply it first to an untested production project.

@@ -17,6 +17,10 @@ Checkpoint 10 adds `npm run security:client-secrets` and the aggregate `npm run 
 
 ## Coverage priorities
 
+Mission track switching coverage verifies that the selector stays visible during an unfinished mission, switching tracks resumes the corresponding saved session, and starting another track does not resume or discard the first track. Coverage-card tests distinguish practiced questions from mastery and verify expandable Aerospace module/chapter menus. `mission_track_coverage.test.sql` adds 14 rollback-only assertions for function grants, student-only access, two independent resumable tracks, distinct-question deduplication, available chapter counts, untouched chapters, absence of scoring fields, unassigned-content denial, and cross-student answer/session isolation. Expected linked aggregate after migration 056: 659/659.
+
+Student mission coverage checks next/crossed checkpoint boundaries, duplicate-count suppression, short-session launch, resume navigation, completed daily messaging, and weekly goal selection. `student_missions.test.sql` adds 18 rollback-only assertions for preference RLS and grants, non-student denial, default/valid/invalid targets, persisted incorrect-answer effort, owner-only counts, resume ownership, and timezone validation. The expected linked aggregate after migration 055 is 645/645 (627 plus 18). Manual acceptance should also check local midnight/Monday rollover, goal persistence on another device, and 5/10/20-answer study milestone cards.
+
 Unit: mastery, spaced dates, adaptive selection, readiness, practice blueprints, CSV validation, duplicate detection, role helpers.
 
 The self-service sign-up regression validates trimmed email/name input, strong

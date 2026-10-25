@@ -11,7 +11,8 @@ import {
   useSetPracticeTestPaused,
 } from "../features/practice/hooks/usePracticeTest";
 
-jest.mock("expo-router", () => ({ useRouter: () => ({ replace: jest.fn() }) }));
+const mockReplace = jest.fn();
+jest.mock("expo-router", () => ({ useRouter: () => ({ replace: mockReplace }) }));
 jest.mock("../features/study/hooks/useStudySession", () => ({
   useStudySession: jest.fn(),
   useSubmitStudyAnswer: jest.fn(),
@@ -92,6 +93,7 @@ const activeSession = {
 };
 
 beforeEach(() => {
+  mockReplace.mockClear();
   jest.mocked(useStudySession).mockReturnValue({
     data: activeSession,
     isPending: false,
@@ -115,6 +117,42 @@ beforeEach(() => {
   jest
     .mocked(usePracticeTestResults)
     .mockReturnValue({ isPending: false, isError: false } as never);
+});
+
+describe("leaving an unfinished study session", () => {
+  it("returns to the Study catalog so another chapter can be chosen", async () => {
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        mode: "study",
+        questions: [{ ...question, session_mode: "study" }],
+      },
+      isPending: false,
+      isError: false,
+    } as never);
+    await render(<StudySessionView sessionId={activeSession.id} />);
+    expect(
+      screen.getByText("Your submitted answers are saved. You can choose another chapter."),
+    ).toBeVisible();
+    const user = userEvent.setup();
+    await user.press(screen.getByRole("button", { name: "Back to study catalog" }));
+    expect(mockReplace).toHaveBeenCalledWith("/study");
+  });
+
+  it("waits for an answer submission before enabling exit", async () => {
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        mode: "study",
+        questions: [{ ...question, session_mode: "study" }],
+      },
+      isPending: false,
+      isError: false,
+    } as never);
+    jest.mocked(useSubmitStudyAnswer).mockReturnValue({ isPending: true, isError: false } as never);
+    await render(<StudySessionView sessionId={activeSession.id} />);
+    expect(screen.getByRole("button", { name: "Back to study catalog" })).toBeDisabled();
+  });
 });
 
 describe("practice test session", () => {

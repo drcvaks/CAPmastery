@@ -12,9 +12,17 @@ type AppScreenProps = PropsWithChildren<{
   title: string;
   description?: string;
   actions?: ReactNode;
+  maxContentWidth?: number;
 }>;
 
-export function AppScreen({ eyebrow, title, description, actions, children }: AppScreenProps) {
+export function AppScreen({
+  eyebrow,
+  title,
+  description,
+  actions,
+  children,
+  maxContentWidth = 1040,
+}: AppScreenProps) {
   const auth = useOptionalAuth();
   const pathname = usePathname();
   const { width } = useWindowDimensions();
@@ -35,7 +43,11 @@ export function AppScreen({ eyebrow, title, description, actions, children }: Ap
       <View style={[styles.shell, wide && styles.shellWide]}>
         {!hasStudentWebSidebar ? <WorkspaceSwitcher vertical={wide} /> : null}
         <ScrollView
-          contentContainerStyle={[styles.scrollContent, wide && styles.scrollContentWide]}
+          contentContainerStyle={[
+            styles.scrollContent,
+            wide && styles.scrollContentWide,
+            { maxWidth: maxContentWidth },
+          ]}
           keyboardShouldPersistTaps="handled"
           style={styles.scroller}
         >

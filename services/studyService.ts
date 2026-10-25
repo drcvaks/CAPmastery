@@ -6,10 +6,14 @@ import {
   type StudySession,
 } from "../features/study/schemas";
 
-export async function createStudySession(examId: string, topicId?: string): Promise<string> {
+export async function createStudySession(
+  examId: string,
+  topicId?: string,
+  questionCount = 10,
+): Promise<string> {
   const { data, error } = await getSupabaseClient().rpc("create_study_session", {
     p_exam_id: examId,
-    p_question_count: 10,
+    p_question_count: questionCount,
     ...(topicId ? { p_topic_id: topicId } : {}),
   });
   if (error) throw error;

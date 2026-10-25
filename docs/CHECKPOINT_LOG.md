@@ -1,5 +1,37 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Leave a study session for the catalog
+
+- Added a visible Back to study catalog button above the current question in ordinary study sessions. Cadets can choose a different chapter without answering all questions in the current set.
+- Navigation preserves submitted answers and does not mark an unfinished session completed or delete its history. The button is disabled while an answer submission is pending; practice-test and challenge controls are unaffected.
+- Updated the shared session component, navigation regression coverage, and architecture documentation. No migration, database mutation, credential, or Supabase action is required.
+- Validation: strict TypeScript passed; both focused Jest suites passed (12/12 tests); formatting and whitespace checks passed. Targeted ESLint completed with no errors and one existing `Array<T>` style warning. Manual acceptance: refresh the app, open an ordinary study session, submit an answer, and use Back to study catalog to choose another chapter. Android device testing and linked database tests were not repeated for this client-only navigation change.
+- Expo web production export also passed (1,591 modules). Next step is owner acceptance on web and Android; no additional checkpoint was started.
+
+## Post-Checkpoint 10 — Home route panel beside missions
+
+- Added a responsive two-column Home layout on web at 1280 pixels and wider. Mission and weekly cards appear in the main left column; Your route appears in a 360–400-pixel right column, keeping the chosen track's coverage visible beside the mission controls.
+- Added an optional `AppScreen.maxContentWidth` prop so Home can use a 1440-pixel content cap without widening other pages. Android and narrower web retain a single column with coverage immediately below Today’s Mission.
+- No database, RPC, permission, goal, or session-resume behavior changed. No Supabase action is required.
+- Validation passed: strict TypeScript, ESLint on the changed screen files, formatting, whitespace checks, 3/3 focused component suites with 7/7 tests, and the web production export (1,591 modules). No database test rerun was needed; Android production export was not repeated for this web-specific layout change. Manual acceptance is to refresh Home at desktop and narrow widths and confirm the tracker moves between the right column and its inline mobile position.
+
+## Post-Checkpoint 10 — Mission track switching and visual coverage
+
+- Home keeps track selection visible during unfinished missions and explicitly identifies the current track. The Continue action resumes only the selected exam's latest owned active study session; changing tracks preserves the other session and saved answers. Newly created sessions invalidate mission data immediately.
+- Added a selected-track coverage card with chapter progress bars and Not started/In progress/All questions practiced labels. Aerospace chapters sit inside expandable module menus. Coverage uses distinct accessible questions answered, regardless of correctness, and is explicitly separate from mastery and exam readiness. Daily/weekly goals still combine all track effort.
+- Added migration `202610160056_mission_track_coverage.sql` for the student-owner projection, plus typed service parsing, UI tests, and 14 rollback-only pgTAP assertions. There are no new tables or client write permissions.
+- Validation: focused mission/study regressions passed 4/4 suites and 16/16 tests; the complete client suite passed 36/36 suites and 235/235 tests. Strict TypeScript, lint for all files changed in this follow-up, formatting, whitespace checks, and client credential scanning passed. Web and Android production exports passed, resolving the prior mission export verification gap; Android bundled 1,721 modules into a 5.3 MB Hermes bundle. The previously recorded unrelated full-project visual-viewer lint error was not changed here.
+- The owner applied migration 056 and reported the complete linked database suite passing 659/659 on October 16, 2026, including `mission_track_coverage.test.sql` at 14/14, `student_missions.test.sql` at 18/18, and all 13 release-security assertions. No content reimport is required. Remaining manual acceptance should switch Leadership/Aerospace in both directions, confirm each saved session resumes independently, and inspect per-chapter/module question coverage.
+
+## Post-Checkpoint 10 — Student Home missions
+
+- Replaced the Home readiness-heavy view with a daily ten-question mission, small next-checkpoint message, 25/50/100 weekly target controls, effort counts, and accessible progress bars. All answers count toward effort, regardless of correctness.
+- Added resumable mission navigation and 5/10/20-question session launches. Secure study submissions trigger Quick Win, Mission Started, and Strong Session feedback at the corresponding accepted answer counts; the session completion screen retains the milestone message.
+- Added migration 055 with owner-readable RLS preferences, protected goal saves, and an owner-only mission projection using validated local timezones and Monday–Sunday weeks. Client counters, new badges, streaks, competitions, leaderboards, and readiness calculations are outside this change.
+- Added typed RPC/table declarations, service/query boundaries, pure checkpoint tests, Home component tests, and 18 rollback-only pgTAP assertions. Existing Progress and practice-exam scoring remain separate from the Home effort view.
+- Validation: direct TypeScript, changed-file formatting, whitespace checks, and the client credential scan passed. New Home component tests passed 2/2 and checkpoint unit tests passed 2/2; the full run passed 230/231 tests across 34/35 suites, with the unchanged navigation suite exceeding its five-second test timeout on a slow run. Its isolated rerun passed 2/2, covering all 231 tests across the initial run and retry. Repository lint reports the pre-existing `react-hooks/set-state-in-effect` error in `VisualAidViewer.tsx` and an existing array-style warning in `StudySession.tsx`. A separate mission-file lint run and Expo configuration/web/Android export processes stalled without completion; exports reached Metro startup but produced no confirmed bundle. These checks were stopped and are not claimed as passed.
+- The owner applied migration 055 and reported the complete linked database suite passing 645/645 on October 16, 2026, including `student_missions.test.sql` at 18/18 and all 13 release-security assertions. Manual device acceptance should verify resume, short missions, milestone feedback, local calendar rollover, and cross-device goal persistence. The client lint/export limitations above remain unresolved by this database result.
+
 ## Post-Checkpoint 10 — Responsive wide-web student sidebar
 
 - Added an original persistent left navigation sidebar for student routes on web viewports at least 900 pixels wide. It presents CAP Mastery branding, colorful icon tiles, clear active states, Home/Study/Progress/Challenge destinations, the signed-in identity, and authorized multi-role workspace links.

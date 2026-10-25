@@ -1,5 +1,5 @@
-import { ProgressDashboard } from "../../features/progress/components/ProgressDashboard";
+import { StudentMissionDashboard } from "../../features/progress/components/StudentMissionDashboard";
 
 export default function StudentHomeScreen() {
-  return <ProgressDashboard audience="student" compact />;
+  return <StudentMissionDashboard />;
 }

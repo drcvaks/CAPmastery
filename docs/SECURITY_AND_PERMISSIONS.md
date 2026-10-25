@@ -1,5 +1,9 @@
 # Security and Permissions
 
+Student mission preferences and projections are available only to the signed-in global student. Neither RPC accepts another student's ID, and clients cannot write effort counts or preferences directly. Counts derive from secure answer submissions; repeated same-answer submissions retain the existing attempt and do not increment mission progress. The new preference table enables RLS and exposes only an owner SELECT policy.
+
+Track-specific resume and chapter/module coverage use a separate owner-only projection with no student-ID parameter. It repeats approved-active or exact assigned-draft content access internally and counts only distinct questions with the caller's attempts. No answer key, correctness statistic, or readiness score is returned. Per-exam active session IDs are always filtered by the authenticated owner.
+
 ## Security invariants
 
 - Authorization is database-enforced; hidden routes are not a security control.

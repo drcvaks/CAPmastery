@@ -17,6 +17,7 @@ import type { PracticeTopicResult } from "../../practice/schemas";
 import { getSafeStudyMessage } from "../errors";
 import { useStudySession, useSubmitStudyAnswer } from "../hooks/useStudySession";
 import { AnswerResultCard } from "./AnswerResultCard";
+import { crossedMissionCheckpoint } from "../../progress/missions";
 
 export function StudySessionView({ sessionId }: { sessionId: string }) {
   const router = useRouter();
@@ -29,6 +30,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoices, setSelectedChoices] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
+  const [celebration, setCelebration] = useState<ReturnType<typeof crossedMissionCheckpoint>>();
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const initialized = useRef(false);
   const timeoutRequested = useRef(false);
@@ -188,9 +190,10 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     const percentage = Math.round((session.correctCount / session.questionCount) * 100);
     return (
       <AppCard
-        title="Session complete"
+        title={celebration ? `${celebration.title}!` : "Session complete"}
         description={`You answered ${session.correctCount} of ${session.questionCount} correctly (${percentage}%).`}
       >
+        {celebration ? <Text style={styles.supportive}>{celebration.message}</Text> : null}
         <Text style={styles.supportive}>
           Review is part of learning. Your answers updated the topics and questions selected for
           future study sessions.
@@ -213,11 +216,14 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   async function handleSubmit() {
     if (!selectedChoiceId || !currentQuestion) return;
     try {
-      await submitAnswer.mutateAsync({
+      const result = await submitAnswer.mutateAsync({
         sessionQuestionId: currentQuestion.session_question_id,
         selectedChoiceId,
         responseTimeMs: Date.now() - (questionStartedAt.current ?? Date.now()),
       });
+      if (session?.mode === "study" && !currentQuestion.attempt_id) {
+        setCelebration(crossedMissionCheckpoint(session.answeredCount, result.answered_count));
+      }
       const refreshed = await sessionQuery.refetch();
       if (refreshed.data?.status === "completed") {
         setShowResults(true);
@@ -297,6 +303,28 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
 
   return (
     <View style={styles.stack}>
+      {session.mode === "study" ? (
+        <View style={styles.stack}>
+          <AppButton
+            label="Back to study catalog"
+            variant="secondary"
+            disabled={submitAnswer.isPending}
+            onPress={() => router.replace("/study")}
+          />
+          <Text style={styles.muted}>
+            Your submitted answers are saved. You can choose another chapter.
+          </Text>
+        </View>
+      ) : null}
+      {celebration && session.mode === "study" ? (
+        <AppCard title={`${celebration.title}!`} description={celebration.message}>
+          <AppButton
+            label="Continue mission"
+            variant="secondary"
+            onPress={() => setCelebration(undefined)}
+          />
+        </AppCard>
+      ) : null}
       {session.mode === "practice_test" ? (
         <AppCard
           title="Unofficial practice test"

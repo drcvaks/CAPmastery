@@ -33,6 +33,20 @@ export type Database = {
   };
   public: {
     Tables: {
+      student_mission_preferences: {
+        Row: { student_id: string; weekly_goal: number };
+        Insert: { student_id: string; weekly_goal?: number };
+        Update: { student_id?: string; weekly_goal?: number };
+        Relationships: [
+          {
+            foreignKeyName: "student_mission_preferences_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       achievements: {
         Row: {
           active: boolean;
@@ -2344,6 +2358,18 @@ export type Database = {
       admin_get_user_access_overview: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
+      };
+      get_student_missions: {
+        Args: { p_timezone?: string };
+        Returns: Json;
+      };
+      get_student_mission_tracks: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      set_student_weekly_mission: {
+        Args: { p_goal: number };
+        Returns: undefined;
       };
       admin_reset_student_learning_progress: {
         Args: { p_confirm?: boolean; p_reason: string; p_student_id: string };

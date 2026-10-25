@@ -11,9 +11,18 @@ export const studyQueryKeys = {
 };
 
 export function useCreateStudySession() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ examId, topicId }: { examId: string; topicId?: string }) =>
-      createStudySession(examId, topicId),
+    mutationFn: ({
+      examId,
+      topicId,
+      questionCount,
+    }: {
+      examId: string;
+      topicId?: string;
+      questionCount?: number;
+    }) => createStudySession(examId, topicId, questionCount),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["progress", "missions"] }),
   });
 }
 

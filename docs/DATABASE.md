@@ -1,5 +1,11 @@
 # Database Plan
 
+## Student missions
+
+Migration `202610160056_mission_track_coverage.sql` adds the owner-only `get_student_mission_tracks` projection. It returns each accessible exam's newest active study-session ID and ordered chapter/module coverage from distinct owned attempts joined to accessible current questions. Repeated answers never inflate coverage; unassigned, archived, or rejected content is excluded. The function has an empty search path and authenticated-only execution with an internal global Student-role check. It introduces no table or write grant and leaves migration 055's daily/weekly effort totals intact.
+
+Migration `202610150055_student_missions.sql` adds `student_mission_preferences`, with an owner-only SELECT policy and no client write grants. The protected `set_student_weekly_mission` RPC permits only the current global student and goal values 25, 50, or 100; the default is 50. `get_student_missions` accepts a validated IANA timezone, derives daily and Monday–Sunday weekly attempt counts from existing secure `question_attempts`, and returns accessible track counts plus the newest active owned study session. Both functions have an empty fixed search path, explicit authenticated grants, and internal student authorization. There is no client-written progress counter or new achievement table.
+
 ## Principles
 
 - A new CAP Mastery Supabase project; never connect to mySCP.
