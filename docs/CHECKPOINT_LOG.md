@@ -1,5 +1,23 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Lazy chapter/module image previews
+
+- Added independently collapsible chapter/module sections beneath the Image library test groups, with image counts and accessible expanded states. All sections start closed, including when a search reveals matching tests.
+- Image thumbnails and signed-URL queries mount only for expanded sections. Collapsing a section removes its previews and stops their background refresh observers; metadata remains available for grouping/search. No database migration or Supabase action is needed.
+- Updated the component, regression tests, image-library guide, and architecture notes. Strict TypeScript, targeted ESLint, formatting, and whitespace checks passed. Both focused Jest suites passed (8/8 tests), including no signed-URL requests before chapter expansion, sibling-section isolation, collapsing previews, and search without eager image loading. Database tests and Android production export were not repeated for this display-only change. Next is owner acceptance after reloading the image library; no further checkpoint was started.
+- Web production export passed (1,599 modules). Manual acceptance: expand a test, confirm chapter/module sections remain closed, then open only the section whose images are needed.
+
+## Post-Checkpoint 10 — Administrator image library
+
+- Added an Image library tab with searchable, initially collapsed test groups, ordered chapter/module sections, thumbnails, all-use locations, and full-screen zoom previews. Registered assets without question mappings remain visible in Other / unlinked images.
+- Added explicit PNG replacement selection/preview, accessible description, change reason, save/discard controls, and friendly upload errors. Replacements use immutable new Storage objects and stable asset keys so all linked questions receive the correction without altering question text, captions, history, or grading.
+- Migration `202610250057_admin_visual_library.sql` adds two admin-only, empty-search-path RPCs for inventory and optimistic replacement; changes are audited with previous/new paths, and old objects and approval status are retained. Existing student Storage/read protections are unchanged. Added 23 rollback-only pgTAP assertions.
+- Changed the admin workspace, added a visual library component, pure schemas/grouping/PNG validation, typed services/hooks, platform file pickers, database types, and component/service/unit regressions. Added SDK-compatible Expo DocumentPicker and a direct FileSystem dependency with lockfile updates. Architecture, database, permissions, testing, Android-build, and limitations documentation are current.
+- The owner applied migration 057 and reported the complete linked database suite passing 682/682 on October 25, 2026, including `admin_visual_library.test.sql` at 23/23 and all 13 release-security checks. This is an owner-reported linked result, not a database run from this process. Existing Android standalone installs require a rebuilt app for the new native file picker. No content reimport is required.
+- Validation passed: strict TypeScript; targeted ESLint with no errors/warnings; changed-file formatting and whitespace checks; client credential scan; public Expo configuration; web production export (1,599 modules); Android Hermes production export (1,747 modules, 5.4 MB). The sandbox initially denied writing Hermes bytecode; rerunning the same Android export outside that sandbox passed. Physical-device upload acceptance remains manual.
+- The complete Jest run initially passed 247/248 with the existing navigation test exceeding its default five-second timeout. Its isolated retry passed 2/2; rerunning the complete suite with `--testTimeout=30000` passed 39/39 suites and 248/248 tests. New visual component, service, and pure-validation tests all pass. No later checkpoint was started; next is web/Android acceptance using `docs/ADMIN_IMAGE_LIBRARY.md`.
+- Dependency installation and a read-only `npm audit --json` reported 17 advisories (7 moderate, 9 high, 1 critical, including transitive `shell-quote`). These existing paths were not changed or force-upgraded by this feature; the current snapshot and need for a separate supported dependency-hardening pass are recorded in Known Limitations.
+
 ## Post-Checkpoint 10 — Leave a study session for the catalog
 
 - Added a visible Back to study catalog button above the current question in ordinary study sessions. Cadets can choose a different chapter without answering all questions in the current set.

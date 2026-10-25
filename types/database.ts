@@ -2359,6 +2359,22 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      admin_get_learning_visuals: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_replace_learning_visual: {
+        Args: {
+          p_asset_key: string;
+          p_expected_storage_path: string;
+          p_storage_path: string;
+          p_width: number;
+          p_height: number;
+          p_alt_text: string;
+          p_reason: string;
+        };
+        Returns: undefined;
+      };
       get_student_missions: {
         Args: { p_timezone?: string };
         Returns: Json;

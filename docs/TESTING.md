@@ -17,6 +17,17 @@ Checkpoint 10 adds `npm run security:client-secrets` and the aggregate `npm run 
 
 ## Coverage priorities
 
+Administrator image-library coverage checks PNG signature/size/dimension validation,
+curriculum grouping and unlinked visibility, initially collapsed groups, explicit
+replacement preview/save, required reasons, picker failures, immutable uploads,
+failed upload/activation behavior, and protected catalog errors.
+`admin_visual_library.test.sql` adds 23 rollback-only assertions for grants,
+student/reviewer denial, admin projection, unchanged early-read restrictions,
+missing/non-PNG uploads, required reasons, successful replacement, stale-edit
+rejection, retained original objects/mappings/status, and before/after audit data.
+After migration 057 the expected linked aggregate is 682 (659 + 23); this is not a
+claim of a linked test run until the owner applies and verifies it.
+
 Mission track switching coverage verifies that the selector stays visible during an unfinished mission, switching tracks resumes the corresponding saved session, and starting another track does not resume or discard the first track. Coverage-card tests distinguish practiced questions from mastery and verify expandable Aerospace module/chapter menus. `mission_track_coverage.test.sql` adds 14 rollback-only assertions for function grants, student-only access, two independent resumable tracks, distinct-question deduplication, available chapter counts, untouched chapters, absence of scoring fields, unassigned-content denial, and cross-student answer/session isolation. Expected linked aggregate after migration 056: 659/659.
 
 Student mission coverage checks next/crossed checkpoint boundaries, duplicate-count suppression, short-session launch, resume navigation, completed daily messaging, and weekly goal selection. `student_missions.test.sql` adds 18 rollback-only assertions for preference RLS and grants, non-student denial, default/valid/invalid targets, persisted incorrect-answer effort, owner-only counts, resume ownership, and timezone validation. The expected linked aggregate after migration 055 is 645/645 (627 plus 18). Manual acceptance should also check local midnight/Monday rollover, goal persistence on another device, and 5/10/20-answer study milestone cards.

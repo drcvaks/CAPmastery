@@ -203,6 +203,30 @@ approved visual in a near-full-screen modal on Android and web. Explicit
 posters readable without adding a platform-specific image library or changing
 the protected signed-URL delivery boundary.
 
+### Administrator image library
+
+The Administration workspace includes an Image library tab. An administrator-only
+projection lists every registered visual (including unlinked assets) and derives
+test/chapter/module locations from question learning-support mappings. Collapsed
+test groups, search, thumbnail previews, and the existing full-screen zoom viewer
+keep the library usable on web and Android. Shared visuals appear under each
+chapter that uses them, and the editor lists every affected location.
+
+Chapter/module sections are independently collapsible and initially closed, even
+when search reveals matching test groups. Thumbnail components and their signed-URL
+queries mount only when that section is expanded; closing a section unmounts its
+previews and stops background refresh for those query observers. Cached query data
+can still be reused when reopened. No Storage or database behavior changes.
+
+The file picker accepts PNGs up to 5 MiB and checks the PNG signature and dimensions.
+Web reads the browser File; native uses Expo DocumentPicker and FileSystem bytes.
+An explicit Save replacement uploads a uniquely named object without overwriting
+the current file, then invokes an audited admin-only replacement RPC with the
+expected old path. Concurrent stale saves fail; the old object, asset key, question
+mappings, captions, grading, and approval status are preserved. Student access still
+requires an owned answer or completed delayed-feedback session. A failed activation
+can leave an unreferenced uploaded object for later audited operator cleanup.
+
 ### Wright Brothers study-track extension
 
 Migration `202608250046` adds Wright Brothers as a separate first-class exam

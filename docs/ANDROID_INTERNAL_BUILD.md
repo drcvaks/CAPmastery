@@ -1,5 +1,11 @@
 # Android Pilot Builds
 
+The administrator Image library adds SDK-57-compatible `expo-document-picker`
+and a direct `expo-file-system` dependency. Existing standalone Android installs
+need a new EAS build to include the picker; a JavaScript-only refresh/update cannot
+add a missing native module. Web needs no native build. Install locked dependencies
+with `npm.cmd ci` when updating another checkout.
+
 The repository includes two Android profiles:
 
 - `pilot` produces a directly installable APK for ordinary test devices.

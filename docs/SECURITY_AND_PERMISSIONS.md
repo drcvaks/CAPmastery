@@ -86,6 +86,16 @@ login; no service-role credential is accepted or stored.
 
 ## Checkpoint 5 mastery enforcement
 
+Administrator image management uses two additional authenticated entrypoints:
+`admin_get_learning_visuals` and `admin_replace_learning_visual`. Both independently
+require the global administrator role and fix an empty search path; neither grants
+access to private tables. Replacement checks the registered old path under a row
+lock, an existing private PNG object and its size, bounded dimensions, accessible
+description, and change reason. It preserves approval status and audits old/new
+paths and metadata. Objects are never overwritten/deleted by this UI. Existing
+Storage policies and student answer/completion gates remain unchanged. Content
+reviewer status alone does not authorize this administrative workflow.
+
 Question state and topic mastery are private student records in API-exposed tables with RLS enabled. Authenticated users receive select-only access filtered to `student_id = auth.uid()`; they cannot insert, update, delete, forge scores, or inspect another student's rows. Reviewers receive no student-mastery access by role.
 
 The security-definer grading transaction, not the client, supplies correctness to the mastery updater. The updater has an empty `search_path`, accepts the already-authorized student/question/result, clamps all score and interval ranges, and runs only for a newly inserted attempt. Adaptive session creation reads only the caller's state and continues to enforce approved-content or exact private-pilot-package eligibility.

@@ -18,9 +18,10 @@ import {
 } from "../hooks/useContentAdmin";
 import type { ReviewEditPayload, ReviewQuestion } from "../schemas";
 import { UserAccessAdmin } from "./UserAccessAdmin";
+import { VisualLibraryAdmin } from "./VisualLibraryAdmin";
 
 export function ContentAdminWorkspace() {
-  const [panel, setPanel] = useState<"import" | "review" | "users">("users");
+  const [panel, setPanel] = useState<"import" | "review" | "users" | "images">("users");
   return (
     <AppScreen
       actions={<SignOutButton />}
@@ -31,6 +32,7 @@ export function ContentAdminWorkspace() {
       <View style={styles.row}>
         <Tab active={panel === "users"} label="User access" onPress={() => setPanel("users")} />
         <Tab active={panel === "import"} label="CSV import" onPress={() => setPanel("import")} />
+        <Tab active={panel === "images"} label="Image library" onPress={() => setPanel("images")} />
         <Tab
           active={panel === "review"}
           label="Review questions"
@@ -40,6 +42,7 @@ export function ContentAdminWorkspace() {
       {panel === "users" ? <UserAccessAdmin /> : null}
       {panel === "import" ? <ImportPanel onReview={() => setPanel("review")} /> : null}
       {panel === "review" ? <ReviewPanel /> : null}
+      {panel === "images" ? <VisualLibraryAdmin /> : null}
     </AppScreen>
   );
 }

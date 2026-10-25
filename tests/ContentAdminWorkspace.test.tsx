@@ -3,6 +3,9 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { ContentAdminWorkspace } from "../features/admin/components/ContentAdminWorkspace";
 import * as adminHooks from "../features/admin/hooks/useContentAdmin";
 import * as userAccessHooks from "../features/admin/hooks/useAdminUserAccess";
+jest.mock("../features/admin/components/VisualLibraryAdmin", () => ({
+  VisualLibraryAdmin: () => null,
+}));
 
 jest.mock("../features/admin/hooks/useContentAdmin", () => ({
   useDuplicateCheck: jest.fn(),

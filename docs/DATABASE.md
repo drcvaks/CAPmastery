@@ -1,5 +1,17 @@
 # Database Plan
 
+## Administrator image library
+
+Migration `202610250057_admin_visual_library.sql` adds an admin-only visual
+inventory projection and an audited replacement RPC. It introduces no table,
+private table grant, or Storage policy change. Inventory includes registered
+assets without question mappings and all question-derived exam/chapter/module
+locations. Replacement locks the registry row, checks the expected previous path,
+validates a new uploaded private PNG object and bounded metadata, retains approval
+status and the stable asset key, and records old/new paths and the reason in the
+existing audit log. Previous image objects are retained. Do not rerun an outdated
+visual manifest after a UI correction without reconciling its stored path.
+
 ## Student missions
 
 Migration `202610160056_mission_track_coverage.sql` adds the owner-only `get_student_mission_tracks` projection. It returns each accessible exam's newest active study-session ID and ordered chapter/module coverage from distinct owned attempts joined to accessible current questions. Repeated answers never inflate coverage; unassigned, archived, or rejected content is excluded. The function has an empty search path and authenticated-only execution with an internal global Student-role check. It introduces no table or write grant and leaves migration 055's daily/weekly effort totals intact.
