@@ -1,5 +1,14 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Curriculum review browser and visual question workbench
+
+- Replaced the first-100 flat review list with searchable/status-filtered, initially collapsed test → module → chapter menus. Every question is reachable; expanded chapters render 20 rows at a time. Returning from an editor preserves the open list and filters.
+- Added a responsive visual editor with the prompt, all four editable choices and per-choice explanations, correct-answer radio controls, and a side panel for explanation/source/save/review. Classification and additional teaching/review fields are collapsed. React Hook Form preserves hidden values, submission controls disable during saves, and Back warns before discarding unsaved corrections. Existing draft, approval, audit, and versioning functions remain authoritative. No tester permissions were added.
+- Migration `202611030058_question_review_catalog.sql` adds a reviewer/admin-only complete JSON metadata catalog; it changes no table, RLS policy, answer-detail function, or edit function. On November 5, 2026, the owner reported 697/697 linked database checks passing after migration 058, including 15/15 review-catalog checks and 13/13 release-security checks.
+- Changed the admin composition/schema/service/types and shared text-field style composition; added review browser/editor/grouping components, client regressions, and updated architecture/database/security/testing documentation. Exact manual steps are in `docs/QUESTION_REVIEW_WORKSPACE.md`; no later checkpoint was started.
+- Local checks passed: strict TypeScript, targeted ESLint with no errors/warnings, changed-file formatting, whitespace checks, and the client credential scan. The full Jest suite passed 42/42 suites and 259/259 tests with a 30-second per-test timeout; a focused post-refactor run passed 4/4 suites and 11/11 tests. Web production export passed (1,602 modules). Physical-device/browser acceptance remains pending.
+- Android Hermes production export also passed (1,750 modules, 5.4 MB). Next is owner acceptance of the grouped catalog and responsive editor. Existing dependency advisories recorded in Known Limitations remain outside this change; no dependency version was changed.
+
 ## Post-Checkpoint 10 — Lazy chapter/module image previews
 
 - Added independently collapsible chapter/module sections beneath the Image library test groups, with image counts and accessible expanded states. All sections start closed, including when a search reveals matching tests.

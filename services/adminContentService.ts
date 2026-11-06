@@ -45,7 +45,7 @@ export async function importQuestionCsv(
 }
 
 export async function fetchReviewQueue(): Promise<ReviewQueueItem[]> {
-  const { data, error } = await getSupabaseClient().rpc("get_content_review_queue");
+  const { data, error } = await getSupabaseClient().rpc("get_content_review_catalog");
   if (error) throw error;
   return z.array(reviewQueueItemSchema).parse(data);
 }

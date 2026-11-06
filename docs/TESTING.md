@@ -17,6 +17,15 @@ Checkpoint 10 adds `npm run security:client-secrets` and the aggregate `npm run 
 
 ## Coverage priorities
 
+Curriculum-review tests cover ordered exam/module/chapter grouping, initial
+collapse, per-chapter pagination, search/status filters, access beyond the old
+first-100 limit, complete JSON catalog parsing beyond 1000 rows, correct-answer
+selection and full edit payloads, retained hidden classifications, and discard
+confirmation. `question_review_catalog.test.sql` adds 15 rollback-only assertions
+for grants, student/unassigned denial, reviewer/admin access, 1005 synthetic rows,
+curriculum labels, absent answer/student fields, and the unchanged legacy API.
+The owner reported 697/697 linked checks passing after migration 058, including all 15 review-catalog checks.
+
 Administrator image-library coverage checks PNG signature/size/dimension validation,
 curriculum grouping and unlinked visibility, initially collapsed groups, explicit
 replacement preview/save, required reasons, picker failures, immutable uploads,

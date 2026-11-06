@@ -56,6 +56,14 @@ before opening registration beyond the controlled cadet group.
 
 ## Answer protection
 
+The curriculum review catalog is reviewer/admin-only and returns prompt metadata,
+status, and curriculum labels, not choices, keys, explanations, or student records.
+Its complete inventory is a single JSON array, not a broadened table grant. A
+student or unassigned account cannot call it. The redesigned editor continues to
+retrieve keys only through the existing authorized single-question detail function
+and saves through the existing audited correction/review functions. No tester
+roles are granted and no student-facing data access changes.
+
 Checkpoint 3 makes answer leakage structurally difficult: public questions and choices have no correctness fields. Answer keys, explanations, remediation, choice feedback, and source passages are private-schema tables with no `anon` or `authenticated` table grants. The student-safe `get_approved_questions` function is security-invoker and RLS-filtered; drafts and source-document records are hidden from students.
 
 Reviewers write answer keys only through an authorized, audited function. Approval requires source authorization, an objective, valid choices, an answer/explanation, and an approving quality review. RLS prevents direct approval and direct edits to approved prompts/choices; a private trigger prevents changing an approved answer key. Server-side grading is intentionally deferred to Checkpoint 4.

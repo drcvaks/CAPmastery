@@ -2363,6 +2363,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      get_content_review_catalog: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       admin_replace_learning_visual: {
         Args: {
           p_asset_key: string;

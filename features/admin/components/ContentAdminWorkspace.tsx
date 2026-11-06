@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
@@ -13,10 +13,9 @@ import {
   useQuestionCsvImport,
   useReviewQuestion,
   useReviewQueue,
-  useSaveReviewQuestion,
-  useSubmitQuestionReview,
 } from "../hooks/useContentAdmin";
-import type { ReviewEditPayload, ReviewQuestion } from "../schemas";
+import { ReviewQuestionBrowser } from "./ReviewQuestionBrowser";
+import { QuestionReviewEditor } from "./QuestionReviewEditor";
 import { UserAccessAdmin } from "./UserAccessAdmin";
 import { VisualLibraryAdmin } from "./VisualLibraryAdmin";
 
@@ -28,6 +27,7 @@ export function ContentAdminWorkspace() {
       description="Manage registered-user access and administer reviewed study content."
       eyebrow="Administration"
       title="Content workspace"
+      maxContentWidth={panel === "review" ? 1480 : 1040}
     >
       <View style={styles.row}>
         <Tab active={panel === "users"} label="User access" onPress={() => setPanel("users")} />
@@ -175,321 +175,46 @@ function ReviewPanel() {
   const [selectedId, setSelectedId] = useState<string>();
   const detail = useReviewQuestion(selectedId);
 
-  if (selectedId) {
-    return (
-      <View style={styles.stack}>
-        <View style={styles.backAction}>
-          <AppButton
-            label="Back to review queue"
-            onPress={() => setSelectedId(undefined)}
-            variant="secondary"
-          />
-        </View>
-        {detail.data ? (
-          <QuestionEditor detail={detail.data} />
-        ) : (
-          <AppCard
-            description={detail.isError ? safeError(detail.error) : "Loading question…"}
-            title="Question editor"
-          />
-        )}
-      </View>
-    );
-  }
-
+  const selected = queue.data?.find((item) => item.question_id === selectedId);
   return (
     <View style={styles.stack}>
-      <AppCard description="Drafts and requested changes appear first." title="Review queue">
+      {selectedId ? (
+        <View style={styles.stack}>
+          {!detail.data ? (
+            <View style={styles.backAction}>
+              <AppButton
+                label="Back to review queue"
+                onPress={() => setSelectedId(undefined)}
+                variant="secondary"
+              />
+            </View>
+          ) : null}
+          {detail.data ? (
+            <QuestionReviewEditor
+              key={selectedId}
+              detail={detail.data}
+              onBack={() => setSelectedId(undefined)}
+              context={
+                selected
+                  ? `${selected.exam_title} · ${selected.module_number ? `Module ${selected.module_number} · ` : ""}${selected.chapter_title ?? selected.topic_title}`
+                  : undefined
+              }
+            />
+          ) : (
+            <AppCard
+              description={detail.isError ? safeError(detail.error) : "Loading question…"}
+              title="Question editor"
+            />
+          )}
+        </View>
+      ) : null}
+      <View style={selectedId ? { display: "none" } : undefined}>
         {queue.isPending ? <Text style={styles.muted}>Loading questions…</Text> : null}
         {queue.isError ? <Issue error text={safeError(queue.error)} /> : null}
-        {queue.data?.slice(0, 100).map((item) => (
-          <Pressable
-            accessibilityRole="button"
-            key={item.question_id}
-            onPress={() => setSelectedId(item.question_id)}
-            style={styles.queueItem}
-          >
-            <Text style={styles.eyebrow}>{item.external_id ?? "No external ID"}</Text>
-            <Text numberOfLines={2} style={styles.body}>
-              {item.question_text}
-            </Text>
-            <Text style={styles.muted}>
-              {item.review_status} · version {item.version}
-            </Text>
-          </Pressable>
-        ))}
-      </AppCard>
+        <ReviewQuestionBrowser questions={queue.data ?? []} onSelect={setSelectedId} />
+      </View>
     </View>
   );
-}
-
-function QuestionEditor({ detail }: { detail: ReviewQuestion }) {
-  const id = detail.question.id;
-  const save = useSaveReviewQuestion(id);
-  const review = useSubmitQuestionReview(id);
-  const [edit, setEdit] = useState<ReviewEditPayload>(() => toEdit(detail));
-  const [reason, setReason] = useState("");
-  const [ratings, setRatings] = useState({ accuracy: "5", clarity: "5", source: "5", notes: "" });
-
-  function set<K extends keyof ReviewEditPayload>(key: K, value: ReviewEditPayload[K]) {
-    setEdit((current) => ({ ...current, [key]: value }));
-  }
-
-  async function decide(decision: "approve" | "request_changes" | "reject") {
-    await save.mutateAsync({ payload: edit, changeReason: reason });
-    return review.mutateAsync({
-      accuracyRating: Number(ratings.accuracy),
-      clarityRating: Number(ratings.clarity),
-      sourceAlignmentRating: Number(ratings.source),
-      notes: ratings.notes,
-      decision,
-    });
-  }
-
-  return (
-    <AppCard
-      description={`${detail.question.review_status} · version ${detail.question.version}. Review decisions save the displayed corrections first.`}
-      title={detail.question.external_id ?? "Question editor"}
-    >
-      <AppTextField
-        label="Question"
-        multiline
-        onChangeText={(value) => set("question_text", value)}
-        value={edit.question_text}
-      />
-      <AppTextField
-        label="Difficulty"
-        onChangeText={(value) => set("difficulty", value as ReviewEditPayload["difficulty"])}
-        value={edit.difficulty}
-      />
-      <AppTextField
-        label="Cognitive level"
-        onChangeText={(value) =>
-          set("cognitive_level", value as ReviewEditPayload["cognitive_level"])
-        }
-        value={edit.cognitive_level}
-      />
-      {edit.choices.map((choice, index) => (
-        <View key={choice.key} style={styles.choice}>
-          <Text style={styles.eyebrow}>Choice {choice.key}</Text>
-          <AppTextField
-            label="Text"
-            onChangeText={(text) =>
-              set(
-                "choices",
-                edit.choices.map((item, i) => (i === index ? { ...item, text } : item)),
-              )
-            }
-            value={choice.text}
-          />
-          <AppTextField
-            label="Explanation"
-            multiline
-            onChangeText={(feedback) =>
-              set(
-                "choices",
-                edit.choices.map((item, i) => (i === index ? { ...item, feedback } : item)),
-              )
-            }
-            value={choice.feedback}
-          />
-        </View>
-      ))}
-      <AppTextField
-        label="Correct letter"
-        onChangeText={(value) => set("correct_letter", value.toUpperCase())}
-        value={edit.correct_letter}
-      />
-      <AppTextField
-        label="Main explanation"
-        multiline
-        onChangeText={(value) => set("explanation", value)}
-        value={edit.explanation}
-      />
-      <AppTextField
-        label="Common mistake"
-        multiline
-        onChangeText={(value) => set("common_mistake", value)}
-        value={edit.common_mistake}
-      />
-      <AppTextField
-        label="Remediation"
-        multiline
-        onChangeText={(value) => set("remediation", value)}
-        value={edit.remediation}
-      />
-      <AppTextField
-        label="Source reference"
-        multiline
-        onChangeText={(value) => set("source_reference", value)}
-        value={edit.source_reference}
-      />
-      <AppTextField
-        label="Source page start"
-        keyboardType="number-pad"
-        onChangeText={(value) => set("source_page_start", value)}
-        value={edit.source_page_start}
-      />
-      <AppTextField
-        label="Source page end"
-        keyboardType="number-pad"
-        onChangeText={(value) => set("source_page_end", value)}
-        value={edit.source_page_end}
-      />
-      <AppTextField
-        label="Estimated seconds"
-        keyboardType="number-pad"
-        onChangeText={(value) => set("estimated_time_seconds", value)}
-        value={edit.estimated_time_seconds}
-      />
-      <Text style={styles.heading}>Final-exam classification</Text>
-      <AppTextField
-        label="Chapter number"
-        keyboardType="number-pad"
-        onChangeText={(value) => set("chapter_number", value)}
-        value={edit.chapter_number}
-      />
-      <AppTextField
-        label="Exam likeness (high, medium, or low)"
-        onChangeText={(value) => set("exam_likeness", value as ReviewEditPayload["exam_likeness"])}
-        value={edit.exam_likeness}
-      />
-      <AppTextField
-        label="Distractor difficulty (basic, moderate, or close)"
-        onChangeText={(value) =>
-          set("distractor_difficulty", value as ReviewEditPayload["distractor_difficulty"])
-        }
-        value={edit.distractor_difficulty}
-      />
-      <View style={styles.switchRow}>
-        <View style={styles.switchCopy}>
-          <Text style={styles.switchTitle}>Eligible for final exam</Text>
-          <Text style={styles.body}>Study mode can still use this question when disabled.</Text>
-        </View>
-        <Switch
-          accessibilityLabel="Eligible for final exam"
-          onValueChange={(value) => set("eligible_for_final_exam", value)}
-          trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-          value={edit.eligible_for_final_exam}
-        />
-      </View>
-      <AppTextField
-        label="Final-exam selection weight"
-        keyboardType="decimal-pad"
-        onChangeText={(value) => set("final_exam_weight", value)}
-        value={edit.final_exam_weight}
-      />
-      <AppTextField
-        label="Content origin"
-        onChangeText={(value) =>
-          set("content_origin", value as ReviewEditPayload["content_origin"])
-        }
-        value={edit.content_origin}
-      />
-      <AppTextField
-        label="Style reference"
-        onChangeText={(value) =>
-          set("style_reference", value as ReviewEditPayload["style_reference"])
-        }
-        value={edit.style_reference}
-      />
-      {detail.question.review_status === "approved" ? (
-        <AppTextField
-          label="Reason for revising approved content"
-          multiline
-          onChangeText={setReason}
-          value={reason}
-        />
-      ) : null}
-      <AppButton
-        label="Save corrections as draft"
-        loading={save.isPending}
-        onPress={() =>
-          void save.mutateAsync({ payload: edit, changeReason: reason }).catch(() => undefined)
-        }
-      />
-      {save.isSuccess ? (
-        <Text style={styles.success}>Draft saved; prior approved versions remain in history.</Text>
-      ) : null}
-      {save.isError ? <Issue error text={safeError(save.error)} /> : null}
-      <Text style={styles.heading}>Quality review</Text>
-      <AppTextField
-        label="Accuracy 1–5"
-        keyboardType="number-pad"
-        onChangeText={(accuracy) => setRatings((v) => ({ ...v, accuracy }))}
-        value={ratings.accuracy}
-      />
-      <AppTextField
-        label="Clarity 1–5"
-        keyboardType="number-pad"
-        onChangeText={(clarity) => setRatings((v) => ({ ...v, clarity }))}
-        value={ratings.clarity}
-      />
-      <AppTextField
-        label="Source alignment 1–5"
-        keyboardType="number-pad"
-        onChangeText={(source) => setRatings((v) => ({ ...v, source }))}
-        value={ratings.source}
-      />
-      <AppTextField
-        label="Review notes"
-        multiline
-        onChangeText={(notes) => setRatings((v) => ({ ...v, notes }))}
-        value={ratings.notes}
-      />
-      <View style={styles.row}>
-        <AppButton
-          label="Approve for students"
-          loading={review.isPending || save.isPending}
-          onPress={() => void decide("approve").catch(() => undefined)}
-        />
-        <AppButton
-          label="Request changes"
-          onPress={() => void decide("request_changes").catch(() => undefined)}
-          variant="secondary"
-        />
-        <AppButton
-          label="Reject"
-          onPress={() => void decide("reject").catch(() => undefined)}
-          variant="secondary"
-        />
-      </View>
-      {review.isSuccess ? (
-        <Text style={styles.success}>Review decision recorded and audited.</Text>
-      ) : null}
-      {review.isError ? <Issue error text={safeError(review.error)} /> : null}
-    </AppCard>
-  );
-}
-
-function toEdit(detail: ReviewQuestion): ReviewEditPayload {
-  const correct =
-    detail.choices.find((choice) => choice.id === detail.answer.correct_choice_id)?.key ?? "";
-  return {
-    question_text: detail.question.question_text,
-    difficulty: detail.question.difficulty,
-    cognitive_level: detail.question.cognitive_level,
-    source_reference: detail.question.source_reference ?? "",
-    source_page_start: detail.question.source_page_start?.toString() ?? "",
-    source_page_end: detail.question.source_page_end?.toString() ?? "",
-    estimated_time_seconds: detail.question.estimated_time_seconds?.toString() ?? "",
-    chapter_number: detail.question.chapter_number?.toString() ?? "",
-    exam_likeness: detail.question.exam_likeness ?? "",
-    distractor_difficulty: detail.question.distractor_difficulty ?? "",
-    eligible_for_final_exam: detail.question.eligible_for_final_exam ?? false,
-    final_exam_weight: (detail.question.final_exam_weight ?? 0).toString(),
-    content_origin: detail.question.content_origin ?? "",
-    style_reference: detail.question.style_reference ?? "",
-    choices: detail.choices.map((choice) => ({
-      key: choice.key,
-      text: choice.text,
-      feedback: choice.feedback ?? "",
-    })),
-    correct_letter: correct,
-    explanation: detail.answer.explanation,
-    remediation: detail.answer.remediation ?? "",
-    common_mistake: detail.answer.common_mistake ?? "",
-  };
 }
 
 function Issue({ error = false, text }: { error?: boolean; text: string }) {

@@ -122,16 +122,73 @@ describe("ContentAdminWorkspace", () => {
   it("opens a draft in the shared reviewer editor without exposing student data", async () => {
     await render(<ContentAdminWorkspace />);
     await act(() => fireEvent.press(screen.getByText("Review questions")));
-    await act(() => fireEvent.press(screen.getByText("What should a reviewer verify?")));
+    await act(() => fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" })));
+    await act(() => fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" })));
+    await act(() =>
+      fireEvent.press(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" })),
+    );
     expect(
       screen.getByText("draft · version 1. Review decisions save the displayed corrections first."),
     ).toBeVisible();
-    expect(screen.getByLabelText("Correct letter").props.value).toBe("A");
+    expect(screen.getByText("Correct answer: A")).toBeVisible();
+    expect(screen.getByLabelText("Choice D text").props.value).toBe("Choice 4");
     expect(screen.getByText("Approve for students")).toBeVisible();
     expect(screen.getByText("Back to review queue")).toBeVisible();
     expect(screen.queryByText("Review queue")).toBeNull();
     expect(screen.queryByText(/student progress/i)).toBeNull();
     await act(() => fireEvent.press(screen.getByText("Back to review queue")));
+    expect(screen.getByText("Review queue")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" })).toBeVisible();
+  });
+
+  it("saves all visible corrections and retains hidden classifications", async () => {
+    const save = jest.fn().mockResolvedValue(2);
+    jest.mocked(adminHooks.useSaveReviewQuestion).mockReturnValue({
+      mutateAsync: save,
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+    } as never);
+    await render(<ContentAdminWorkspace />);
+    await fireEvent.press(screen.getByText("Review questions"));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" }));
+    expect(screen.queryByLabelText("Difficulty")).toBeNull();
+    await fireEvent.changeText(
+      screen.getByLabelText("Question"),
+      "Corrected question for testers?",
+    );
+    await fireEvent.press(screen.getByRole("radio", { name: "Mark choice B correct" }));
+    await fireEvent.changeText(screen.getByLabelText("Choice B text"), "Corrected choice B");
+    await fireEvent.press(screen.getByText("Save corrections as draft"));
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          question_text: "Corrected question for testers?",
+          correct_letter: "B",
+          difficulty: "medium",
+          choices: expect.arrayContaining([
+            expect.objectContaining({ key: "B", text: "Corrected choice B" }),
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it("warns before discarding an unsaved question edit", async () => {
+    await render(<ContentAdminWorkspace />);
+    await fireEvent.press(screen.getByText("Review questions"));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" }));
+    await fireEvent.changeText(screen.getByLabelText("Question"), "Unsaved correction");
+    await fireEvent.press(screen.getByText("Back to review queue"));
+    expect(screen.getByText("Discard corrections and return")).toBeVisible();
+    await fireEvent.press(screen.getByText("Keep editing"));
+    expect(screen.getByLabelText("Question").props.value).toBe("Unsaved correction");
+    await fireEvent.press(screen.getByText("Back to review queue"));
+    await fireEvent.press(screen.getByText("Discard corrections and return"));
     expect(screen.getByText("Review queue")).toBeVisible();
   });
 });

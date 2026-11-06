@@ -84,6 +84,28 @@ Reviewed `short_explanation` now takes precedence for default feedback. Memory a
 
 ## Checkpoint 5 boundary
 
+### Curriculum-based administrator review workspace
+
+Review questions uses the reviewer-only `get_content_review_catalog` projection
+for complete question metadata, avoiding the old first-100 client slice and
+table-shaped RPC row limits. The JSON inventory groups tests in milestone order,
+nests Aerospace modules and chapters, and supports prompt/ID/chapter search and
+review-status filters. Groups start collapsed; an expanded chapter renders 20
+questions at a time with explicit Show next controls. All questions remain reachable.
+Answer-bearing detail loads only for the selected question through the existing
+protected reviewer-detail RPC.
+
+The desktop workbench opts into a 1480-pixel content cap and presents four editable
+choice cards in a two-column grid beside explanation/source and save/review controls.
+Native and narrow web stack the same controls. Correct-answer radio controls replace
+the free-text answer letter; classification settings and extra teaching/review fields
+use disclosures. React Hook Form retains all default classification values even
+when their controls are hidden. Save/review still uses the existing audited functions
+and approved-question versioning; the new catalog changes no editing authorization.
+The catalog remains mounted but hidden during editing to preserve open groups and
+filters. Back warns before discarding unsaved question corrections. Tester accounts
+and new role grants are outside this change.
+
 Every newly recorded answer now updates per-question spaced-review state and topic mastery inside the same protected PostgreSQL transaction that grades the response. Same-choice retries return the existing attempt without applying mastery twice. The formulas are mirrored in the pure `features/adaptive/engine.ts` module with injected time and deterministic seeded tie-breaking so coefficients, boundaries, decay, allocation, and sparse-bank behavior can be tested without network state.
 
 Checkpoint 8 keeps CSV parsing and early validation in the pure `features/admin/csv.ts` boundary, while authoritative validation, import, editing, and approval remain in reviewer-only PostgreSQL functions. The responsive admin route is a thin composition over typed services and TanStack Query hooks. An approved edit is snapshotted before the current question advances to a new draft version, so existing attempts continue to identify the exact version they presented.

@@ -17,7 +17,7 @@ export function AppTextField({ error, label, ...inputProps }: AppTextFieldProps)
         accessibilityHint={error || inputProps.accessibilityHint}
         accessibilityLabel={label}
         placeholderTextColor={theme.colors.muted}
-        style={[styles.input, error && styles.inputError]}
+        style={[styles.input, inputProps.style, error && styles.inputError]}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>

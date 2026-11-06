@@ -1,5 +1,15 @@
 # Database Plan
 
+## Curriculum review catalog
+
+Migration `202611030058_question_review_catalog.sql` adds
+`get_content_review_catalog()`, an authenticated entrypoint with an internal
+administrator/content-reviewer check and an empty fixed search path. It returns
+one JSON array of curriculum-labeled question metadata, avoiding first-100 and
+table-shaped RPC row-limit truncation. It exposes no choices, answer keys, teaching
+explanations, or student data. Existing queue/detail/edit/review functions and all
+table grants, RLS policies, and versioning rules remain unchanged.
+
 ## Administrator image library
 
 Migration `202610250057_admin_visual_library.sql` adds an admin-only visual
