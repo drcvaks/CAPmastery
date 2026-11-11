@@ -1,6 +1,6 @@
 # Reviewing questions by curriculum
 
-Open Administration → Review questions. Expand a test, then a module (Aerospace)
+Open Content Review → Review questions. Expand a test, then a module (Aerospace)
 and chapter. Menus start closed. Search matches question IDs, prompts, and curriculum
 labels; status buttons narrow the list. Each chapter starts with 20 questions and
 offers Show next controls, so questions beyond the first 100 remain available.
@@ -14,14 +14,19 @@ remain accessible through disclosure buttons. Hidden settings retain their value
 Save corrections as draft does not approve content. Approve/Request changes/Reject
 save the displayed corrections first and then use the existing audited review
 workflow. Editing approved content requires a reason and preserves version history.
-Back asks before discarding unsaved question corrections and returns to the same
-open chapter. Changing the overall workspace/tab is not covered by this local Back
+Previous and Next step through the selected chapter's filtered results, including
+questions beyond the currently expanded page. The editor shows the test, chapter
+or module, question position, and review status instead of the internal ID.
+Corrections saved during the current review tab session are marked as saved
+drafts; this does not mark them approved or infer prior edits to older drafts.
+Back, Previous, and Next offer to save or discard unsaved corrections, or keep
+editing. Saving on navigation does not submit review ratings or notes.
+Back returns to the same open chapter. Changing the overall workspace/tab is not covered by this local
 confirmation; save before leaving the Review questions tab.
 
-This remains an administrator UI. The protected catalog/detail functions also
-support the existing content-reviewer role, but this change does not grant tester
-access or expose the administration route to a new role. Arrange tester permissions
-separately; do not give someone administrator access solely to review wording.
+Assigned testers use a chapter-scoped, proposal-only version of this editor.
+See [Content Review tester rollout](CONTENT_REVIEW_TESTERS.md). Tester access is
+separate from Administration and from study packets.
 
 ## Apply migration 058
 

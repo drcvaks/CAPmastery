@@ -10,6 +10,12 @@ import {
   submitQuestionReview,
 } from "../../../services/adminContentService";
 import type { ReviewEditPayload } from "../schemas";
+import {
+  fetchTesterQuestion,
+  fetchTesterQuestions,
+  proposeQuestion,
+} from "../../../services/contentTesterService";
+import { useOptionalAuth } from "../../auth/AuthContext";
 
 export const contentAdminKeys = {
   queue: ["content-admin", "queue"] as const,
@@ -29,23 +35,38 @@ export function useQuestionCsvImport() {
   });
 }
 
-export function useReviewQueue() {
-  return useQuery({ queryKey: contentAdminKeys.queue, queryFn: fetchReviewQueue });
+export function useReviewQueue(tester = false) {
+  const userId = useOptionalAuth()?.session?.user.id;
+  return useQuery({
+    queryKey: [...contentAdminKeys.queue, userId, tester],
+    queryFn: tester ? fetchTesterQuestions : fetchReviewQueue,
+    staleTime: 0,
+  });
 }
 
-export function useReviewQuestion(id?: string) {
+export function useReviewQuestion(id?: string, tester = false) {
+  const userId = useOptionalAuth()?.session?.user.id;
   return useQuery({
-    queryKey: contentAdminKeys.question(id ?? "none"),
-    queryFn: () => fetchReviewQuestion(id!),
+    queryKey: [...contentAdminKeys.question(id ?? "none"), userId, tester],
+    queryFn: () => (tester ? fetchTesterQuestion(id!) : fetchReviewQuestion(id!)),
+    gcTime: tester ? 0 : undefined,
     enabled: Boolean(id),
   });
 }
 
-export function useSaveReviewQuestion(id: string) {
+export function useSaveReviewQuestion(id: string, tester = false, updatedAt?: unknown) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ payload, changeReason }: { payload: ReviewEditPayload; changeReason: string }) =>
-      saveReviewQuestion(id, payload, changeReason),
+    mutationFn: async ({
+      payload,
+      changeReason,
+    }: {
+      payload: ReviewEditPayload;
+      changeReason: string;
+    }) =>
+      tester
+        ? proposeQuestion(id, payload, changeReason, updatedAt)
+        : saveReviewQuestion(id, payload, changeReason),
     onSuccess: async () => {
       await Promise.all([
         client.invalidateQueries({ queryKey: contentAdminKeys.queue }),

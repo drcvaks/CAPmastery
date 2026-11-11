@@ -15,17 +15,33 @@ import { AppTextField } from "../../../components/common/AppTextField";
 import { theme } from "../../../lib/constants/theme";
 import { useSaveReviewQuestion, useSubmitQuestionReview } from "../hooks/useContentAdmin";
 import type { ReviewEditPayload, ReviewQuestion } from "../schemas";
+import { ReviewStatusPill } from "./ReviewStatusPill";
 
 export function QuestionReviewEditor({
   detail,
   onBack,
   context,
+  position,
+  total,
+  saved,
+  onSaved,
+  onNavigate,
+  scrollToTop,
+  tester = false,
 }: {
   detail: ReviewQuestion;
   onBack: () => void;
   context?: string;
+  position: number;
+  total: number;
+  saved: boolean;
+  onSaved: () => void;
+  onNavigate: (offset: -1 | 1) => void;
+  scrollToTop: () => void;
+  tester?: boolean;
 }) {
-  const save = useSaveReviewQuestion(detail.question.id);
+  const [baseUpdatedAt] = useState(detail.question.updated_at);
+  const save = useSaveReviewQuestion(detail.question.id, tester, baseUpdatedAt);
   const review = useSubmitQuestionReview(detail.question.id);
   const form = useForm<ReviewEditPayload>({ defaultValues: toEdit(detail) });
   // Every field is seeded by toEdit; hidden classification fields remain in form state.
@@ -34,7 +50,7 @@ export function QuestionReviewEditor({
     defaultValue: toEdit(detail),
   }) as ReviewEditPayload;
   const [reason, setReason] = useState("");
-  const [leaving, setLeaving] = useState(false);
+  const [destination, setDestination] = useState<"queue" | -1 | 1>();
   const [ratings, setRatings] = useState({ accuracy: "5", clarity: "5", source: "5", notes: "" });
   const { width } = useWindowDimensions();
   const wide = Platform.OS === "web" && width >= 1150;
@@ -45,8 +61,13 @@ export function QuestionReviewEditor({
     edit.choices.every((c) => c.text.trim()) &&
     edit.choices.some((c) => c.key === edit.correct_letter),
   );
-  const reasonRequired = detail.question.review_status === "approved";
-  const canSave = valid && (!reasonRequired || reason.trim().length >= 10);
+  const reasonRequired = tester || detail.question.review_status === "approved";
+  const canSave =
+    valid &&
+    (!reasonRequired || reason.trim().length >= 10) &&
+    (!tester ||
+      (Boolean(edit.source_reference.trim()) &&
+        !["rejected", "archived"].includes(detail.question.review_status)));
   function field(name: FieldPath<ReviewEditPayload>, label: string, multiline = false) {
     return (
       <Controller
@@ -71,6 +92,7 @@ export function QuestionReviewEditor({
     await save.mutateAsync({ payload: edit, changeReason: reason });
     form.reset(edit);
     setReason("");
+    onSaved();
   }
   async function decide(decision: "approve" | "request_changes" | "reject") {
     await persist();
@@ -81,36 +103,105 @@ export function QuestionReviewEditor({
       notes: ratings.notes,
       decision,
     });
+    setRatings({ accuracy: "5", clarity: "5", source: "5", notes: "" });
+  }
+  function go(target: "queue" | -1 | 1) {
+    if (target === "queue") onBack();
+    else onNavigate(target);
+  }
+  function askToGo(target: "queue" | -1 | 1) {
+    if (
+      form.formState.isDirty ||
+      reason.trim() ||
+      ratings.notes.trim() ||
+      [ratings.accuracy, ratings.clarity, ratings.source].some((rating) => rating !== "5")
+    ) {
+      setDestination(target);
+      scrollToTop();
+    } else {
+      go(target);
+    }
   }
   return (
     <View style={styles.stack}>
+      <Text accessibilityRole="header" style={styles.title}>
+        {context ?? "Question review"}
+      </Text>
+      <View style={styles.toolbar}>
+        <Text style={styles.heading}>
+          Question {position} of {total}
+        </Text>
+        <ReviewStatusPill
+          status={detail.question.review_status}
+          saved={!tester && (saved || save.isSuccess)}
+        />
+        {tester && (saved || save.isSuccess) ? (
+          <Text style={styles.success}>Proposal submitted</Text>
+        ) : null}
+      </View>
       <View style={styles.toolbar}>
         <AppButton
           label="Back to review queue"
           variant="secondary"
           disabled={busy}
-          onPress={() => (form.formState.isDirty ? setLeaving(true) : onBack())}
+          onPress={() => askToGo("queue")}
+        />
+        <AppButton
+          label="Previous question"
+          variant="secondary"
+          disabled={busy || position <= 1}
+          onPress={() => askToGo(-1)}
+        />
+        <AppButton
+          label="Next question"
+          variant="secondary"
+          disabled={busy || position >= total}
+          onPress={() => askToGo(1)}
         />
         <Text style={styles.muted}>
           {form.formState.isDirty ? "Unsaved corrections" : "No unsaved corrections"}
         </Text>
       </View>
-      {leaving ? (
+      {destination !== undefined ? (
         <AppCard
           title="Unsaved corrections"
-          description="Save your corrections first, or discard them before returning to the chapter list."
+          description={
+            tester
+              ? "Submit your proposal for admin review, discard changes, or keep editing."
+              : "Save or discard your corrections before leaving this question. Saving here does not approve the question or submit review ratings and notes."
+          }
         >
-          <AppButton label="Keep editing" onPress={() => setLeaving(false)} />
-          <AppButton label="Discard corrections and return" variant="secondary" onPress={onBack} />
+          <AppButton
+            label="Keep editing"
+            disabled={busy}
+            onPress={() => setDestination(undefined)}
+          />
+          <AppButton
+            label={tester ? "Submit proposal and continue" : "Save draft and continue"}
+            disabled={busy || !canSave}
+            onPress={() =>
+              void persist()
+                .then(() => go(destination))
+                .catch(() => undefined)
+            }
+          />
+          {save.isError ? <ErrorText error={save.error} /> : null}
+          <AppButton
+            label={
+              destination === "queue"
+                ? "Discard corrections and return"
+                : "Discard corrections and continue"
+            }
+            variant="secondary"
+            disabled={busy}
+            onPress={() => go(destination)}
+          />
         </AppCard>
       ) : null}
-      <Text accessibilityRole="header" style={styles.title}>
-        {detail.question.external_id ?? "Question editor"}
-      </Text>
-      {context ? <Text style={styles.muted}>{context}</Text> : null}
       <Text style={styles.muted}>
-        {detail.question.review_status} · version {detail.question.version}. Review decisions save
-        the displayed corrections first.
+        {tester
+          ? "Answer keys are visible here for review only. Your changes need administrator approval."
+          : "Review decisions save the displayed corrections first."}
       </Text>
       <View style={[styles.layout, wide && styles.wide]}>
         <View style={[styles.primary, wide && styles.primaryWide]}>
@@ -169,13 +260,22 @@ export function QuestionReviewEditor({
             </Disclosure>
           </AppCard>
           <AppCard
-            title="Review and save"
-            description="Saving corrections keeps the question as a draft. Approval is a separate, audited review decision."
+            title={tester ? "Propose corrections" : "Review and save"}
+            description={
+              tester
+                ? "The live question stays unchanged until an administrator approves your proposal."
+                : "Saving corrections keeps the question as a draft. Approval is a separate, audited review decision."
+            }
           >
             {reasonRequired ? (
               <AppTextField
-                label="Reason for revising approved content"
+                label={
+                  tester
+                    ? "Reason for proposal (at least 10 characters)"
+                    : "Reason for revising approved content"
+                }
                 value={reason}
+                maxLength={tester ? 1000 : undefined}
                 onChangeText={setReason}
                 editable={!busy}
                 multiline
@@ -186,73 +286,89 @@ export function QuestionReviewEditor({
                 Enter a question, four choices, a correct answer, and a main explanation.
               </Text>
             ) : null}
+            {tester && !edit.source_reference.trim() ? (
+              <Text style={styles.error}>Add a source reference before proposing corrections.</Text>
+            ) : null}
+            {tester && ["rejected", "archived"].includes(detail.question.review_status) ? (
+              <Text style={styles.muted}>
+                Archived and rejected questions are read-only for testers.
+              </Text>
+            ) : null}
             <AppButton
-              label="Save corrections as draft"
+              label={tester ? "Submit question proposal" : "Save corrections as draft"}
               loading={save.isPending}
               disabled={busy || !canSave}
               onPress={() => void persist().catch(() => undefined)}
             />
             {save.isSuccess ? (
               <Text style={styles.success}>
-                Draft saved; prior approved versions remain in history.
+                {tester
+                  ? "Proposal submitted for admin approval."
+                  : "Draft saved; prior approved versions remain in history."}
               </Text>
             ) : null}
             {save.isError ? <ErrorText error={save.error} /> : null}
-            <Disclosure title="Quality ratings and review notes">
-              {(
-                [
-                  ["accuracy", "Accuracy 1–5"],
-                  ["clarity", "Clarity 1–5"],
-                  ["source", "Source alignment 1–5"],
-                ] as const
-              ).map(([key, label]) => (
-                <AppTextField
-                  key={key}
-                  label={label}
-                  value={ratings[key]}
-                  keyboardType="number-pad"
-                  editable={!busy}
-                  onChangeText={(value) => setRatings((current) => ({ ...current, [key]: value }))}
+            {!tester ? (
+              <>
+                <Disclosure title="Quality ratings and review notes">
+                  {(
+                    [
+                      ["accuracy", "Accuracy 1–5"],
+                      ["clarity", "Clarity 1–5"],
+                      ["source", "Source alignment 1–5"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <AppTextField
+                      key={key}
+                      label={label}
+                      value={ratings[key]}
+                      keyboardType="number-pad"
+                      editable={!busy}
+                      onChangeText={(value) =>
+                        setRatings((current) => ({ ...current, [key]: value }))
+                      }
+                    />
+                  ))}
+                  <AppTextField
+                    label="Review notes"
+                    value={ratings.notes}
+                    onChangeText={(notes) => setRatings((current) => ({ ...current, notes }))}
+                    editable={!busy}
+                    multiline
+                  />
+                </Disclosure>
+                <AppButton
+                  label="Approve for students"
+                  disabled={
+                    busy ||
+                    !canSave ||
+                    ![ratings.accuracy, ratings.clarity, ratings.source].every((value) =>
+                      /^[1-5]$/.test(value),
+                    )
+                  }
+                  loading={review.isPending}
+                  onPress={() => void decide("approve").catch(() => undefined)}
                 />
-              ))}
-              <AppTextField
-                label="Review notes"
-                value={ratings.notes}
-                onChangeText={(notes) => setRatings((current) => ({ ...current, notes }))}
-                editable={!busy}
-                multiline
-              />
-            </Disclosure>
-            <AppButton
-              label="Approve for students"
-              disabled={
-                busy ||
-                !canSave ||
-                ![ratings.accuracy, ratings.clarity, ratings.source].every((value) =>
-                  /^[1-5]$/.test(value),
-                )
-              }
-              loading={review.isPending}
-              onPress={() => void decide("approve").catch(() => undefined)}
-            />
-            <View style={styles.toolbar}>
-              <AppButton
-                label="Request changes"
-                variant="secondary"
-                disabled={busy || !canSave}
-                onPress={() => void decide("request_changes").catch(() => undefined)}
-              />
-              <AppButton
-                label="Reject"
-                variant="secondary"
-                disabled={busy || !canSave}
-                onPress={() => void decide("reject").catch(() => undefined)}
-              />
-            </View>
-            {review.isSuccess ? (
-              <Text style={styles.success}>Review decision recorded and audited.</Text>
+                <View style={styles.toolbar}>
+                  <AppButton
+                    label="Request changes"
+                    variant="secondary"
+                    disabled={busy || !canSave}
+                    onPress={() => void decide("request_changes").catch(() => undefined)}
+                  />
+                  <AppButton
+                    label="Reject"
+                    variant="secondary"
+                    disabled={busy || !canSave}
+                    onPress={() => void decide("reject").catch(() => undefined)}
+                  />
+                </View>
+                {review.isSuccess ? (
+                  <Text style={styles.success}>Review decision recorded and audited.</Text>
+                ) : null}
+                {review.isError ? <ErrorText error={review.error} /> : null}
+              </>
             ) : null}
-            {review.isError ? <ErrorText error={review.error} /> : null}
           </AppCard>
         </View>
       </View>
@@ -290,6 +406,14 @@ export function QuestionReviewEditor({
           />
         </View>
       </Disclosure>
+      {position < total ? (
+        <AppButton
+          label="Continue to next question"
+          variant="secondary"
+          disabled={busy}
+          onPress={() => askToGo(1)}
+        />
+      ) : null}
     </View>
   );
 }

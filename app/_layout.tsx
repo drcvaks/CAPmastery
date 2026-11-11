@@ -31,6 +31,7 @@ export default function RootLayout() {
               <Stack.Screen name="(student)" options={{ headerShown: false }} />
               <Stack.Screen name="(parent)" options={{ headerShown: false }} />
               <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+              <Stack.Screen name="content-review" options={{ headerShown: false }} />
               <Stack.Screen name="unauthorized" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" options={{ title: "Not found" }} />
             </Stack>

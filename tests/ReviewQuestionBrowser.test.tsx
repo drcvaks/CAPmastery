@@ -24,11 +24,11 @@ it("starts collapsed, nests module/chapter menus, and reveals additional questio
   await fireEvent.press(
     screen.getByRole("button", { name: "Expand Chapter 2 · Synthetic chapter" }),
   );
-  expect(screen.getByRole("button", { name: "Review TEST-Q020" })).toBeVisible();
-  expect(screen.queryByRole("button", { name: "Review TEST-Q021" })).toBeNull();
+  expect(screen.getByRole("button", { name: /^Review question 20:/ })).toBeVisible();
+  expect(screen.queryByRole("button", { name: /^Review question 21:/ })).toBeNull();
   await fireEvent.press(screen.getByText("Show next 20 questions"));
-  await fireEvent.press(screen.getByRole("button", { name: "Review TEST-Q021" }));
-  expect(select).toHaveBeenCalledWith(questions[20]?.question_id);
+  await fireEvent.press(screen.getByRole("button", { name: /^Review question 21:/ }));
+  expect(select).toHaveBeenCalledWith({ ids: questions.map((q) => q.question_id), index: 20 });
 });
 it("can find a question beyond the old first-100 limit and filter its status", async () => {
   await render(<ReviewQuestionBrowser questions={questions} onSelect={jest.fn()} />);

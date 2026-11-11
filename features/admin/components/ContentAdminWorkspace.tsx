@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View, type ScrollView } from "react-native";
 
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
@@ -14,35 +14,80 @@ import {
   useReviewQuestion,
   useReviewQueue,
 } from "../hooks/useContentAdmin";
-import { ReviewQuestionBrowser } from "./ReviewQuestionBrowser";
+import { ReviewQuestionBrowser, type ReviewSelection } from "./ReviewQuestionBrowser";
 import { QuestionReviewEditor } from "./QuestionReviewEditor";
 import { UserAccessAdmin } from "./UserAccessAdmin";
 import { VisualLibraryAdmin } from "./VisualLibraryAdmin";
+import { ContentProposals } from "./ContentProposals";
+import { useOptionalAuth } from "../../auth/AuthContext";
+import { useRouter } from "expo-router";
 
-export function ContentAdminWorkspace() {
-  const [panel, setPanel] = useState<"import" | "review" | "users" | "images">("users");
+export function ContentAdminWorkspace({ mode = "admin" }: { mode?: "admin" | "review" } = {}) {
+  const roles = useOptionalAuth()?.access?.roles;
+  const admin = roles?.includes("admin") ?? true;
+  const tester = !admin && !roles?.includes("content_reviewer");
+  const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
+  const [panel, setPanel] = useState<"import" | "review" | "users" | "images" | "proposals">(
+    mode === "review" ? "review" : "users",
+  );
   return (
     <AppScreen
+      scrollRef={scrollRef}
       actions={<SignOutButton />}
-      description="Manage registered-user access and administer reviewed study content."
-      eyebrow="Administration"
-      title="Content workspace"
+      description={
+        mode === "review"
+          ? "Review questions and images, and track proposed changes."
+          : "Manage user access and import study content."
+      }
+      eyebrow={mode === "review" ? "Study content" : "Administration"}
+      title={mode === "review" ? "Content Review" : "Administration"}
       maxContentWidth={panel === "review" ? 1480 : 1040}
     >
       <View style={styles.row}>
-        <Tab active={panel === "users"} label="User access" onPress={() => setPanel("users")} />
-        <Tab active={panel === "import"} label="CSV import" onPress={() => setPanel("import")} />
-        <Tab active={panel === "images"} label="Image library" onPress={() => setPanel("images")} />
-        <Tab
-          active={panel === "review"}
-          label="Review questions"
-          onPress={() => setPanel("review")}
-        />
+        {mode === "admin" ? (
+          <>
+            <Tab active={panel === "users"} label="User access" onPress={() => setPanel("users")} />
+            <Tab
+              active={panel === "import"}
+              label="CSV import"
+              onPress={() => setPanel("import")}
+            />
+          </>
+        ) : (
+          <>
+            {admin || tester ? (
+              <Tab
+                active={panel === "images"}
+                label="Image library"
+                onPress={() => setPanel("images")}
+              />
+            ) : null}
+            <Tab
+              active={panel === "review"}
+              label="Review questions"
+              onPress={() => setPanel("review")}
+            />
+            {admin || tester ? (
+              <Tab
+                active={panel === "proposals"}
+                label={admin ? "Pending approvals" : "My proposals"}
+                onPress={() => setPanel("proposals")}
+              />
+            ) : null}
+          </>
+        )}
       </View>
       {panel === "users" ? <UserAccessAdmin /> : null}
-      {panel === "import" ? <ImportPanel onReview={() => setPanel("review")} /> : null}
-      {panel === "review" ? <ReviewPanel /> : null}
-      {panel === "images" ? <VisualLibraryAdmin /> : null}
+      {panel === "import" ? <ImportPanel onReview={() => router.push("/content-review")} /> : null}
+      {panel === "review" ? (
+        <ReviewPanel
+          tester={tester}
+          scrollToTop={() => scrollRef.current?.scrollTo({ y: 0, animated: false })}
+        />
+      ) : null}
+      {panel === "images" ? <VisualLibraryAdmin tester={tester} /> : null}
+      {panel === "proposals" ? <ContentProposals admin={admin} /> : null}
     </AppScreen>
   );
 }
@@ -170,10 +215,12 @@ function ImportPanel({ onReview }: { onReview: () => void }) {
   );
 }
 
-function ReviewPanel() {
-  const queue = useReviewQueue();
-  const [selectedId, setSelectedId] = useState<string>();
-  const detail = useReviewQuestion(selectedId);
+function ReviewPanel({ scrollToTop, tester }: { scrollToTop: () => void; tester: boolean }) {
+  const queue = useReviewQueue(tester);
+  const [selection, setSelection] = useState<ReviewSelection>();
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const selectedId = selection?.ids[selection.index];
+  const detail = useReviewQuestion(selectedId, tester);
 
   const selected = queue.data?.find((item) => item.question_id === selectedId);
   return (
@@ -184,19 +231,32 @@ function ReviewPanel() {
             <View style={styles.backAction}>
               <AppButton
                 label="Back to review queue"
-                onPress={() => setSelectedId(undefined)}
+                onPress={() => setSelection(undefined)}
                 variant="secondary"
               />
             </View>
           ) : null}
-          {detail.data ? (
+          {detail.data && selection ? (
             <QuestionReviewEditor
               key={selectedId}
               detail={detail.data}
-              onBack={() => setSelectedId(undefined)}
+              tester={tester}
+              onBack={() => setSelection(undefined)}
+              onSaved={() =>
+                setSavedIds((ids) => (ids.includes(selectedId) ? ids : [...ids, selectedId]))
+              }
+              saved={savedIds.includes(selectedId)}
+              position={selection.index + 1}
+              total={selection.ids.length}
+              scrollToTop={scrollToTop}
+              onNavigate={(offset) => {
+                if (!selection.ids[selection.index + offset]) return;
+                scrollToTop();
+                setSelection({ ...selection, index: selection.index + offset });
+              }}
               context={
                 selected
-                  ? `${selected.exam_title} · ${selected.module_number ? `Module ${selected.module_number} · ` : ""}${selected.chapter_title ?? selected.topic_title}`
+                  ? `${selected.exam_title} · ${selected.module_number ? `Module ${selected.module_number} · ` : ""}${selected.chapter_number ? `Chapter ${selected.chapter_number} · ` : ""}${selected.chapter_title ?? selected.topic_title}`
                   : undefined
               }
             />
@@ -211,7 +271,16 @@ function ReviewPanel() {
       <View style={selectedId ? { display: "none" } : undefined}>
         {queue.isPending ? <Text style={styles.muted}>Loading questions…</Text> : null}
         {queue.isError ? <Issue error text={safeError(queue.error)} /> : null}
-        <ReviewQuestionBrowser questions={queue.data ?? []} onSelect={setSelectedId} />
+        {queue.data ? (
+          <ReviewQuestionBrowser
+            questions={queue.data}
+            onSelect={(next) => {
+              scrollToTop();
+              setSelection(next);
+            }}
+            savedIds={tester ? [] : savedIds}
+          />
+        ) : null}
       </View>
     </View>
   );

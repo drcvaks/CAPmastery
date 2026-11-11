@@ -1,22 +1,25 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { UserAccessAdmin } from "../features/admin/components/UserAccessAdmin";
 import * as hooks from "../features/admin/hooks/useAdminUserAccess";
+import { learningAccess } from "../services/contentTesterService";
+jest.mock("../services/contentTesterService", () => ({ learningAccess: jest.fn() }));
 
 jest.mock("../features/admin/hooks/useAdminUserAccess", () => ({
+  adminUserAccessKeys: { overview: ["admin-user-access", "overview"] },
   useAdminUserAccessOverview: jest.fn(),
   useUpdateAdminStudentAccess: jest.fn(),
 }));
 
-const update = {
-  data: undefined,
-  error: null,
-  isError: false,
-  isPending: false,
-  isSuccess: false,
-  mutateAsync: jest.fn().mockResolvedValue(undefined),
-  reset: jest.fn(),
-};
+function renderAdmin() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
+  return render(
+    <QueryClientProvider client={client}>
+      <UserAccessAdmin />
+    </QueryClientProvider>,
+  );
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -90,12 +93,27 @@ beforeEach(() => {
     isPending: false,
     isError: false,
   } as never);
-  jest.mocked(hooks.useUpdateAdminStudentAccess).mockReturnValue(update as never);
+  jest.mocked(learningAccess).mockResolvedValue({
+    grants: [],
+    sections: jest
+      .mocked(hooks.useAdminUserAccessOverview)
+      .getMockImplementation()!().data!.packages.map((packet) => ({
+      exam_id: packet.exam_title,
+      exam_title: packet.exam_title,
+      chapter_id: packet.import_package.startsWith("AD_") ? null : packet.import_package,
+      title: packet.topic_titles[0]!,
+      module_number: packet.import_package.startsWith("AD_") ? 1 : null,
+      chapter_number: null,
+      packages: [packet.import_package],
+      question_count: packet.question_count,
+      image_count: 4,
+    })),
+  });
 });
 
 describe("UserAccessAdmin", () => {
   it("shows registered users with existing roles and packet assignments", async () => {
-    await render(<UserAccessAdmin />);
+    await renderAdmin();
     expect(screen.getByText("2 registered · 1 students · 7 study packets")).toBeVisible();
     expect(screen.getByText("new-cadet@example.test")).toBeVisible();
     expect(screen.getByText("No workspace role")).toBeVisible();
@@ -105,34 +123,40 @@ describe("UserAccessAdmin", () => {
   });
 
   it("grants Student access and saves the selected packets together", async () => {
-    await render(<UserAccessAdmin />);
+    await renderAdmin();
     await act(() => fireEvent.press(screen.getByLabelText("Manage access for New Cadet")));
-    expect(screen.getByText("Study packets")).toBeVisible();
-    await act(() => fireEvent.press(screen.getByLabelText("Wright Brothers packets")));
-    expect(screen.getByLabelText("Assign LTL1_C1_100")).toBeDisabled();
+    expect(await screen.findByText("Study & Content Review access")).toBeVisible();
+    await fireEvent.press(screen.getByLabelText("Wright Brothers"));
+    const chapter = "Learn to Lead, Volume 1, Chapter 1";
+    await fireEvent.press(screen.getByLabelText(chapter));
+    expect(screen.getAllByText("100 questions · 4 images")[0]).toBeVisible();
+    const packet = `${chapter}: Study packet (LTL1_C1_100)`;
+    expect(screen.getByLabelText(packet)).toBeDisabled();
 
     await act(() =>
       fireEvent(screen.getByLabelText("Student workspace access"), "valueChange", true),
     );
-    await act(() => fireEvent(screen.getByLabelText("Assign LTL1_C1_100"), "valueChange", true));
-    await act(() => fireEvent.press(screen.getByText("Save student access")));
+    await fireEvent(screen.getByLabelText(packet), "valueChange", true);
+    await fireEvent.press(screen.getByText("Save access"));
+    await screen.findByText("Access saved.");
 
-    expect(update.mutateAsync).toHaveBeenCalledWith({
-      userId: "ac100000-0000-4000-8000-000000000002",
+    expect(learningAccess).toHaveBeenCalledWith("ac100000-0000-4000-8000-000000000002", {
       studentEnabled: true,
-      importPackages: ["LTL1_C1_100"],
+      packages: ["LTL1_C1_100"],
+      grants: undefined,
     });
   });
 
   it("orders exam groups and expands only the requested packet menu", async () => {
-    await render(<UserAccessAdmin />);
+    await renderAdmin();
     await act(() => fireEvent.press(screen.getByLabelText("Manage access for New Cadet")));
 
+    await screen.findByLabelText("Wright Brothers");
     const groupLabels = [
-      "Wright Brothers packets",
-      "Billy Mitchell Leadership packets",
-      "Billy Mitchell Aerospace packets",
-      "Earhart packets",
+      "Wright Brothers",
+      "Billy Mitchell Leadership",
+      "Billy Mitchell Aerospace",
+      "Earhart",
     ];
     expect(
       screen
@@ -140,24 +164,22 @@ describe("UserAccessAdmin", () => {
         .map((element) => element.props.accessibilityLabel)
         .filter((label) => groupLabels.includes(label)),
     ).toEqual(groupLabels);
-    expect(screen.getByLabelText("Wright Brothers packets").props.accessibilityState).toEqual({
+    expect(screen.getByLabelText("Wright Brothers").props.accessibilityState).toEqual({
       expanded: false,
     });
-    expect(
-      screen.getByLabelText("Billy Mitchell Leadership packets").props.accessibilityState,
-    ).toEqual({ expanded: false });
-    expect(screen.queryByLabelText("Assign LTL1_C1_100")).toBeNull();
-    expect(screen.queryByLabelText("Assign LTL2_C4_75")).toBeNull();
-
-    await act(() => fireEvent.press(screen.getByLabelText("Wright Brothers packets")));
-    expect(screen.getByLabelText("Assign LTL1_C1_100")).toBeVisible();
-    await act(() => fireEvent.press(screen.getByLabelText("Billy Mitchell Leadership packets")));
-    expect(screen.getByLabelText("Assign LTL2_C4_75")).toBeVisible();
-    expect(screen.getByText("Select all Billy Mitchell Leadership")).toBeVisible();
+    expect(screen.getByLabelText("Billy Mitchell Leadership").props.accessibilityState).toEqual({
+      expanded: false,
+    });
+    expect(screen.queryByLabelText("Module 1")).toBeNull();
+    await fireEvent.press(screen.getByLabelText("Billy Mitchell Aerospace"));
+    expect(screen.getByLabelText("Module 1")).toBeVisible();
+    expect(screen.queryByLabelText("Module 1: Study packet (AD_M1_100)")).toBeNull();
+    await fireEvent.press(screen.getByLabelText("Module 1"));
+    expect(screen.getByLabelText("Module 1: Study packet (AD_M1_100)")).toBeVisible();
   });
 
   it("filters by email and returns to the complete list", async () => {
-    await render(<UserAccessAdmin />);
+    await renderAdmin();
     await act(() =>
       fireEvent.changeText(screen.getByLabelText("Search by name, email, or role"), "current"),
     );

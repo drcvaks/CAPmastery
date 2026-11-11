@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren, ReactNode, Ref } from "react";
 import { Platform, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { usePathname } from "expo-router";
@@ -13,6 +13,7 @@ type AppScreenProps = PropsWithChildren<{
   description?: string;
   actions?: ReactNode;
   maxContentWidth?: number;
+  scrollRef?: Ref<ScrollView>;
 }>;
 
 export function AppScreen({
@@ -22,6 +23,7 @@ export function AppScreen({
   actions,
   children,
   maxContentWidth = 1040,
+  scrollRef,
 }: AppScreenProps) {
   const auth = useOptionalAuth();
   const pathname = usePathname();
@@ -43,6 +45,7 @@ export function AppScreen({
       <View style={[styles.shell, wide && styles.shellWide]}>
         {!hasStudentWebSidebar ? <WorkspaceSwitcher vertical={wide} /> : null}
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[
             styles.scrollContent,
             wide && styles.scrollContentWide,

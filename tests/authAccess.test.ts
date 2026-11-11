@@ -12,9 +12,17 @@ describe("role-aware routing", () => {
   });
 
   it("routes a content reviewer to the restricted content workspace", () => {
-    expect(canAccessArea(["content_reviewer"], "admin")).toBe(true);
+    expect(canAccessArea(["content_reviewer"], "admin")).toBe(false);
     expect(canAccessArea(["content_reviewer"], "student")).toBe(false);
-    expect(resolveSignedInRoute(["content_reviewer"])).toBe("/admin");
+    expect(resolveSignedInRoute(["content_reviewer"])).toBe("/content-review");
+  });
+
+  it("routes testers only to Content Review unless they have separate study access", () => {
+    expect(resolveSignedInRoute(["content_tester"])).toBe("/content-review");
+    expect(canAccessArea(["content_tester"], "admin")).toBe(false);
+    expect(canAccessArea(["content_tester"], "student")).toBe(false);
+    expect(canAccessArea(["student", "content_tester"], "student")).toBe(true);
+    expect(canAccessArea(["student"], "content-review")).toBe(false);
   });
 
   it("does not invent access for an unassigned account", () => {

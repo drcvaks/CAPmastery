@@ -6,13 +6,18 @@ import { AppTextField } from "../../../components/common/AppTextField";
 import { theme } from "../../../lib/constants/theme";
 import { groupReviewQuestions, type ReviewGroup } from "../reviewCatalog";
 import type { ReviewQueueItem } from "../schemas";
+import { ReviewStatusPill } from "./ReviewStatusPill";
+
+export type ReviewSelection = { ids: string[]; index: number };
 
 export function ReviewQuestionBrowser({
   questions,
   onSelect,
+  savedIds = [],
 }: {
   questions: ReviewQueueItem[];
-  onSelect: (id: string) => void;
+  onSelect: (selection: ReviewSelection) => void;
+  savedIds?: string[];
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
@@ -57,12 +62,20 @@ export function ReviewQuestionBrowser({
         {!filtered.length ? <Text>No questions match these filters.</Text> : null}
       </AppCard>
       {groupReviewQuestions(filtered).map((group) => (
-        <ReviewBranch key={group.key} group={group} onSelect={onSelect} />
+        <ReviewBranch key={group.key} group={group} onSelect={onSelect} savedIds={savedIds} />
       ))}
     </View>
   );
 }
-function ReviewBranch({ group, onSelect }: { group: ReviewGroup; onSelect: (id: string) => void }) {
+function ReviewBranch({
+  group,
+  onSelect,
+  savedIds,
+}: {
+  group: ReviewGroup;
+  onSelect: (selection: ReviewSelection) => void;
+  savedIds: string[];
+}) {
   const [open, setOpen] = useState(false);
   const [limit, setLimit] = useState(20);
   return (
@@ -82,21 +95,24 @@ function ReviewBranch({ group, onSelect }: { group: ReviewGroup; onSelect: (id: 
       {open ? (
         <View style={styles.children}>
           {group.children.map((child) => (
-            <ReviewBranch key={child.key} group={child} onSelect={onSelect} />
+            <ReviewBranch key={child.key} group={child} onSelect={onSelect} savedIds={savedIds} />
           ))}
-          {group.questions.slice(0, limit).map((q) => (
+          {group.questions.slice(0, limit).map((q, index) => (
             <Pressable
               key={q.question_id}
               accessibilityRole="button"
-              accessibilityLabel={`Review ${q.external_id ?? q.question_id}`}
-              onPress={() => onSelect(q.question_id)}
+              accessibilityLabel={`Review question ${index + 1}: ${q.question_text}`}
+              onPress={() =>
+                onSelect({ ids: group.questions.map((item) => item.question_id), index })
+              }
               style={styles.question}
             >
               <View style={styles.row}>
-                <Text style={styles.identifier}>{q.external_id ?? "Question"}</Text>
-                <Text style={styles.muted}>
-                  {q.review_status.replace("_", " ")} · v{q.version}
-                </Text>
+                <Text style={styles.identifier}>Question {index + 1}</Text>
+                <ReviewStatusPill
+                  status={q.review_status}
+                  saved={savedIds.includes(q.question_id)}
+                />
               </View>
               <Text style={styles.body}>{q.question_text}</Text>
               <Text style={styles.identifier}>Open question and answers →</Text>

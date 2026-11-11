@@ -6,6 +6,12 @@ Track-specific resume and chapter/module coverage use a separate owner-only proj
 
 ## Security invariants
 
+The unified User Access editor calls an administrator-only RPC to read aggregate
+curriculum counts and save Study and Content Review assignments in one transaction.
+The RPC reuses the separate audited assignment routines; granting a study packet
+does not confer answer-key access. No answer keys or image URLs are returned by
+the assignment catalog.
+
 - Authorization is database-enforced; hidden routes are not a security control.
 - Students access only their own sessions, attempts, mastery, goals, achievements, and permitted challenges.
 - Guardians/coaches access only actively linked students and only capabilities granted on that relationship.
@@ -55,6 +61,16 @@ CAPTCHA and a formal parental-consent/privacy workflow remain required decisions
 before opening registration beyond the controlled cadet group.
 
 ## Answer protection
+
+The restricted Content Tester role never satisfies the legacy broad reviewer
+predicate. New reviewer-only answer snapshots require an active profile, tester
+role, and a matching question grant for all content, the test, or the chapter.
+Image grants cannot read question keys; the private storage policy allows
+originals linked to assigned chapters (or all registered images for a global
+image grant) and uploads to reserved, non-overwritable proposal paths. Private
+grants and proposals expose no direct client table permissions.
+Only admin-checked RPCs grant access or apply changes; all decisions are audited.
+Study and active practice-test answer delivery are unchanged.
 
 The curriculum review catalog is reviewer/admin-only and returns prompt metadata,
 status, and curriculum labels, not choices, keys, explanations, or student records.

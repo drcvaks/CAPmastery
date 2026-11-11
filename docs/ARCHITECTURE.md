@@ -86,6 +86,12 @@ Reviewed `short_explanation` now takes precedence for default feedback. Memory a
 
 ### Curriculum-based administrator review workspace
 
+The Content Review route is separate from Administration. Restricted testers use
+the existing editors in proposal-only mode with assignment-filtered detail APIs;
+admins use the approval inbox to compare snapshots and apply changes through the
+existing versioned edit and image replacement routines. Tester privileges are
+not treated as study access or as the existing broad reviewer role.
+
 Review questions uses the reviewer-only `get_content_review_catalog` projection
 for complete question metadata, avoiding the old first-100 client slice and
 table-shaped RPC row limits. The JSON inventory groups tests in milestone order,

@@ -5,10 +5,15 @@ import {
   replaceLearningVisual,
 } from "../../../services/adminVisualService";
 import { useAuth } from "../../auth/AuthProvider";
+import { fetchTesterVisuals, proposeVisual } from "../../../services/contentTesterService";
 
-export function useAdminVisuals() {
+export function useAdminVisuals(tester = false, enabled = true) {
   const { session } = useAuth();
-  return useQuery({ queryKey: ["admin-visuals", session?.user.id], queryFn: fetchLearningVisuals });
+  return useQuery({
+    queryKey: ["admin-visuals", session?.user.id, tester],
+    enabled,
+    queryFn: tester ? fetchTesterVisuals : fetchLearningVisuals,
+  });
 }
 export function useAdminVisualUrl(path: string) {
   const { session } = useAuth();
@@ -19,10 +24,10 @@ export function useAdminVisualUrl(path: string) {
     refetchInterval: 5 * 60 * 1000,
   });
 }
-export function useReplaceAdminVisual() {
+export function useReplaceAdminVisual(tester = false) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: replaceLearningVisual,
+    mutationFn: tester ? proposeVisual : replaceLearningVisual,
     onSuccess: async () => {
       await Promise.all([
         client.invalidateQueries({ queryKey: ["admin-visuals"] }),

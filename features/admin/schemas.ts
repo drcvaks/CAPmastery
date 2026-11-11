@@ -14,7 +14,15 @@ export const adminAccessUserSchema = z.object({
   status: z.enum(["active", "disabled"]),
   created_at: z.string(),
   roles: z.array(
-    z.enum(["student", "parent", "coach", "content_reviewer", "squadron_leader", "admin"]),
+    z.enum([
+      "student",
+      "parent",
+      "coach",
+      "content_reviewer",
+      "squadron_leader",
+      "admin",
+      "content_tester",
+    ]),
   ),
   assigned_packages: z.array(z.string().regex(/^[A-Z0-9][A-Z0-9_-]{2,119}$/)),
 });

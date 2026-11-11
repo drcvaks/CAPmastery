@@ -2367,6 +2367,35 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: Json;
       };
+      admin_content_tester_access: { Args: { p_user_id: string; p_grants?: Json }; Returns: Json };
+      admin_learning_access: {
+        Args: {
+          p_user_id: string;
+          p_student_enabled?: boolean;
+          p_import_packages?: string[];
+          p_grants?: Json;
+        };
+        Returns: Json;
+      };
+      get_tester_question_catalog: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_tester_question: { Args: { p_question_id: string }; Returns: Json };
+      get_tester_visuals: { Args: Record<PropertyKey, never>; Returns: Json };
+      submit_content_proposal: {
+        Args: {
+          p_kind: string;
+          p_target: string;
+          p_payload: Json;
+          p_reason: string;
+          p_expected_updated_at: string;
+        };
+        Returns: Json;
+      };
+      finish_content_image_proposal: { Args: { p_id: string }; Returns: undefined };
+      get_content_proposals: { Args: Record<PropertyKey, never>; Returns: Json };
+      admin_decide_content_proposal: {
+        Args: { p_id: string; p_decision: string; p_notes?: string; p_ratings?: Json };
+        Returns: undefined;
+      };
       admin_replace_learning_visual: {
         Args: {
           p_asset_key: string;
@@ -2877,7 +2906,14 @@ export type Database = {
       };
     };
     Enums: {
-      app_role: "student" | "parent" | "coach" | "content_reviewer" | "squadron_leader" | "admin";
+      app_role:
+        | "student"
+        | "parent"
+        | "coach"
+        | "content_reviewer"
+        | "squadron_leader"
+        | "admin"
+        | "content_tester";
       challenge_status: "active" | "completed" | "cancelled";
       cognitive_level: "recall" | "understanding" | "application" | "scenario";
       concept_relationship_type:
@@ -3054,7 +3090,15 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["student", "parent", "coach", "content_reviewer", "squadron_leader", "admin"],
+      app_role: [
+        "student",
+        "parent",
+        "coach",
+        "content_reviewer",
+        "squadron_leader",
+        "admin",
+        "content_tester",
+      ],
       challenge_status: ["active", "completed", "cancelled"],
       cognitive_level: ["recall", "understanding", "application", "scenario"],
       concept_relationship_type: [

@@ -17,6 +17,12 @@ const workspaces: Workspace[] = [
   { area: "student", href: "/home", icon: "school-outline", label: "Student" },
   { area: "parent", href: "/family-progress", icon: "people-outline", label: "Family" },
   { area: "admin", href: "/admin", icon: "settings-outline", label: "Admin" },
+  {
+    area: "content-review",
+    href: "/content-review",
+    icon: "create-outline",
+    label: "Content Review",
+  },
 ];
 
 export function WorkspaceSwitcher({
@@ -97,6 +103,7 @@ export function WorkspaceSwitcher({
 }
 
 function isWorkspaceActive(pathname: string, area: ProtectedArea) {
+  if (area === "content-review") return pathname === "/content-review";
   if (area === "admin") return pathname === "/admin" || pathname.startsWith("/admin/");
   if (area === "parent") return pathname.startsWith("/family-");
   return (

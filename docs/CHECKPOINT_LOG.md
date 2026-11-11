@@ -1,5 +1,51 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Unified Study and Content Review access
+
+- Combined the user access controls into a collapsed test → module/chapter
+  hierarchy. Study packets, question-and-answer review, and image review remain
+  independently assignable; section totals and individual packet counts are shown.
+- Migration 061 adds an administrator-only aggregate catalog and one atomic save
+  through the existing audited Student and tester assignment functions. No new
+  tables or permissions for students/testers. Seven linked regression assertions
+  cover counts, authorization and rollback; apply 061 and expect 740 linked checks.
+- The previous linked baseline was confirmed by the owner: 733/733 passed.
+  Deployment steps are in `docs/CONTENT_REVIEW_TESTERS.md`. The new linked checks
+  were not run here because the database password was not available in this process.
+- Strict TypeScript, changed-file lint and formatting, whitespace checks, and
+  Expo public configuration passed. Jest passed 43/43 suites and 265/265 tests.
+  Production exports passed for web (1,608 modules) and Android Hermes (1,756
+  modules). No subsequent checkpoint was started.
+
+## Post-Checkpoint 10 — Scoped content testers and approvals
+
+- Separated Administration (user access and CSV imports) from Content Review
+  (questions, images, pending approvals or tester history). Added independent
+  question/image access switches at all-content, test, and chapter scope.
+- Migrations 059–060 introduce the restricted tester role, private assignments
+  and proposals, scoped answer/image reads, proposal upload policies, and
+  administrator-only audited decisions. Pending submissions never edit live
+  material; approvals check the baseline and reuse existing publication routines.
+- Added role navigation, assignment and approval UI, typed services, and
+  client/database regressions. Deployment and acceptance steps are in
+  `docs/CONTENT_REVIEW_TESTERS.md`. No tester grants were issued during development.
+- Local verification: strict TypeScript, changed-file ESLint and Prettier, and
+  whitespace checks passed. Jest passed 43/43 suites and 265/265 tests with a
+  30-second per-test timeout. Expo production exports passed on web (1,607
+  modules) and Android Hermes (1,755 modules). The 36 new linked SQL checks
+  were not run here because the process lacks a linked database password.
+  Apply migrations 059–060, verify the expected 733 linked checks, then deploy
+  and smoke-test question-only, image-only, and admin accounts before rollout.
+  No subsequent checkpoint was started.
+
+## Post-Checkpoint 10 — Sequential question review
+
+- Previous and Next navigate the selected chapter's filtered order without reopening the queue or loading all answers. The sequence stays stable if saving changes a question's status. The editor returns to the top on navigation and offers a Next shortcut below its fields.
+- Replaced visible question IDs with curriculum titles, question positions, and status pills. Existing review statuses come from the database; the saved-draft badge tracks successful saves during the current review tab session only.
+- Queue, Previous, and Next share the unsaved-corrections confirmation with save-draft, discard, and keep-editing actions. The queue no longer renders a misleading empty catalog during loading. No database migration, role, or Supabase change is required.
+- Updated the review browser/editor, status pill, shared screen scroll ref, regression tests, and review guide. Next is acceptance in the deployed review workspace after the frontend is redeployed.
+- Validation passed: TypeScript, targeted ESLint, Prettier, whitespace checks, 7/7 tests in the two focused Jest suites, and Expo web production export (1,603 modules). Android export and linked database tests were not rerun for this frontend-only change.
+
 ## Post-Checkpoint 10 — Curriculum review browser and visual question workbench
 
 - Replaced the first-100 flat review list with searchable/status-filtered, initially collapsed test → module → chapter menus. Every question is reachable; expanded chapters render 20 rows at a time. Returning from an editor preserves the open list and filters.

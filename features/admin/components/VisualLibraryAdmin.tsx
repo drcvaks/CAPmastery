@@ -13,8 +13,8 @@ import {
 } from "../hooks/useAdminVisuals";
 import { visualLibraryGroups, type LearningVisual, type PickedVisual } from "../visuals";
 
-export function VisualLibraryAdmin() {
-  const library = useAdminVisuals();
+export function VisualLibraryAdmin({ tester = false }: { tester?: boolean } = {}) {
+  const library = useAdminVisuals(tester);
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<string[]>([]);
   const [selectedKey, setSelectedKey] = useState<string>();
@@ -25,11 +25,14 @@ export function VisualLibraryAdmin() {
       <VisualEditor
         key={`${selected.asset_key}:${selected.storage_path}`}
         visual={selected}
+        tester={tester}
         onBack={() => setSelectedKey(undefined)}
         onSaved={() => {
           setSelectedKey(undefined);
           setNotice(
-            "Replacement saved. Every linked question will use the corrected image when reloaded.",
+            tester
+              ? "Replacement submitted for admin approval. The current image is unchanged."
+              : "Replacement saved. Every linked question will use the corrected image when reloaded.",
           );
         }}
       />
@@ -177,15 +180,17 @@ function VisualThumbnail({ visual, onPress }: { visual: LearningVisual; onPress:
 
 function VisualEditor({
   visual,
+  tester,
   onBack,
   onSaved,
 }: {
   visual: LearningVisual;
+  tester: boolean;
   onBack: () => void;
   onSaved: () => void;
 }) {
   const url = useAdminVisualUrl(visual.storage_path);
-  const replace = useReplaceAdminVisual();
+  const replace = useReplaceAdminVisual(tester);
   const [file, setFile] = useState<PickedVisual | null>(null);
   const [altText, setAltText] = useState(visual.alt_text);
   const [reason, setReason] = useState("");
@@ -241,8 +246,9 @@ function VisualEditor({
           <Text style={styles.muted}>No question currently uses this registered image.</Text>
         ) : null}
         <Text style={styles.muted}>
-          Replacing this shared image updates every question listed above. Existing question text,
-          captions, and scores are unchanged. The previous file is retained.
+          {tester
+            ? "Your replacement stays private until an admin approves it. The admin will see all chapters affected by a shared image."
+            : "Replacing this shared image updates every linked question. Existing question text, captions, and scores are unchanged. The previous file is retained."}
         </Text>
         {uri ? (
           <VisualAidViewer
@@ -307,7 +313,7 @@ function VisualEditor({
               multiline
             />
             <AppButton
-              label="Save replacement"
+              label={tester ? "Submit image proposal" : "Save replacement"}
               loading={replace.isPending}
               disabled={imageError || !altText.trim() || reason.trim().length < 10}
               onPress={() => void save()}

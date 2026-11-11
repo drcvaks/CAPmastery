@@ -3,6 +3,14 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { ContentAdminWorkspace } from "../features/admin/components/ContentAdminWorkspace";
 import * as adminHooks from "../features/admin/hooks/useContentAdmin";
 import * as userAccessHooks from "../features/admin/hooks/useAdminUserAccess";
+import { useOptionalAuth } from "../features/auth/AuthContext";
+jest.mock("../features/admin/components/ContentProposals", () => ({
+  ContentProposals: () => null,
+}));
+jest.mock("../features/admin/components/LearningAccessEditor", () => ({
+  LearningAccessEditor: () => null,
+}));
+jest.mock("../features/auth/AuthContext", () => ({ useOptionalAuth: jest.fn() }));
 jest.mock("../features/admin/components/VisualLibraryAdmin", () => ({
   VisualLibraryAdmin: () => null,
 }));
@@ -44,6 +52,7 @@ function mutation(data?: unknown) {
 }
 
 beforeEach(() => {
+  jest.mocked(useOptionalAuth).mockReturnValue(null);
   jest.mocked(userAccessHooks.useAdminUserAccessOverview).mockReturnValue({
     data: { users: [], packages: [] },
     isPending: false,
@@ -106,6 +115,89 @@ beforeEach(() => {
 });
 
 describe("ContentAdminWorkspace", () => {
+  it("shows assigned answer details to a tester with proposal actions only", async () => {
+    jest
+      .mocked(useOptionalAuth)
+      .mockReturnValue({ status: "signed_in", access: { roles: ["content_tester"] } } as never);
+    const submit = jest.fn().mockResolvedValue(undefined);
+    jest.mocked(adminHooks.useSaveReviewQuestion).mockReturnValue({ mutateAsync: submit } as never);
+    await render(<ContentAdminWorkspace mode="review" />);
+    expect(screen.getByText("My proposals")).toBeVisible();
+    expect(screen.queryByText("User access")).toBeNull();
+    expect(screen.queryByText("Pending approvals")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Review question 1:/ }));
+    expect(adminHooks.useReviewQuestion).toHaveBeenCalledWith(questionId, true);
+    expect(screen.getByText("Correct answer: A")).toBeVisible();
+    expect(screen.queryByText("Approve for students")).toBeNull();
+    expect(screen.queryByText("Save corrections as draft")).toBeNull();
+    await fireEvent.changeText(
+      screen.getByLabelText("Reason for proposal (at least 10 characters)"),
+      "Clarify this wording",
+    );
+    await fireEvent.press(screen.getByText("Submit question proposal"));
+    expect(submit).toHaveBeenCalledWith(
+      expect.objectContaining({ changeReason: "Clarify this wording" }),
+    );
+  });
+  it("saves and advances within the chapter, then shows saved status when returning", async () => {
+    const nextId = "81000000-0000-4000-8000-000000000002";
+    const queue = jest.mocked(adminHooks.useReviewQueue).getMockImplementation()!();
+    const entry = queue.data![0]!;
+    jest.mocked(adminHooks.useReviewQueue).mockReturnValue({
+      ...queue,
+      data: [
+        entry,
+        {
+          ...entry,
+          question_id: nextId,
+          external_id: "CHECKPOINT8-Q002",
+          question_text: "Second question?",
+        },
+      ],
+    } as never);
+    const detail = jest.mocked(adminHooks.useReviewQuestion).getMockImplementation()!(questionId);
+    jest.mocked(adminHooks.useReviewQuestion).mockImplementation(
+      (id) =>
+        ({
+          ...detail,
+          data: id
+            ? {
+                ...detail.data!,
+                question: {
+                  ...detail.data!.question,
+                  id,
+                  question_text: id === nextId ? "Second question?" : entry.question_text,
+                },
+              }
+            : undefined,
+        }) as never,
+    );
+    const save = jest.fn().mockResolvedValue(1);
+    jest.mocked(adminHooks.useSaveReviewQuestion).mockReturnValue({ mutateAsync: save } as never);
+    await render(<ContentAdminWorkspace mode="review" />);
+    await fireEvent.press(screen.getByText("Review questions"));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Review question 1:/ }));
+    expect(screen.getByRole("button", { name: "Previous question" })).toBeDisabled();
+    await fireEvent.changeText(screen.getByLabelText("Question"), "Edited first question?");
+    await fireEvent.press(screen.getByRole("button", { name: "Next question" }));
+    expect(screen.getByText("Question 1 of 2")).toBeVisible();
+    await fireEvent.press(screen.getByRole("button", { name: "Save draft and continue" }));
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({ question_text: "Edited first question?" }),
+      }),
+    );
+    expect(screen.getByText("Question 2 of 2")).toBeVisible();
+    expect(screen.getByLabelText("Question").props.value).toBe("Second question?");
+    expect(screen.getByRole("button", { name: "Next question" })).toBeDisabled();
+    await fireEvent.press(screen.getByRole("button", { name: "Previous question" }));
+    expect(screen.getByText("Corrections saved · draft")).toBeVisible();
+  });
+
   it("loads the canonical template and reports invalid pasted CSV before import", async () => {
     await render(<ContentAdminWorkspace />);
     await act(() => fireEvent.press(screen.getByText("CSV import")));
@@ -120,16 +212,12 @@ describe("ContentAdminWorkspace", () => {
   });
 
   it("opens a draft in the shared reviewer editor without exposing student data", async () => {
-    await render(<ContentAdminWorkspace />);
+    await render(<ContentAdminWorkspace mode="review" />);
     await act(() => fireEvent.press(screen.getByText("Review questions")));
     await act(() => fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" })));
     await act(() => fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" })));
-    await act(() =>
-      fireEvent.press(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" })),
-    );
-    expect(
-      screen.getByText("draft · version 1. Review decisions save the displayed corrections first."),
-    ).toBeVisible();
+    await act(() => fireEvent.press(screen.getByRole("button", { name: /^Review question 1:/ })));
+    expect(screen.getByText("Leadership · Review topic")).toBeVisible();
     expect(screen.getByText("Correct answer: A")).toBeVisible();
     expect(screen.getByLabelText("Choice D text").props.value).toBe("Choice 4");
     expect(screen.getByText("Approve for students")).toBeVisible();
@@ -138,7 +226,7 @@ describe("ContentAdminWorkspace", () => {
     expect(screen.queryByText(/student progress/i)).toBeNull();
     await act(() => fireEvent.press(screen.getByText("Back to review queue")));
     expect(screen.getByText("Review queue")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Review question 1:/ })).toBeVisible();
   });
 
   it("saves all visible corrections and retains hidden classifications", async () => {
@@ -149,11 +237,11 @@ describe("ContentAdminWorkspace", () => {
       isError: false,
       isSuccess: false,
     } as never);
-    await render(<ContentAdminWorkspace />);
+    await render(<ContentAdminWorkspace mode="review" />);
     await fireEvent.press(screen.getByText("Review questions"));
     await fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" }));
     await fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" }));
-    await fireEvent.press(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Review question 1:/ }));
     expect(screen.queryByLabelText("Difficulty")).toBeNull();
     await fireEvent.changeText(
       screen.getByLabelText("Question"),
@@ -177,11 +265,11 @@ describe("ContentAdminWorkspace", () => {
   });
 
   it("warns before discarding an unsaved question edit", async () => {
-    await render(<ContentAdminWorkspace />);
+    await render(<ContentAdminWorkspace mode="review" />);
     await fireEvent.press(screen.getByText("Review questions"));
     await fireEvent.press(screen.getByRole("button", { name: "Expand Leadership" }));
     await fireEvent.press(screen.getByRole("button", { name: "Expand Review topic" }));
-    await fireEvent.press(screen.getByRole("button", { name: "Review CHECKPOINT8-Q001" }));
+    await fireEvent.press(screen.getByRole("button", { name: /^Review question 1:/ }));
     await fireEvent.changeText(screen.getByLabelText("Question"), "Unsaved correction");
     await fireEvent.press(screen.getByText("Back to review queue"));
     expect(screen.getByText("Discard corrections and return")).toBeVisible();
