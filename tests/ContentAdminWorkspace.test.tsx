@@ -10,6 +10,9 @@ jest.mock("../features/admin/components/ContentProposals", () => ({
 jest.mock("../features/admin/components/LearningAccessEditor", () => ({
   LearningAccessEditor: () => null,
 }));
+jest.mock("../features/admin/components/FamilyLinksEditor", () => ({
+  FamilyLinksEditor: () => null,
+}));
 jest.mock("../features/auth/AuthContext", () => ({ useOptionalAuth: jest.fn() }));
 jest.mock("../features/admin/components/VisualLibraryAdmin", () => ({
   VisualLibraryAdmin: () => null,

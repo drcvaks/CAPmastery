@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserAccessAdmin } from "../features/admin/components/UserAccessAdmin";
 import * as hooks from "../features/admin/hooks/useAdminUserAccess";
 import { learningAccess } from "../services/contentTesterService";
+import { adminFamilyLinks } from "../services/adminAccessService";
+jest.mock("../services/adminAccessService", () => ({ adminFamilyLinks: jest.fn() }));
 jest.mock("../services/contentTesterService", () => ({ learningAccess: jest.fn() }));
 
 jest.mock("../features/admin/hooks/useAdminUserAccess", () => ({
@@ -112,6 +114,34 @@ beforeEach(() => {
 });
 
 describe("UserAccessAdmin", () => {
+  it("requires confirmation before linking a cadet or revoking access", async () => {
+    const parentId = "ac100000-0000-4000-8000-000000000002";
+    const studentId = "ac100000-0000-4000-8000-000000000003";
+    jest
+      .mocked(adminFamilyLinks)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { student_id: studentId, relationship_type: "parent", can_view_progress: true },
+      ])
+      .mockResolvedValueOnce([]);
+    await renderAdmin();
+    await fireEvent.press(screen.getByLabelText("Family links for New Cadet"));
+    await screen.findByText("No active family links.");
+    await fireEvent.changeText(
+      screen.getByLabelText("Find a cadet by name or email"),
+      "current-student",
+    );
+    await fireEvent.press(screen.getByLabelText(/Link cadet: Current Student/));
+    expect(adminFamilyLinks).toHaveBeenCalledTimes(1);
+    await fireEvent.press(screen.getByLabelText("Confirm family link"));
+    await screen.findByText("Can view progress");
+    expect(adminFamilyLinks).toHaveBeenCalledWith(parentId, { studentId, enabled: true });
+    await fireEvent.press(screen.getByLabelText(/Revoke link: Current Student/));
+    expect(adminFamilyLinks).toHaveBeenCalledTimes(2);
+    await fireEvent.press(screen.getByLabelText("Confirm revocation"));
+    await screen.findByText("No active family links.");
+    expect(adminFamilyLinks).toHaveBeenCalledWith(parentId, { studentId, enabled: false });
+  });
   it("shows registered users with existing roles and packet assignments", async () => {
     await renderAdmin();
     expect(screen.getByText("2 registered · 1 students · 7 study packets")).toBeVisible();

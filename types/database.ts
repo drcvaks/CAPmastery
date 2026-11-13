@@ -2377,6 +2377,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      admin_family_links: {
+        Args: { p_guardian_id: string; p_student_id?: string; p_enabled?: boolean };
+        Returns: Json;
+      };
       get_tester_question_catalog: { Args: Record<PropertyKey, never>; Returns: Json };
       get_tester_question: { Args: { p_question_id: string }; Returns: Json };
       get_tester_visuals: { Args: Record<PropertyKey, never>; Returns: Json };

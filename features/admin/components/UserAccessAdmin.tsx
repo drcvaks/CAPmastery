@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { LearningAccessEditor } from "./LearningAccessEditor";
+import { FamilyLinksEditor } from "./FamilyLinksEditor";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppCard } from "../../../components/common/AppCard";
+import { AppButton } from "../../../components/common/AppButton";
 import { AppTextField } from "../../../components/common/AppTextField";
 import { theme } from "../../../lib/constants/theme";
 import { useAdminUserAccessOverview } from "../hooks/useAdminUserAccess";
@@ -13,7 +15,20 @@ export function UserAccessAdmin() {
   const overview = useAdminUserAccessOverview();
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>();
+  const [familyId, setFamilyId] = useState<string>();
   const selectedUser = overview.data?.users.find((user) => user.user_id === selectedId);
+  const familyUser = overview.data?.users.find((user) => user.user_id === familyId);
+
+  if (familyUser && overview.data) {
+    return (
+      <FamilyLinksEditor
+        key={familyUser.user_id}
+        parent={familyUser}
+        users={overview.data.users}
+        onBack={() => setFamilyId(undefined)}
+      />
+    );
+  }
 
   if (selectedUser && overview.data) {
     return (
@@ -63,37 +78,45 @@ export function UserAccessAdmin() {
       </AppCard>
 
       {users.map((user) => (
-        <Pressable
-          accessibilityHint="Opens Study and Content Review permissions"
-          accessibilityLabel={`Manage access for ${user.display_name}`}
-          accessibilityRole="button"
-          key={user.user_id}
-          onPress={() => setSelectedId(user.user_id)}
-          style={({ pressed }) => [styles.userCard, pressed && styles.pressed]}
-        >
-          <View style={styles.userHeading}>
-            <View style={styles.userIdentity}>
-              <Text style={styles.userName}>{user.display_name}</Text>
-              <Text style={styles.email}>{user.email ?? "No email address"}</Text>
+        <View key={user.user_id} style={styles.userCard}>
+          <Pressable
+            accessibilityHint="Opens Study and Content Review permissions"
+            accessibilityLabel={`Manage access for ${user.display_name}`}
+            accessibilityRole="button"
+            onPress={() => setSelectedId(user.user_id)}
+            style={({ pressed }) => [styles.cardContents, pressed && styles.pressed]}
+          >
+            <View style={styles.userHeading}>
+              <View style={styles.userIdentity}>
+                <Text style={styles.userName}>{user.display_name}</Text>
+                <Text style={styles.email}>{user.email ?? "No email address"}</Text>
+              </View>
+              <Text style={[styles.status, user.status === "disabled" && styles.statusDisabled]}>
+                {user.status}
+              </Text>
             </View>
-            <Text style={[styles.status, user.status === "disabled" && styles.statusDisabled]}>
-              {user.status}
-            </Text>
+            <View style={styles.chips}>
+              {user.roles.length ? (
+                user.roles.map((role) => (
+                  <Text key={role} style={[styles.chip, role === "student" && styles.studentChip]}>
+                    {role}
+                  </Text>
+                ))
+              ) : (
+                <Text style={styles.noRole}>No workspace role</Text>
+              )}
+            </View>
+            <AssignedPacketSummary packets={overview.data?.packages ?? []} user={user} />
+            <Text style={styles.manageLabel}>Manage access →</Text>
+          </Pressable>
+          <View style={{ alignItems: "flex-start" }}>
+            <AppButton
+              label={`Family links for ${user.display_name}`}
+              variant="secondary"
+              onPress={() => setFamilyId(user.user_id)}
+            />
           </View>
-          <View style={styles.chips}>
-            {user.roles.length ? (
-              user.roles.map((role) => (
-                <Text key={role} style={[styles.chip, role === "student" && styles.studentChip]}>
-                  {role}
-                </Text>
-              ))
-            ) : (
-              <Text style={styles.noRole}>No workspace role</Text>
-            )}
-          </View>
-          <AssignedPacketSummary packets={overview.data?.packages ?? []} user={user} />
-          <Text style={styles.manageLabel}>Manage access →</Text>
-        </Pressable>
+        </View>
       ))}
     </View>
   );
@@ -218,6 +241,7 @@ function ErrorText({ value }: { value: unknown }) {
 }
 
 const styles = StyleSheet.create({
+  cardContents: { gap: theme.spacing.sm },
   assignedGroup: { color: theme.colors.ink, fontSize: 13, fontWeight: "700", lineHeight: 18 },
   assignedSummary: { gap: 2 },
   chip: {

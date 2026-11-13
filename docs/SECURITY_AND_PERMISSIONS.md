@@ -6,6 +6,11 @@ Track-specific resume and chapter/module coverage use a separate owner-only proj
 
 ## Security invariants
 
+Administration → User access → Family links manages each parent–cadet pair
+through the admin-only, audited `admin_family_links` RPC. New links grant the
+Parent role and progress viewing atomically, with content assignment and
+challenge management off. Revoking one link leaves other links and roles intact.
+
 The unified User Access editor calls an administrator-only RPC to read aggregate
 curriculum counts and save Study and Content Review assignments in one transaction.
 The RPC reuses the separate audited assignment routines; granting a study packet

@@ -1,5 +1,18 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Admin family links
+
+- In Administration → User access, find the parent's registered account and
+  open **Family links**. Find a cadet by name or email and confirm the link.
+  Repeat for siblings. The parent uses Family Progress after signing in again.
+- Migration `202611130062` adds admin-only listing, read-only linking, and
+  audited revocation for individual pairs. No accounts were linked in this work.
+- Apply migration 062 before deploying the app and run the linked database suite
+  (12 new family-link tests, 752 total from the previous 740). Smoke-test linking
+  and revoking using test accounts.
+- TypeScript, Expo public configuration and whitespace checks passed. Linked
+  database tests were not run because the database password was unavailable.
+
 ## Post-Checkpoint 10 — Unified Study and Content Review access
 
 - Combined the user access controls into a collapsed test → module/chapter
