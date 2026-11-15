@@ -6,6 +6,11 @@ Track-specific resume and chapter/module coverage use a separate owner-only proj
 
 ## Security invariants
 
+Study issue reports are tied to the signed-in cadet's own answered Study encounter.
+Raw report rows are visible only to their author; admin-only RPCs list reporter
+identity, retrieve version snapshots, and audit status changes. Review and tester
+roles do not receive reporter details. Report status does not publish content.
+
 Administration → User access → Family links manages each parent–cadet pair
 through the admin-only, audited `admin_family_links` RPC. New links grant the
 Parent role and progress viewing atomically, with content assignment and

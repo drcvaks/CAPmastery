@@ -4,6 +4,9 @@ import { ContentAdminWorkspace } from "../features/admin/components/ContentAdmin
 import * as adminHooks from "../features/admin/hooks/useContentAdmin";
 import * as userAccessHooks from "../features/admin/hooks/useAdminUserAccess";
 import { useOptionalAuth } from "../features/auth/AuthContext";
+jest.mock("../features/admin/components/StudyIssueInbox", () => ({
+  StudyIssueInbox: () => null,
+}));
 jest.mock("../features/admin/components/ContentProposals", () => ({
   ContentProposals: () => null,
 }));

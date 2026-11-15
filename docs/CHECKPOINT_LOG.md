@@ -1,5 +1,24 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Study issue reporting
+
+- Answered Study questions offer **Report an issue** with multiple categories,
+  an optional note (required for Other), and disclosure that admins can identify
+  the reporter. Practice-test and challenge reporting are out of scope.
+- **Content Review → Issue reports** shows reporter identity to admins only.
+  Admins can check the session-recorded version when available, open the current
+  question editor, and update report status without changing live content.
+- Apply migration `202611150063` before deploying the app. Run the linked
+  database suite (12 additional assertions, expected total 764), then try
+  submitting as a cadet and reviewing as an admin using test accounts.
+- Version references come from Study session assignment. Study can display live
+  content, so a concurrent edit or replacement can make the saved version or
+  visual reference differ from what appeared on-screen. Older reports may have
+  no version. Automatic tester assignments and reporter notifications are not
+  part of this release.
+- TypeScript, Expo public configuration, and whitespace checks passed. Linked
+  database checks were not run here because the database password was unavailable.
+
 ## Post-Checkpoint 10 — Admin family links
 
 - In Administration → User access, find the parent's registered account and

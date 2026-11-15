@@ -19,6 +19,7 @@ import { QuestionReviewEditor } from "./QuestionReviewEditor";
 import { UserAccessAdmin } from "./UserAccessAdmin";
 import { VisualLibraryAdmin } from "./VisualLibraryAdmin";
 import { ContentProposals } from "./ContentProposals";
+import { StudyIssueInbox } from "./StudyIssueInbox";
 import { useOptionalAuth } from "../../auth/AuthContext";
 import { useRouter } from "expo-router";
 
@@ -28,9 +29,9 @@ export function ContentAdminWorkspace({ mode = "admin" }: { mode?: "admin" | "re
   const tester = !admin && !roles?.includes("content_reviewer");
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  const [panel, setPanel] = useState<"import" | "review" | "users" | "images" | "proposals">(
-    mode === "review" ? "review" : "users",
-  );
+  const [panel, setPanel] = useState<
+    "import" | "review" | "users" | "images" | "proposals" | "issues"
+  >(mode === "review" ? "review" : "users");
   return (
     <AppScreen
       scrollRef={scrollRef}
@@ -75,6 +76,13 @@ export function ContentAdminWorkspace({ mode = "admin" }: { mode?: "admin" | "re
                 onPress={() => setPanel("proposals")}
               />
             ) : null}
+            {admin ? (
+              <Tab
+                active={panel === "issues"}
+                label="Issue reports"
+                onPress={() => setPanel("issues")}
+              />
+            ) : null}
           </>
         )}
       </View>
@@ -88,6 +96,11 @@ export function ContentAdminWorkspace({ mode = "admin" }: { mode?: "admin" | "re
       ) : null}
       {panel === "images" ? <VisualLibraryAdmin tester={tester} /> : null}
       {panel === "proposals" ? <ContentProposals admin={admin} /> : null}
+      {panel === "issues" && admin ? (
+        <StudyIssueInbox
+          scrollToTop={() => scrollRef.current?.scrollTo({ y: 0, animated: false })}
+        />
+      ) : null}
     </AppScreen>
   );
 }

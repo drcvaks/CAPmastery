@@ -1384,6 +1384,9 @@ export type Database = {
       };
       question_reports: {
         Row: {
+          categories: string[];
+          question_version: number | null;
+          session_question_id: string | null;
           created_at: string;
           details: string;
           id: string;
@@ -1397,6 +1400,9 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          categories?: string[];
+          question_version?: number | null;
+          session_question_id?: string | null;
           created_at?: string;
           details: string;
           id?: string;
@@ -1410,6 +1416,9 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          categories?: string[];
+          question_version?: number | null;
+          session_question_id?: string | null;
           created_at?: string;
           details?: string;
           id?: string;
@@ -2380,6 +2389,25 @@ export type Database = {
       admin_family_links: {
         Args: { p_guardian_id: string; p_student_id?: string; p_enabled?: boolean };
         Returns: Json;
+      };
+      submit_study_issue: {
+        Args: { p_session_question_id: string; p_categories: string[]; p_details: string };
+        Returns: undefined;
+      };
+      admin_study_issues: {
+        Args: {
+          p_status: Database["public"]["Enums"]["question_report_status"];
+          p_offset?: number;
+        };
+        Returns: Json;
+      };
+      admin_study_issue_snapshot: { Args: { p_report_id: string }; Returns: Json };
+      admin_set_study_issue_status: {
+        Args: {
+          p_report_id: string;
+          p_status: Database["public"]["Enums"]["question_report_status"];
+        };
+        Returns: undefined;
       };
       get_tester_question_catalog: { Args: Record<PropertyKey, never>; Returns: Json };
       get_tester_question: { Args: { p_question_id: string }; Returns: Json };

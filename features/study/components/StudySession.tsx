@@ -17,6 +17,7 @@ import type { PracticeTopicResult } from "../../practice/schemas";
 import { getSafeStudyMessage } from "../errors";
 import { useStudySession, useSubmitStudyAnswer } from "../hooks/useStudySession";
 import { AnswerResultCard } from "./AnswerResultCard";
+import { StudyIssueForm } from "./StudyIssueForm";
 import { crossedMissionCheckpoint } from "../../progress/missions";
 
 export function StudySessionView({ sessionId }: { sessionId: string }) {
@@ -512,6 +513,13 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
                 : null
             }
           />
+          {session.mode === "study" ? (
+            <StudyIssueForm
+              key={currentQuestion.session_question_id}
+              id={currentQuestion.session_question_id}
+              prompt={currentQuestion.question_text}
+            />
+          ) : null}
           {markReviewed.isError ? (
             <Text accessibilityRole="alert" style={styles.error}>
               Review progress could not be saved. Please try again before continuing.

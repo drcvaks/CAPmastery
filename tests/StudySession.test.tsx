@@ -13,6 +13,7 @@ import {
 
 const mockReplace = jest.fn();
 jest.mock("expo-router", () => ({ useRouter: () => ({ replace: mockReplace }) }));
+jest.mock("../services/studyIssueService", () => ({ submitStudyIssue: jest.fn() }));
 jest.mock("../features/study/hooks/useStudySession", () => ({
   useStudySession: jest.fn(),
   useSubmitStudyAnswer: jest.fn(),
