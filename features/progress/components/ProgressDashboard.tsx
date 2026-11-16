@@ -7,7 +7,6 @@ import { AppCard } from "../../../components/common/AppCard";
 import { AppLinkButton } from "../../../components/common/AppLinkButton";
 import { AppScreen } from "../../../components/common/AppScreen";
 import { theme } from "../../../lib/constants/theme";
-import { SignOutButton } from "../../auth/components/SignOutButton";
 import { getSafeStudyMessage } from "../../study/errors";
 import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { READINESS_DISCLAIMER } from "../readiness";
@@ -44,10 +43,7 @@ export function ProgressDashboard({ audience, compact = false }: ProgressDashboa
         audience === "guardian" ? (
           <View style={styles.studentTabs}>
             <AppLinkButton href="/family-challenge" label="Family challenge" variant="secondary" />
-            <SignOutButton />
           </View>
-        ) : compact ? (
-          <SignOutButton />
         ) : undefined
       }
       description={description}

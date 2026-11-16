@@ -9,7 +9,6 @@ import { AppScreen } from "../../../components/common/AppScreen";
 import { AppTextField } from "../../../components/common/AppTextField";
 import { theme } from "../../../lib/constants/theme";
 import { useAuth } from "../../auth/AuthProvider";
-import { SignOutButton } from "../../auth/components/SignOutButton";
 import {
   ENCOURAGEMENT_LABELS,
   encouragementReactionSchema,
@@ -38,11 +37,8 @@ export function ChallengeWorkspace({ audience }: { audience: "guardian" | "stude
         guardian ? (
           <View style={styles.actionRow}>
             <AppLinkButton href="/family-progress" label="View progress" variant="secondary" />
-            <SignOutButton />
           </View>
-        ) : (
-          <SignOutButton />
-        )
+        ) : undefined
       }
       description={
         guardian

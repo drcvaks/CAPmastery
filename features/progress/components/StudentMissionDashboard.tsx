@@ -5,7 +5,6 @@ import { AppScreen } from "../../../components/common/AppScreen";
 import { AppCard } from "../../../components/common/AppCard";
 import { AppButton } from "../../../components/common/AppButton";
 import { theme } from "../../../lib/constants/theme";
-import { SignOutButton } from "../../auth/components/SignOutButton";
 import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { useStudentMissions, useSetWeeklyMission } from "../hooks/useStudentMissions";
 import { crossedMissionCheckpoint, nextMissionCheckpoint } from "../missions";
@@ -54,7 +53,6 @@ export function StudentMissionDashboard() {
       eyebrow="Student Home"
       title="Your next mission"
       description="A few minutes. A little practice. Another checkpoint reached."
-      actions={<SignOutButton />}
       maxContentWidth={splitLayout ? 1400 : 1080}
     >
       {mission.isPending ? (

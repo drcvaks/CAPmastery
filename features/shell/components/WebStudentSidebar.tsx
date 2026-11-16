@@ -10,7 +10,7 @@ import { WorkspaceSwitcher } from "../../auth/components/WorkspaceSwitcher";
 type StudentTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const capMasteryLogo = require("../../../assets/cap-mastery-logo.png");
+const capMasteryBanner = require("../../../assets/cap-mastery-banner.png");
 
 const routePresentation = {
   home: { label: "Home", icon: "compass", color: "#FFFFFF", soft: "#123C7A" },
@@ -25,18 +25,16 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
 
   return (
     <View accessibilityLabel="Student navigation" style={styles.sidebar}>
-      <View style={styles.brandCard}>
-        <View style={styles.brandMark}>
-          <Image
-            accessibilityLabel="CAP Mastery crest"
-            resizeMode="contain"
-            source={capMasteryLogo}
-            style={styles.brandLogo}
-          />
-        </View>
-        <View style={styles.brandCopy}>
-          <Text style={styles.brandName}>CAP Mastery</Text>
-          <Text style={styles.brandTagline}>Cadet study coach</Text>
+      <View style={styles.brandBannerCard}>
+        <Image
+          accessibilityLabel="CAP Mastery — Mastering Cadet Milestone Tests"
+          resizeMode="contain"
+          source={capMasteryBanner}
+          style={styles.brandBannerImage}
+        />
+        <View style={styles.srOnly}>
+          <Text>CAP Mastery</Text>
+          <Text>Cadet study coach</Text>
         </View>
       </View>
 
@@ -130,42 +128,28 @@ const styles = StyleSheet.create({
     width: 40,
   },
   avatarText: { color: theme.colors.surface, fontSize: 16, fontWeight: "900" },
-  brandCard: {
+  brandBannerCard: {
     alignItems: "center",
-    backgroundColor: "#0A2E66",
-    borderColor: "#1D4682",
+    backgroundColor: "#ECF0F5",
+    borderColor: "#CBD5E1",
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    flexDirection: "row",
-    gap: theme.spacing.sm,
-    padding: 10,
+    height: 74,
+    justifyContent: "center",
+    overflow: "hidden",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    width: "100%",
   },
-  brandCopy: { flex: 1, gap: 2 },
-  brandLogo: {
+  brandBannerImage: {
     height: "100%",
     width: "100%",
   },
-  brandMark: {
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    height: 46,
-    justifyContent: "center",
+  srOnly: {
+    height: 1,
     overflow: "hidden",
-    width: 46,
-  },
-  brandName: {
-    color: theme.colors.surface,
-    fontSize: 18,
-    fontWeight: "900",
-    letterSpacing: -0.3,
-  },
-  brandTagline: {
-    color: "#CBD5E1",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
+    position: "absolute",
+    width: 1,
   },
   silverRule: {
     backgroundColor: "#183B70",
@@ -230,11 +214,11 @@ const styles = StyleSheet.create({
     borderRightColor: "#163564",
     borderRightWidth: 1,
     gap: theme.spacing.md,
-    minWidth: 252,
+    minWidth: 280,
     paddingBottom: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: 12,
     paddingTop: theme.spacing.lg,
-    width: 252,
+    width: 280,
   },
   spacer: { flex: 1, minHeight: theme.spacing.lg },
 });

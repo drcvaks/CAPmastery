@@ -6,7 +6,6 @@ import { AppCard } from "../../../components/common/AppCard";
 import { AppScreen } from "../../../components/common/AppScreen";
 import { AppTextField } from "../../../components/common/AppTextField";
 import { theme } from "../../../lib/constants/theme";
-import { SignOutButton } from "../../auth/components/SignOutButton";
 import { QUESTION_CSV_TEMPLATE, validateQuestionCsv, type CsvPreview } from "../csv";
 import {
   useDuplicateCheck,
@@ -35,7 +34,6 @@ export function ContentAdminWorkspace({ mode = "admin" }: { mode?: "admin" | "re
   return (
     <AppScreen
       scrollRef={scrollRef}
-      actions={<SignOutButton />}
       description={
         mode === "review"
           ? "Review questions and images, and track proposed changes."
