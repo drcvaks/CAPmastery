@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Tabs } from "expo-router";
 
 import { theme } from "../../../lib/constants/theme";
@@ -9,11 +9,14 @@ import { WorkspaceSwitcher } from "../../auth/components/WorkspaceSwitcher";
 
 type StudentTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const capMasteryLogo = require("../../../assets/cap-mastery-logo.png");
+
 const routePresentation = {
-  home: { label: "Home", icon: "compass", color: "#38BDF8", soft: "#0C4A6E" },
-  study: { label: "Study", icon: "book", color: "#F87171", soft: "#7F1D1D" },
-  progress: { label: "Progress", icon: "stats-chart", color: "#34D399", soft: "#064E3B" },
-  challenge: { label: "Challenge", icon: "trophy", color: "#FBBF24", soft: "#78350F" },
+  home: { label: "Home", icon: "compass", color: "#FFFFFF", soft: "#123C7A" },
+  study: { label: "Study", icon: "book", color: "#FCA5A5", soft: "#7F1D1D" },
+  progress: { label: "Progress", icon: "stats-chart", color: "#6EE7B7", soft: "#064E3B" },
+  challenge: { label: "Challenge", icon: "trophy", color: "#E2E8F0", soft: "#1E3A5F" },
 } as const;
 
 export function WebStudentSidebar({ state, descriptors, navigation }: StudentTabBarProps) {
@@ -24,7 +27,12 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
     <View accessibilityLabel="Student navigation" style={styles.sidebar}>
       <View style={styles.brandCard}>
         <View style={styles.brandMark}>
-          <Ionicons color={theme.colors.goldBright} name="shield-checkmark" size={24} />
+          <Image
+            accessibilityLabel="CAP Mastery crest"
+            resizeMode="contain"
+            source={capMasteryLogo}
+            style={styles.brandLogo}
+          />
         </View>
         <View style={styles.brandCopy}>
           <Text style={styles.brandName}>CAP Mastery</Text>
@@ -32,7 +40,7 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
         </View>
       </View>
 
-      <View style={styles.goldRule} />
+      <View style={styles.silverRule} />
 
       <Text style={styles.sectionLabel}>Study tools</Text>
       <View style={styles.navigationLinks}>
@@ -76,9 +84,7 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
               <Text style={[styles.navigationText, focused && styles.navigationTextActive]}>
                 {label}
               </Text>
-              {focused ? (
-                <View style={[styles.activeDot, { backgroundColor: theme.colors.goldBright }]} />
-              ) : null}
+              {focused ? <View style={styles.activeDot} /> : null}
             </Pressable>
           );
         })}
@@ -104,13 +110,21 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
 }
 
 const styles = StyleSheet.create({
-  activeDot: { borderRadius: 5, height: 9, marginLeft: "auto", width: 9 },
+  activeDot: {
+    backgroundColor: "#BA121A",
+    borderColor: "#FFFFFF",
+    borderRadius: 5,
+    borderWidth: 1.5,
+    height: 9,
+    marginLeft: "auto",
+    width: 9,
+  },
   avatar: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderColor: theme.colors.goldBright,
+    borderColor: "#CBD5E1",
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1.5,
     height: 40,
     justifyContent: "center",
     width: 40,
@@ -118,40 +132,43 @@ const styles = StyleSheet.create({
   avatarText: { color: theme.colors.surface, fontSize: 16, fontWeight: "900" },
   brandCard: {
     alignItems: "center",
-    backgroundColor: "#11325B",
-    borderColor: "#1F497D",
+    backgroundColor: "#0A2E66",
+    borderColor: "#1D4682",
     borderRadius: theme.radius.md,
     borderWidth: 1,
     flexDirection: "row",
     gap: theme.spacing.sm,
-    padding: 12,
+    padding: 10,
   },
   brandCopy: { flex: 1, gap: 2 },
+  brandLogo: {
+    height: "100%",
+    width: "100%",
+  },
   brandMark: {
     alignItems: "center",
-    backgroundColor: "#06162B",
-    borderColor: theme.colors.gold,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1.5,
-    height: 42,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    height: 46,
     justifyContent: "center",
-    width: 42,
+    overflow: "hidden",
+    width: 46,
   },
   brandName: {
     color: theme.colors.surface,
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: "900",
     letterSpacing: -0.3,
   },
   brandTagline: {
-    color: theme.colors.goldBright,
+    color: "#CBD5E1",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
-  goldRule: {
-    backgroundColor: "#1F497D",
+  silverRule: {
+    backgroundColor: "#183B70",
     height: 1,
     marginVertical: 2,
   },
@@ -164,8 +181,8 @@ const styles = StyleSheet.create({
   },
   identity: {
     alignItems: "center",
-    backgroundColor: "#071A33",
-    borderColor: "#1B3B64",
+    backgroundColor: "#021636",
+    borderColor: "#163564",
     borderRadius: theme.radius.md,
     borderWidth: 1,
     flexDirection: "row",
@@ -175,11 +192,11 @@ const styles = StyleSheet.create({
   identityCopy: { flex: 1, gap: 2 },
   identityName: { color: theme.colors.surface, fontSize: 14, fontWeight: "900" },
   identityRole: {
-    color: "#9BB8D3",
+    color: "#94A3B8",
     fontSize: 11,
     fontWeight: "700",
-    textTransform: "uppercase",
     letterSpacing: 0.4,
+    textTransform: "uppercase",
   },
   navigationLink: {
     alignItems: "center",
@@ -192,15 +209,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   navigationLinkActive: {
-    backgroundColor: "#163B6B",
-    borderColor: "#2C5E9E",
+    backgroundColor: "#0D3573",
+    borderColor: "#265399",
   },
   navigationLinks: { gap: 6 },
-  navigationText: { color: "#C6D9EC", fontSize: 15, fontWeight: "700" },
+  navigationText: { color: "#CBD5E1", fontSize: 15, fontWeight: "700" },
   navigationTextActive: { color: theme.colors.surface, fontWeight: "900" },
   pressed: { opacity: 0.8 },
   sectionLabel: {
-    color: "#89A9C6",
+    color: "#94A3B8",
     fontSize: 11,
     fontWeight: "900",
     letterSpacing: 1.1,
@@ -210,7 +227,7 @@ const styles = StyleSheet.create({
   },
   sidebar: {
     backgroundColor: theme.colors.primary,
-    borderRightColor: "#1D3F6E",
+    borderRightColor: "#163564",
     borderRightWidth: 1,
     gap: theme.spacing.md,
     minWidth: 252,

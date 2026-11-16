@@ -3,10 +3,9 @@ import { Controller, useForm } from "react-hook-form";
 import { useState } from "react";
 
 import { AppButton } from "../../components/common/AppButton";
-import { AppCard } from "../../components/common/AppCard";
 import { AppLinkButton } from "../../components/common/AppLinkButton";
-import { AppScreen } from "../../components/common/AppScreen";
 import { AppTextField } from "../../components/common/AppTextField";
+import { AuthShowcaseFrame } from "../../features/auth/components/AuthShowcaseFrame";
 import {
   passwordResetRequestSchema,
   type PasswordResetRequestValues,
@@ -37,31 +36,32 @@ export default function ForgotPasswordScreen() {
   });
 
   return (
-    <AppScreen
-      eyebrow="Account recovery"
+    <AuthShowcaseFrame
+      activeTab="recovery"
+      errorMessage={requestError}
+      statusMessage={message}
+      subtitle="Enter the email associated with your CAP Mastery account."
       title="Reset your password"
-      description="Enter the email associated with your CAP Mastery invitation."
     >
-      <AppCard title="Recovery email" description={requestError ?? message ?? undefined}>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <AppTextField
-              autoCapitalize="none"
-              autoComplete="email"
-              error={fieldState.error?.message}
-              keyboardType="email-address"
-              label="Email"
-              onBlur={field.onBlur}
-              onChangeText={field.onChange}
-              value={field.value}
-            />
-          )}
-        />
-        <AppButton label="Send reset link" loading={isSubmitting} onPress={() => void submit()} />
-        <AppLinkButton href="/sign-in" label="Back to sign in" variant="secondary" />
-      </AppCard>
-    </AppScreen>
+      <Controller
+        control={control}
+        name="email"
+        render={({ field, fieldState }) => (
+          <AppTextField
+            autoCapitalize="none"
+            autoComplete="email"
+            error={fieldState.error?.message}
+            keyboardType="email-address"
+            label="Email"
+            onBlur={field.onBlur}
+            onChangeText={field.onChange}
+            placeholder="cadet@example.com"
+            value={field.value}
+          />
+        )}
+      />
+      <AppButton label="Send reset link" loading={isSubmitting} onPress={() => void submit()} />
+      <AppLinkButton href="/sign-in" label="Back to sign in" variant="secondary" />
+    </AuthShowcaseFrame>
   );
 }
