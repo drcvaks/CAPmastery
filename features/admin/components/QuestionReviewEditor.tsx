@@ -124,43 +124,45 @@ export function QuestionReviewEditor({
   }
   return (
     <View style={styles.stack}>
-      <Text accessibilityRole="header" style={styles.title}>
-        {context ?? "Question review"}
-      </Text>
-      <View style={styles.toolbar}>
-        <Text style={styles.heading}>
-          Question {position} of {total}
+      <View style={styles.workbenchHeader}>
+        <Text accessibilityRole="header" style={styles.title}>
+          {context ?? "Question review"}
         </Text>
-        <ReviewStatusPill
-          status={detail.question.review_status}
-          saved={!tester && (saved || save.isSuccess)}
-        />
-        {tester && (saved || save.isSuccess) ? (
-          <Text style={styles.success}>Proposal submitted</Text>
-        ) : null}
-      </View>
-      <View style={styles.toolbar}>
-        <AppButton
-          label="Back to review queue"
-          variant="secondary"
-          disabled={busy}
-          onPress={() => askToGo("queue")}
-        />
-        <AppButton
-          label="Previous question"
-          variant="secondary"
-          disabled={busy || position <= 1}
-          onPress={() => askToGo(-1)}
-        />
-        <AppButton
-          label="Next question"
-          variant="secondary"
-          disabled={busy || position >= total}
-          onPress={() => askToGo(1)}
-        />
-        <Text style={styles.muted}>
-          {form.formState.isDirty ? "Unsaved corrections" : "No unsaved corrections"}
-        </Text>
+        <View style={styles.toolbar}>
+          <Text style={styles.positionBadge}>
+            Question {position} of {total}
+          </Text>
+          <ReviewStatusPill
+            status={detail.question.review_status}
+            saved={!tester && (saved || save.isSuccess)}
+          />
+          {tester && (saved || save.isSuccess) ? (
+            <Text style={styles.success}>Proposal submitted</Text>
+          ) : null}
+        </View>
+        <View style={styles.toolbar}>
+          <AppButton
+            label="Back to review queue"
+            variant="secondary"
+            disabled={busy}
+            onPress={() => askToGo("queue")}
+          />
+          <AppButton
+            label="Previous question"
+            variant="secondary"
+            disabled={busy || position <= 1}
+            onPress={() => askToGo(-1)}
+          />
+          <AppButton
+            label="Next question"
+            variant="secondary"
+            disabled={busy || position >= total}
+            onPress={() => askToGo(1)}
+          />
+          <Text style={[styles.muted, form.formState.isDirty && styles.dirtyWarning]}>
+            {form.formState.isDirty ? "Unsaved corrections" : "No unsaved corrections"}
+          </Text>
+        </View>
       </View>
       {destination !== undefined ? (
         <AppCard
@@ -210,9 +212,11 @@ export function QuestionReviewEditor({
             description="Edit the question and every choice together. Select the one correct answer."
           >
             {field("question_text", "Question", true)}
-            <Text style={styles.answer}>
-              Correct answer: {edit.correct_letter || "Choose below"}
-            </Text>
+            <View style={styles.answerBanner}>
+              <Text style={styles.answer}>
+                Correct answer: {edit.correct_letter || "Choose below"}
+              </Text>
+            </View>
             <View style={[styles.choices, wide && styles.choiceGrid]}>
               {edit.choices.map((choice, index) => {
                 const correct = choice.key === edit.correct_letter;
@@ -420,19 +424,19 @@ export function QuestionReviewEditor({
 function Disclosure({ title, children }: PropsWithChildren<{ title: string }>) {
   const [open, setOpen] = useState(false);
   return (
-    <View style={styles.disclosure}>
+    <View style={[styles.disclosure, open && styles.disclosureOpen]}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${open ? "Hide" : "Show"} ${title}`}
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen((value) => !value)}
-        style={styles.disclosureButton}
+        style={[styles.disclosureButton, open && styles.disclosureButtonOpen]}
       >
         <Text style={styles.heading}>
           {open ? "▾" : "▸"} {title}
         </Text>
       </Pressable>
-      {open ? <View style={styles.stack}>{children}</View> : null}
+      {open ? <View style={styles.disclosureBody}>{children}</View> : null}
     </View>
   );
 }
@@ -471,51 +475,137 @@ function toEdit(detail: ReviewQuestion): ReviewEditPayload {
   };
 }
 const styles = StyleSheet.create({
-  stack: { gap: 16 },
-  layout: { gap: 20 },
-  wide: { flexDirection: "row", alignItems: "flex-start" },
-  primary: { minWidth: 0 },
-  primaryWide: { flex: 2 },
-  secondary: { minWidth: 0, gap: 16 },
-  secondaryWide: { flex: 1 },
-  choices: { gap: 12 },
-  choiceGrid: { flexDirection: "row", flexWrap: "wrap" },
-  choice: {
-    backgroundColor: theme.colors.background,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
-    borderRadius: 12,
-    padding: 12,
-    gap: 10,
-  },
-  half: { flexBasis: "47%", flexGrow: 1, minWidth: 0 },
-  correct: { borderColor: theme.colors.success },
-  choiceHeading: { gap: 8 },
-  heading: { fontSize: 16, fontWeight: "800", color: theme.colors.ink },
-  title: { fontSize: 24, fontWeight: "800", color: theme.colors.ink },
-  body: { fontSize: 14, color: theme.colors.ink },
-  muted: { fontSize: 14, color: theme.colors.muted },
-  answer: { fontWeight: "800", color: theme.colors.success, fontSize: 16 },
-  answerButton: {
+  answer: { color: theme.colors.success, fontSize: 15, fontWeight: "900" },
+  answerBanner: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  answerButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 38,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  answerSelected: {
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
+  },
+  body: { color: theme.colors.ink, fontSize: 14, fontWeight: "700" },
+  choice: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.md,
+    borderWidth: 1.5,
+    gap: 10,
+    padding: 14,
+  },
+  choiceGrid: { flexDirection: "row", flexWrap: "wrap" },
+  choiceHeading: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "space-between",
+  },
+  choices: { gap: 12 },
+  correct: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.success,
+    borderWidth: 2,
+  },
+  dirtyWarning: {
+    color: theme.colors.warning,
+    fontWeight: "800",
+  },
+  disclosure: {
+    backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: 8,
-    minHeight: 40,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  disclosureBody: {
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    gap: 14,
+    padding: 14,
+  },
+  disclosureButton: {
+    justifyContent: "center",
+    minHeight: 48,
+    padding: 14,
+  },
+  disclosureButtonOpen: {
+    backgroundColor: theme.colors.primarySoft,
+  },
+  disclosureOpen: {
+    borderColor: theme.colors.borderStrong,
+  },
+  error: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: "700",
     padding: 10,
   },
-  answerSelected: { backgroundColor: theme.colors.primary },
-  selectedText: { color: theme.colors.surface, fontWeight: "700" },
-  toolbar: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10 },
-  success: { color: theme.colors.success },
-  error: { color: theme.colors.danger },
-  disclosure: { gap: 12 },
-  disclosureButton: {
-    minHeight: 48,
-    padding: 12,
+  half: { flexBasis: "47%", flexGrow: 1, minWidth: 0 },
+  heading: { color: theme.colors.ink, fontSize: 16, fontWeight: "900" },
+  layout: { gap: 20 },
+  muted: { color: theme.colors.muted, fontSize: 14, fontWeight: "600" },
+  positionBadge: {
+    backgroundColor: theme.colors.goldSoft,
+    borderColor: theme.colors.goldBorder,
+    borderRadius: theme.radius.pill,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 10,
+    color: theme.colors.primaryDark,
+    fontSize: 13,
+    fontWeight: "900",
+    overflow: "hidden",
+    paddingHorizontal: 12,
+    paddingVertical: 5,
   },
-  settings: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  primary: { minWidth: 0 },
+  primaryWide: { flex: 2 },
+  secondary: { gap: 16, minWidth: 0 },
+  secondaryWide: { flex: 1 },
+  selectedText: { color: theme.colors.surface, fontSize: 14, fontWeight: "800" },
   setting: { flexBasis: 280, flexGrow: 1 },
+  settings: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  stack: { gap: 16 },
+  success: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.success,
+    fontSize: 13,
+    fontWeight: "800",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  title: { color: theme.colors.ink, fontSize: 22, fontWeight: "900" },
+  toolbar: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  wide: { alignItems: "flex-start", flexDirection: "row" },
+  workbenchHeader: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderLeftColor: theme.colors.gold,
+    borderLeftWidth: 4,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    gap: 12,
+    padding: 16,
+  },
 });

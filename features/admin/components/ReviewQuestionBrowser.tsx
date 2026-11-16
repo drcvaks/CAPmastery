@@ -49,17 +49,21 @@ export function ReviewQuestionBrowser({
               onPress={() => setStatus(value)}
               style={[styles.chip, status === value && styles.selected]}
             >
-              <Text style={status === value ? styles.selectedText : styles.body}>
+              <Text style={status === value ? styles.selectedText : styles.chipText}>
                 {value === "all" ? "All statuses" : value.replace("_", " ")}
               </Text>
             </Pressable>
           ))}
         </View>
-        <Text style={styles.muted}>
-          {filtered.length} of {questions.length} questions · Answers load only when you open a
-          question.
-        </Text>
-        {!filtered.length ? <Text>No questions match these filters.</Text> : null}
+        <View style={styles.countBanner}>
+          <Text style={styles.muted}>
+            {filtered.length} of {questions.length} questions · Answers load only when you open a
+            question.
+          </Text>
+        </View>
+        {!filtered.length ? (
+          <Text style={styles.muted}>No questions match these filters.</Text>
+        ) : null}
       </AppCard>
       {groupReviewQuestions(filtered).map((group) => (
         <ReviewBranch key={group.key} group={group} onSelect={onSelect} savedIds={savedIds} />
@@ -79,13 +83,13 @@ function ReviewBranch({
   const [open, setOpen] = useState(false);
   const [limit, setLimit] = useState(20);
   return (
-    <View style={styles.branch}>
+    <View style={[styles.branch, open && styles.branchOpen]}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${open ? "Collapse" : "Expand"} ${group.title}`}
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen((value) => !value)}
-        style={styles.header}
+        style={[styles.header, open && styles.headerOpen]}
       >
         <Text style={styles.heading}>
           {open ? "▾" : "▸"} {group.title}
@@ -107,7 +111,7 @@ function ReviewBranch({
               }
               style={styles.question}
             >
-              <View style={styles.row}>
+              <View style={styles.questionHeader}>
                 <Text style={styles.identifier}>Question {index + 1}</Text>
                 <ReviewStatusPill
                   status={q.review_status}
@@ -115,7 +119,7 @@ function ReviewBranch({
                 />
               </View>
               <Text style={styles.body}>{q.question_text}</Text>
-              <Text style={styles.identifier}>Open question and answers →</Text>
+              <Text style={styles.actionText}>Open question and answers →</Text>
             </Pressable>
           ))}
           {limit < group.questions.length ? (
@@ -131,22 +135,87 @@ function ReviewBranch({
   );
 }
 const styles = StyleSheet.create({
-  stack: { gap: 16 },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  actionText: { color: theme.colors.accent, fontSize: 13, fontWeight: "800" },
+  body: { color: theme.colors.ink, fontSize: 15, fontWeight: "600", lineHeight: 22 },
   branch: {
-    borderWidth: 1,
+    backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: 12,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
     overflow: "hidden",
   },
-  header: { backgroundColor: theme.colors.surface, padding: 16, gap: 4, minHeight: 60 },
-  children: { padding: 12, gap: 12 },
-  heading: { fontSize: 17, fontWeight: "800", color: theme.colors.ink },
-  body: { fontSize: 15, lineHeight: 22, color: theme.colors.ink },
-  muted: { fontSize: 13, color: theme.colors.muted },
-  identifier: { color: theme.colors.accent, fontWeight: "700" },
-  question: { backgroundColor: theme.colors.surface, padding: 16, borderRadius: 10, gap: 8 },
-  chip: { padding: 10, borderRadius: 8, borderWidth: 1, borderColor: theme.colors.border },
-  selected: { backgroundColor: theme.colors.primary },
-  selectedText: { color: theme.colors.surface, fontSize: 15 },
+  branchOpen: {
+    borderColor: theme.colors.borderStrong,
+  },
+  children: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    gap: 12,
+    padding: 14,
+  },
+  chip: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  chipText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "capitalize",
+  },
+  countBanner: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  header: {
+    backgroundColor: theme.colors.surface,
+    gap: 4,
+    justifyContent: "center",
+    minHeight: 60,
+    padding: 16,
+  },
+  headerOpen: {
+    backgroundColor: theme.colors.primarySoft,
+  },
+  heading: { color: theme.colors.ink, fontSize: 17, fontWeight: "900" },
+  identifier: { color: theme.colors.primary, fontSize: 13, fontWeight: "900" },
+  muted: { color: theme.colors.muted, fontSize: 13, fontWeight: "600" },
+  question: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderLeftColor: theme.colors.primary,
+    borderLeftWidth: 4,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: 8,
+    padding: 16,
+  },
+  questionHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "space-between",
+  },
+  row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  selected: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.gold,
+  },
+  selectedText: {
+    color: theme.colors.surface,
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "capitalize",
+  },
+  stack: { gap: 16 },
 });

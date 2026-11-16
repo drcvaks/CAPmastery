@@ -64,42 +64,50 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
 
   return (
     <AppCard title={option.blueprint_name} description={option.description}>
-      <Text style={styles.unofficial}>Unofficial study practice—not an official CAP exam.</Text>
-      <Text style={styles.detail}>
-        {option.question_count} questions · {coverageLabel} · Feedback after completion
-      </Text>
-      {isLeadershipFullExam ? (
-        <Text style={styles.muted}>
-          Every form uses 7–13 questions from each chapter, favors high exam-likeness questions, and
-          avoids duplicate question families.
+      <View style={styles.unofficialBadge}>
+        <Text style={styles.unofficial}>Unofficial study practice—not an official CAP exam.</Text>
+      </View>
+
+      <View style={styles.specBox}>
+        <Text style={styles.detail}>
+          {option.question_count} questions · {coverageLabel} · Feedback after completion
         </Text>
-      ) : null}
-      {isAerospaceFullExam ? (
-        <Text style={styles.muted}>
-          Every form balances all seven Aerospace Dimensions modules, favors high exam-likeness
-          questions, and avoids duplicate question families.
-        </Text>
-      ) : null}
-      {isWrightMockExam ? (
-        <Text style={styles.muted}>
-          Every form uses 10 questions from each Wright Brothers chapter, favors high exam-likeness
-          questions, and avoids duplicate question families.
-        </Text>
-      ) : null}
-      {isEarhartFullExam ? (
-        <Text style={styles.muted}>
-          Every form balances Chapters 9–11, favors high exam-likeness questions, and avoids
-          duplicate question families.
-        </Text>
-      ) : null}
-      {!isFullExam ? (
-        <Text style={styles.muted}>
-          This is the original Chapter 1 pilot. Chapters 4–8 are currently covered by the separate
-          50-question Mitchell practice test.
-        </Text>
-      ) : null}
+        {isLeadershipFullExam ? (
+          <Text style={styles.muted}>
+            Every form uses 7–13 questions from each chapter, favors high exam-likeness questions,
+            and avoids duplicate question families.
+          </Text>
+        ) : null}
+        {isAerospaceFullExam ? (
+          <Text style={styles.muted}>
+            Every form balances all seven Aerospace Dimensions modules, favors high exam-likeness
+            questions, and avoids duplicate question families.
+          </Text>
+        ) : null}
+        {isWrightMockExam ? (
+          <Text style={styles.muted}>
+            Every form uses 10 questions from each Wright Brothers chapter, favors high
+            exam-likeness questions, and avoids duplicate question families.
+          </Text>
+        ) : null}
+        {isEarhartFullExam ? (
+          <Text style={styles.muted}>
+            Every form balances Chapters 9–11, favors high exam-likeness questions, and avoids
+            duplicate question families.
+          </Text>
+        ) : null}
+        {!isFullExam ? (
+          <Text style={styles.muted}>
+            This is the original Chapter 1 pilot. Chapters 4–8 are currently covered by the separate
+            50-question Mitchell practice test.
+          </Text>
+        ) : null}
+      </View>
+
       {option.time_limit_seconds === null ? (
-        <Text style={styles.detail}>Untimed mock exam · No clock</Text>
+        <View style={styles.timerBox}>
+          <Text style={styles.detail}>Untimed mock exam · No clock</Text>
+        </View>
       ) : option.allow_untimed ? (
         <View style={styles.switchRow}>
           <View style={styles.switchCopy}>
@@ -114,7 +122,9 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
           />
         </View>
       ) : (
-        <Text style={styles.detail}>Time limit: {minutes} minutes</Text>
+        <View style={styles.timerBox}>
+          <Text style={styles.detail}>Time limit: {minutes} minutes</Text>
+        </View>
       )}
       {option.time_limit_seconds !== null ? (
         <Text style={styles.muted}>
@@ -147,12 +157,46 @@ function PracticeOptionCard({ option }: { option: PracticeTestOption }) {
 }
 
 const styles = StyleSheet.create({
-  detail: { color: theme.colors.ink, fontSize: 14, lineHeight: 21 },
-  error: { color: theme.colors.danger, fontSize: 15 },
+  detail: { color: theme.colors.ink, fontSize: 14, fontWeight: "800", lineHeight: 21 },
+  error: { color: theme.colors.danger, fontSize: 15, fontWeight: "700" },
   muted: { color: theme.colors.muted, fontSize: 13, lineHeight: 19 },
+  specBox: {
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: 6,
+    padding: theme.spacing.md,
+  },
   stack: { gap: theme.spacing.lg },
   switchCopy: { flex: 1, gap: 2 },
-  switchRow: { alignItems: "center", flexDirection: "row", gap: theme.spacing.md },
+  switchRow: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    padding: 12,
+  },
   switchTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
-  unofficial: { color: theme.colors.accent, fontSize: 14, fontWeight: "800", lineHeight: 20 },
+  timerBox: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: "#B3D4F0",
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  unofficial: { color: theme.colors.accent, fontSize: 13, fontWeight: "900", lineHeight: 19 },
+  unofficialBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: theme.colors.accentSoft,
+    borderColor: theme.colors.dangerBorder,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
 });

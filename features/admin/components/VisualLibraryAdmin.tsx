@@ -69,9 +69,11 @@ export function VisualLibraryAdmin({ tester = false }: { tester?: boolean } = {}
           variant="secondary"
           onPress={() => void library.refetch()}
         />
-        {library.isPending ? <Text>Loading images…</Text> : null}
+        {library.isPending ? <Text style={styles.muted}>Loading images…</Text> : null}
         {library.isError ? <ErrorText error={library.error} /> : null}
-        {library.data && visuals.length === 0 ? <Text>No images match this search.</Text> : null}
+        {library.data && visuals.length === 0 ? (
+          <Text style={styles.muted}>No images match this search.</Text>
+        ) : null}
       </AppCard>
       {visualLibraryGroups(visuals).map((group) => {
         const open = expanded.includes(group.id) || Boolean(filter);
@@ -122,7 +124,7 @@ function VisualSection({
         accessibilityLabel={`${expanded ? "Collapse" : "Expand"} ${label}`}
         accessibilityState={{ expanded }}
         onPress={() => setExpanded((current) => !current)}
-        style={styles.sectionHeader}
+        style={[styles.sectionHeader, expanded && styles.sectionHeaderOpen]}
       >
         <Text style={styles.heading}>
           {expanded ? "▾" : "▸"} {label}
@@ -155,18 +157,20 @@ function VisualThumbnail({ visual, onPress }: { visual: LearningVisual; onPress:
       onPress={onPress}
       style={styles.thumbnail}
     >
-      {url.data ? (
-        <Image
-          accessibilityLabel={visual.alt_text}
-          source={{ uri: url.data }}
-          resizeMode="contain"
-          style={styles.image}
-        />
-      ) : (
-        <Text style={styles.muted}>
-          {url.isError ? "Preview unavailable — open to retry" : "Loading preview…"}
-        </Text>
-      )}
+      <View style={styles.imageFrame}>
+        {url.data ? (
+          <Image
+            accessibilityLabel={visual.alt_text}
+            source={{ uri: url.data }}
+            resizeMode="contain"
+            style={styles.image}
+          />
+        ) : (
+          <Text style={styles.muted}>
+            {url.isError ? "Preview unavailable — open to retry" : "Loading preview…"}
+          </Text>
+        )}
+      </View>
       <Text numberOfLines={2} style={styles.heading}>
         {visual.alt_text}
       </Text>
@@ -235,16 +239,18 @@ function VisualEditor({
         title={visual.alt_text}
         description={`${visual.asset_key} · ${visual.width} × ${visual.height} · ${visual.status}`}
       >
-        <Text style={styles.heading}>Used in</Text>
-        {visual.locations.map((loc, i) => (
-          <Text key={i} style={styles.muted}>
-            {loc.exam_title} · {loc.module_number ? `Module ${loc.module_number} · ` : ""}
-            {loc.chapter_title} · {loc.question_count} questions
-          </Text>
-        ))}
-        {!visual.locations.length ? (
-          <Text style={styles.muted}>No question currently uses this registered image.</Text>
-        ) : null}
+        <View style={styles.usageBox}>
+          <Text style={styles.heading}>Used in</Text>
+          {visual.locations.map((loc, i) => (
+            <Text key={i} style={styles.muted}>
+              {loc.exam_title} · {loc.module_number ? `Module ${loc.module_number} · ` : ""}
+              {loc.chapter_title} · {loc.question_count} questions
+            </Text>
+          ))}
+          {!visual.locations.length ? (
+            <Text style={styles.muted}>No question currently uses this registered image.</Text>
+          ) : null}
+        </View>
         <Text style={styles.muted}>
           {tester
             ? "Your replacement stays private until an admin approves it. The admin will see all chapters affected by a shared image."
@@ -263,7 +269,7 @@ function VisualEditor({
             onImageError={() => setImageError(true)}
           />
         ) : (
-          <Text>Loading image…</Text>
+          <Text style={styles.muted}>Loading image…</Text>
         )}
         {url.isError ? (
           <>
@@ -292,8 +298,8 @@ function VisualEditor({
           unchanged.
         </Text>
         {file ? (
-          <>
-            <Text>
+          <View style={styles.replacementBox}>
+            <Text style={styles.fileLabel}>
               {file.name} · {file.width} × {file.height}
             </Text>
             <AppTextField
@@ -330,7 +336,7 @@ function VisualEditor({
                 replace.reset();
               }}
             />
-          </>
+          </View>
         ) : null}
         {error ? <ErrorText error={error} /> : null}
         {replace.isError ? <ErrorText error={replace.error} /> : null}
@@ -349,30 +355,80 @@ function ErrorText({ error }: { error: unknown }) {
   );
 }
 const styles = StyleSheet.create({
-  sectionHeader: {
-    borderColor: theme.colors.border,
-    borderWidth: 1,
+  action: { color: theme.colors.accent, fontSize: 13, fontWeight: "800" },
+  error: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
     borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.danger,
+    fontSize: 14,
+    fontWeight: "700",
+    padding: 10,
+  },
+  fileLabel: { color: theme.colors.primary, fontSize: 14, fontWeight: "800" },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.md },
+  heading: { color: theme.colors.ink, fontSize: 16, fontWeight: "800" },
+  image: { height: 160, width: "100%" },
+  imageFrame: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 168,
+    padding: 6,
+  },
+  muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
+  replacementBox: {
+    backgroundColor: theme.colors.goldSoft,
+    borderColor: theme.colors.goldBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
     padding: theme.spacing.md,
-    minHeight: 48,
+  },
+  sectionHeader: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
     gap: theme.spacing.xs,
+    minHeight: 48,
+    padding: theme.spacing.md,
+  },
+  sectionHeaderOpen: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.borderStrong,
   },
   stack: { gap: theme.spacing.md },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.md },
-  thumbnail: {
-    flexGrow: 1,
-    flexBasis: 250,
-    maxWidth: 440,
+  success: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.md,
     borderWidth: 1,
+    color: theme.colors.success,
+    fontWeight: "800",
+    padding: 10,
+  },
+  thumbnail: {
+    backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
+    borderWidth: 1,
+    flexBasis: 250,
+    flexGrow: 1,
     gap: theme.spacing.sm,
+    maxWidth: 440,
+    padding: theme.spacing.md,
   },
-  image: { width: "100%", height: 160 },
-  heading: { fontSize: 16, fontWeight: "700", color: theme.colors.ink },
-  muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 21 },
-  action: { color: theme.colors.accent, fontWeight: "700" },
-  error: { color: theme.colors.danger },
-  success: { color: theme.colors.success, fontWeight: "700" },
+  usageBox: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: 4,
+    padding: theme.spacing.md,
+  },
 });

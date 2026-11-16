@@ -16,14 +16,21 @@ export default function StudentLayout() {
         tabBar={useWebSidebar ? (props) => <WebStudentSidebar {...props} /> : undefined}
         screenOptions={{
           headerShown: !useWebSidebar,
-          headerStyle: { backgroundColor: theme.colors.surface },
-          headerTintColor: theme.colors.primary,
-          headerTitleStyle: { fontWeight: "800" },
-          tabBarActiveTintColor: theme.colors.accent,
+          headerStyle: {
+            backgroundColor: theme.colors.primaryDark,
+          },
+          headerTintColor: theme.colors.surface,
+          headerTitleStyle: { fontWeight: "900", letterSpacing: 0.3 },
+          tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.muted,
+          tabBarLabelStyle: { fontSize: 12, fontWeight: "800" },
           tabBarStyle: {
             backgroundColor: theme.colors.surface,
-            borderTopColor: theme.colors.border,
+            borderTopColor: theme.colors.borderStrong,
+            borderTopWidth: 1,
+            minHeight: 62,
+            paddingBottom: 6,
+            paddingTop: 6,
           },
           tabBarPosition: useWebSidebar ? "left" : "bottom",
         }}

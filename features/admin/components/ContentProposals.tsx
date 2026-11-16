@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Image, Text, View, useWindowDimensions } from "react-native";
+import { Image, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppCard } from "../../../components/common/AppCard";
 import { AppButton } from "../../../components/common/AppButton";
 import { AppTextField } from "../../../components/common/AppTextField";
+import { theme } from "../../../lib/constants/theme";
 import {
   decideContentProposal,
   fetchContentProposals,
@@ -20,7 +21,6 @@ function errorText(error: unknown) {
     ? String(error.message)
     : "The proposal request failed.";
 }
-const stack = { gap: 12 };
 const statusLabels = {
   pending: "Pending approval",
   approved: "Approved",
@@ -41,7 +41,9 @@ export function ContentProposals({ admin }: { admin: boolean }) {
   if (proposals.isError)
     return (
       <AppCard title="Proposals unavailable">
-        <Text accessibilityRole="alert">{errorText(proposals.error)}</Text>
+        <Text accessibilityRole="alert" style={styles.errorAlert}>
+          {errorText(proposals.error)}
+        </Text>
         <AppButton label="Retry proposals" onPress={() => void proposals.refetch()} />
       </AppCard>
     );
@@ -51,7 +53,7 @@ export function ContentProposals({ admin }: { admin: boolean }) {
     );
   const list = proposals.data?.filter((item) => !admin || showHistory || item.status === "pending");
   return (
-    <View style={stack}>
+    <View style={styles.stack}>
       <AppCard
         title={admin ? "Pending approvals" : "My proposals"}
         description={
@@ -60,22 +62,24 @@ export function ContentProposals({ admin }: { admin: boolean }) {
             : "Your proposals do not change live content until approved."
         }
       >
-        {admin ? (
+        <View style={styles.actionRow}>
+          {admin ? (
+            <AppButton
+              label={showHistory ? "Show pending only" : "Include proposal history"}
+              variant="secondary"
+              onPress={() => setShowHistory(!showHistory)}
+            />
+          ) : null}
           <AppButton
-            label={showHistory ? "Show pending only" : "Include proposal history"}
+            label="Refresh proposals"
             variant="secondary"
-            onPress={() => setShowHistory(!showHistory)}
+            onPress={() => void proposals.refetch()}
           />
-        ) : null}
-        <AppButton
-          label="Refresh proposals"
-          variant="secondary"
-          onPress={() => void proposals.refetch()}
-        />
+        </View>
         {proposals.isPending ? (
-          <Text>Loading proposals…</Text>
+          <Text style={styles.muted}>Loading proposals…</Text>
         ) : list?.length ? null : (
-          <Text>No proposals to show.</Text>
+          <Text style={styles.muted}>No proposals to show.</Text>
         )}
       </AppCard>
       {list?.map((item) => (
@@ -84,8 +88,12 @@ export function ContentProposals({ admin }: { admin: boolean }) {
           title={summary(item)}
           description={`${statusLabels[item.status]} · ${item.author_name}`}
         >
-          <Text>{item.reason}</Text>
-          {item.decision_notes ? <Text>Admin feedback: {item.decision_notes}</Text> : null}
+          <Text style={styles.body}>{item.reason}</Text>
+          {item.decision_notes ? (
+            <View style={styles.feedbackBox}>
+              <Text style={styles.feedbackText}>Admin feedback: {item.decision_notes}</Text>
+            </View>
+          ) : null}
           {admin ? (
             <AppButton label="Compare proposal" onPress={() => setSelected(item.id)} />
           ) : null}
@@ -134,7 +142,7 @@ function ProposalDetail({ proposal, onBack }: { proposal: ContentProposal; onBac
     },
   });
   return (
-    <View style={stack}>
+    <View style={styles.stack}>
       <AppButton
         label="Back to proposals"
         variant="secondary"
@@ -145,7 +153,7 @@ function ProposalDetail({ proposal, onBack }: { proposal: ContentProposal; onBac
         title={summary(proposal)}
         description={`${statusLabels[proposal.status]} · ${proposal.author_name}`}
       >
-        <Text>Tester notes: {proposal.reason}</Text>
+        <Text style={styles.body}>Tester notes: {proposal.reason}</Text>
         {proposal.kind === "image" ? (
           <ImageImpact assetKey={proposal.target} library={library} />
         ) : (
@@ -211,33 +219,35 @@ function ProposalDetail({ proposal, onBack }: { proposal: ContentProposal; onBac
                 />
               ))
             : null}
-          {(["approved", "changes_requested", "rejected"] as const).map((decision) => (
-            <AppButton
-              key={decision}
-              label={
-                decision === "approved"
-                  ? "Approve and apply"
-                  : decision === "changes_requested"
-                    ? "Request changes"
-                    : "Reject proposal"
-              }
-              variant={decision === "approved" ? "primary" : "secondary"}
-              disabled={
-                mutation.isPending ||
-                (decision === "approved" && !imageReady) ||
-                (decision === "approved" &&
-                  liveQuestion &&
-                  !Object.values(ratings).every((rating) => /^[1-5]$/.test(rating)))
-              }
-              onPress={() => {
-                mutation.reset();
-                setConfirm(decision);
-              }}
-            />
-          ))}
+          <View style={styles.actionRow}>
+            {(["approved", "changes_requested", "rejected"] as const).map((decision) => (
+              <AppButton
+                key={decision}
+                label={
+                  decision === "approved"
+                    ? "Approve and apply"
+                    : decision === "changes_requested"
+                      ? "Request changes"
+                      : "Reject proposal"
+                }
+                variant={decision === "approved" ? "primary" : "secondary"}
+                disabled={
+                  mutation.isPending ||
+                  (decision === "approved" && !imageReady) ||
+                  (decision === "approved" &&
+                    liveQuestion &&
+                    !Object.values(ratings).every((rating) => /^[1-5]$/.test(rating)))
+                }
+                onPress={() => {
+                  mutation.reset();
+                  setConfirm(decision);
+                }}
+              />
+            ))}
+          </View>
           {confirm ? (
-            <View style={stack}>
-              <Text>Confirm decision: {statusLabels[confirm]}.</Text>
+            <View style={styles.confirmBox}>
+              <Text style={styles.confirmTitle}>Confirm decision: {statusLabels[confirm]}.</Text>
               <AppButton
                 label="Confirm decision"
                 disabled={
@@ -256,11 +266,15 @@ function ProposalDetail({ proposal, onBack }: { proposal: ContentProposal; onBac
             </View>
           ) : null}
           {mutation.isError ? (
-            <Text accessibilityRole="alert">{errorText(mutation.error)}</Text>
+            <Text accessibilityRole="alert" style={styles.errorAlert}>
+              {errorText(mutation.error)}
+            </Text>
           ) : null}
         </AppCard>
       ) : proposal.decision_notes ? (
-        <Text>Admin feedback: {proposal.decision_notes}</Text>
+        <View style={styles.feedbackBox}>
+          <Text style={styles.feedbackText}>Admin feedback: {proposal.decision_notes}</Text>
+        </View>
       ) : null}
     </View>
   );
@@ -299,30 +313,30 @@ function QuestionFields({ values }: { values: Record<string, unknown> }) {
     "style_reference",
   ];
   return (
-    <>
+    <View style={styles.fieldStack}>
       {fields.map((key) => (
-        <View key={key} style={{ gap: 3 }}>
-          <Text style={{ fontWeight: "700" }}>{key.replaceAll("_", " ")}</Text>
+        <View key={key} style={styles.fieldRow}>
+          <Text style={styles.fieldLabel}>{key.replaceAll("_", " ")}</Text>
           {key === "choices" && Array.isArray(values.choices) ? (
             values.choices.map((choice, i) => (
-              <Text key={i}>
+              <Text key={i} style={styles.fieldValue}>
                 {String(choice.key)}. {String(choice.text)}
                 {choice.feedback ? ` — ${String(choice.feedback)}` : ""}
               </Text>
             ))
           ) : (
-            <Text>{String(values[key] ?? "—") || "—"}</Text>
+            <Text style={styles.fieldValue}>{String(values[key] ?? "—") || "—"}</Text>
           )}
         </View>
       ))}
-    </>
+    </View>
   );
 }
 function QuestionLocation({ id }: { id: string }) {
   const queue = useReviewQueue();
   const item = queue.data?.find((q) => q.question_id === id);
   return item ? (
-    <Text>
+    <Text style={styles.locationBadge}>
       {item.exam_title} · {item.module_number ? `Module ${item.module_number} · ` : ""}
       {item.chapter_title ?? item.topic_title}
     </Text>
@@ -337,22 +351,22 @@ function ImageImpact({
 }) {
   const image = library.data?.find((item) => item.asset_key === assetKey);
   return (
-    <View style={stack}>
-      <Text>Approval replaces this image everywhere it is used.</Text>
+    <View style={styles.stack}>
+      <Text style={styles.muted}>Approval replaces this image everywhere it is used.</Text>
       {image?.locations.map((loc, i) => (
-        <Text key={i}>
+        <Text key={i} style={styles.locationBadge}>
           {loc.exam_title} · {loc.module_number ? `Module ${loc.module_number} · ` : ""}
           {loc.chapter_title} · {loc.question_count} questions
         </Text>
       ))}
       {library.isError ? (
-        <Text accessibilityRole="alert">
+        <Text accessibilityRole="alert" style={styles.errorAlert}>
           Could not load image locations. Check Image Library before approving.
         </Text>
       ) : library.isPending ? (
-        <Text>Loading affected chapters…</Text>
+        <Text style={styles.muted}>Loading affected chapters…</Text>
       ) : !image?.locations.length ? (
-        <Text>No current question links.</Text>
+        <Text style={styles.muted}>No current question links.</Text>
       ) : null}
     </View>
   );
@@ -373,9 +387,9 @@ function ImageSide({
       {path ? (
         <ProposalImage path={path} alt={alt} onLoad={onLoad} onError={onError} />
       ) : (
-        <Text>No image uploaded.</Text>
+        <Text style={styles.muted}>No image uploaded.</Text>
       )}
-      <Text>{alt}</Text>
+      <Text style={styles.body}>{alt}</Text>
     </>
   );
 }
@@ -408,9 +422,75 @@ function ProposalImage({
         }}
         style={{ width: "100%", height: 300 }}
       />
-      {failed ? <Text accessibilityRole="alert">The image could not be decoded.</Text> : null}
+      {failed ? (
+        <Text accessibilityRole="alert" style={styles.errorAlert}>
+          The image could not be decoded.
+        </Text>
+      ) : null}
     </>
   ) : (
-    <Text>{url.isError ? "Image preview unavailable." : "Loading image preview…"}</Text>
+    <Text style={styles.muted}>
+      {url.isError ? "Image preview unavailable." : "Loading image preview…"}
+    </Text>
   );
 }
+
+const styles = StyleSheet.create({
+  actionRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.sm,
+  },
+  body: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
+  confirmBox: {
+    backgroundColor: theme.colors.goldSoft,
+    borderColor: theme.colors.goldBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
+  confirmTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
+  errorAlert: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.danger,
+    fontSize: 14,
+    fontWeight: "700",
+    padding: theme.spacing.sm,
+  },
+  feedbackBox: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    padding: theme.spacing.sm,
+  },
+  feedbackText: { color: theme.colors.primary, fontSize: 14, fontWeight: "700" },
+  fieldLabel: {
+    color: theme.colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  fieldRow: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    gap: 4,
+    padding: 10,
+  },
+  fieldStack: { gap: 8 },
+  fieldValue: { color: theme.colors.ink, fontSize: 14, lineHeight: 20 },
+  locationBadge: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 20 },
+  stack: { gap: 12 },
+});

@@ -65,10 +65,12 @@ export function UserAccessAdmin() {
           value={query}
         />
         {overview.data ? (
-          <Text style={styles.summary}>
-            {overview.data.users.length} registered · {studentCount} students ·{" "}
-            {overview.data.packages.length} study packets
-          </Text>
+          <View style={styles.summaryBanner}>
+            <Text style={styles.summary}>
+              {overview.data.users.length} registered · {studentCount} students ·{" "}
+              {overview.data.packages.length} study packets
+            </Text>
+          </View>
         ) : null}
         {overview.isPending ? <Text style={styles.muted}>Loading registered users…</Text> : null}
         {overview.isError ? <ErrorText value={overview.error} /> : null}
@@ -98,7 +100,14 @@ export function UserAccessAdmin() {
             <View style={styles.chips}>
               {user.roles.length ? (
                 user.roles.map((role) => (
-                  <Text key={role} style={[styles.chip, role === "student" && styles.studentChip]}>
+                  <Text
+                    key={role}
+                    style={[
+                      styles.chip,
+                      role === "student" && styles.studentChip,
+                      role === "admin" && styles.adminChip,
+                    ]}
+                  >
                     {role}
                   </Text>
                 ))
@@ -106,10 +115,12 @@ export function UserAccessAdmin() {
                 <Text style={styles.noRole}>No workspace role</Text>
               )}
             </View>
-            <AssignedPacketSummary packets={overview.data?.packages ?? []} user={user} />
+            <View style={styles.packetBox}>
+              <AssignedPacketSummary packets={overview.data?.packages ?? []} user={user} />
+            </View>
             <Text style={styles.manageLabel}>Manage access →</Text>
           </Pressable>
-          <View style={{ alignItems: "flex-start" }}>
+          <View style={styles.cardFooter}>
             <AppButton
               label={`Family links for ${user.display_name}`}
               variant="secondary"
@@ -241,52 +252,97 @@ function ErrorText({ value }: { value: unknown }) {
 }
 
 const styles = StyleSheet.create({
+  adminChip: {
+    backgroundColor: theme.colors.goldSoft,
+    borderColor: theme.colors.goldBorder,
+    color: theme.colors.primaryDark,
+  },
+  assignedGroup: { color: theme.colors.inkSecondary, fontSize: 13, fontWeight: "700", lineHeight: 19 },
+  assignedSummary: { gap: 3 },
   cardContents: { gap: theme.spacing.sm },
-  assignedGroup: { color: theme.colors.ink, fontSize: 13, fontWeight: "700", lineHeight: 18 },
-  assignedSummary: { gap: 2 },
+  cardFooter: {
+    alignItems: "flex-start",
+    borderTopColor: theme.colors.borderSoft,
+    borderTopWidth: 1,
+    paddingTop: theme.spacing.sm,
+  },
   chip: {
     backgroundColor: theme.colors.primarySoft,
-    borderRadius: 999,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
     color: theme.colors.primary,
     fontSize: 12,
     fontWeight: "800",
     overflow: "hidden",
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     textTransform: "capitalize",
   },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.xs },
-  email: { color: theme.colors.muted, fontSize: 14 },
-  error: { color: theme.colors.danger, fontSize: 14, lineHeight: 20 },
+  email: { color: theme.colors.muted, fontSize: 14, fontWeight: "500" },
+  error: { color: theme.colors.danger, fontSize: 14, fontWeight: "700", lineHeight: 20 },
   manageLabel: { color: theme.colors.accent, fontSize: 14, fontWeight: "900" },
   muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 20 },
   noRole: { color: theme.colors.danger, fontSize: 13, fontWeight: "700" },
-  packetSummary: { color: theme.colors.ink, fontSize: 14, lineHeight: 20 },
-  pressed: { opacity: 0.78 },
+  packetBox: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    padding: theme.spacing.sm,
+  },
+  packetSummary: { color: theme.colors.primary, fontSize: 14, fontWeight: "800", lineHeight: 20 },
+  pressed: { opacity: 0.85 },
   stack: { gap: theme.spacing.md },
   status: {
-    backgroundColor: "#E6F4EC",
-    borderRadius: 999,
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
     color: theme.colors.success,
     fontSize: 12,
     fontWeight: "900",
     overflow: "hidden",
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     textTransform: "capitalize",
   },
-  statusDisabled: { backgroundColor: theme.colors.accentSoft, color: theme.colors.danger },
-  studentChip: { backgroundColor: "#E6F4EC", color: theme.colors.success },
+  statusDisabled: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
+    color: theme.colors.danger,
+  },
+  studentChip: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    color: theme.colors.success,
+  },
   summary: { color: theme.colors.primary, fontSize: 14, fontWeight: "800" },
+  summaryBanner: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
   userCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
+    borderLeftColor: theme.colors.primary,
+    borderLeftWidth: 4,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     gap: theme.spacing.sm,
     padding: theme.spacing.lg,
   },
-  userHeading: { flexDirection: "row", gap: theme.spacing.md, justifyContent: "space-between" },
+  userHeading: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    justifyContent: "space-between",
+  },
   userIdentity: { flex: 1, gap: 3 },
   userName: { color: theme.colors.ink, fontSize: 19, fontWeight: "900" },
 });

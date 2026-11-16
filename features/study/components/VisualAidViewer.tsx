@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Image,
   Modal,
@@ -34,12 +34,6 @@ export function VisualAidViewer({ onImageError, visual }: VisualAidViewerProps) 
   const [zoom, setZoom] = useState(MIN_ZOOM);
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  useEffect(() => {
-    if (!fullScreen) {
-      setZoom(MIN_ZOOM);
-    }
-  }, [fullScreen]);
-
   const fittedSize = useMemo(() => {
     const viewportWidth = Math.max(240, windowWidth - theme.spacing.lg * 2);
     const viewportHeight = Math.max(240, windowHeight - 170);
@@ -55,7 +49,14 @@ export function VisualAidViewer({ onImageError, visual }: VisualAidViewerProps) 
     return { height, viewportHeight, viewportWidth, width };
   }, [visual.height, visual.width, windowHeight, windowWidth]);
 
-  const close = () => setFullScreen(false);
+  const open = () => {
+    setZoom(MIN_ZOOM);
+    setFullScreen(true);
+  };
+  const close = () => {
+    setFullScreen(false);
+    setZoom(MIN_ZOOM);
+  };
   const zoomPercent = Math.round(zoom * 100);
 
   return (
@@ -73,7 +74,7 @@ export function VisualAidViewer({ onImageError, visual }: VisualAidViewerProps) 
       <Pressable
         accessibilityLabel="Open visual full screen"
         accessibilityRole="button"
-        onPress={() => setFullScreen(true)}
+        onPress={open}
         style={({ pressed }) => [styles.openButton, pressed && styles.controlPressed]}
       >
         <Text style={styles.openButtonText}>Open full screen and zoom</Text>
@@ -216,7 +217,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minWidth: "100%",
   },
-  inlineVisual: { alignSelf: "flex-start", maxHeight: 480, width: "100%" },
+  inlineVisual: {
+    alignSelf: "flex-start",
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    maxHeight: 480,
+    width: "100%",
+  },
   modal: {
     backgroundColor: "#071421",
     flex: 1,
@@ -234,15 +243,16 @@ const styles = StyleSheet.create({
   modalTitle: { color: theme.colors.surface, fontSize: 17, fontWeight: "800", lineHeight: 22 },
   openButton: {
     alignItems: "center",
+    backgroundColor: theme.colors.surface,
     borderColor: theme.colors.primary,
     borderRadius: theme.radius.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     justifyContent: "center",
     minHeight: 44,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
   },
-  openButtonText: { color: theme.colors.primary, fontSize: 15, fontWeight: "800" },
+  openButtonText: { color: theme.colors.primary, fontSize: 14, fontWeight: "800" },
   verticalScrollContent: {
     alignItems: "center",
     justifyContent: "center",

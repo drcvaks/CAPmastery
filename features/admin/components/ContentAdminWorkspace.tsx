@@ -45,7 +45,7 @@ export function ContentAdminWorkspace({ mode = "admin" }: { mode?: "admin" | "re
       title={mode === "review" ? "Content Review" : "Administration"}
       maxContentWidth={panel === "review" ? 1480 : 1040}
     >
-      <View style={styles.row}>
+      <View style={styles.tabBar}>
         {mode === "admin" ? (
           <>
             <Tab active={panel === "users"} label="User access" onPress={() => setPanel("users")} />
@@ -316,16 +316,10 @@ function safeError(value: unknown) {
 
 const styles = StyleSheet.create({
   backAction: { alignItems: "flex-start" },
-  body: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
-  choice: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.radius.md,
-    gap: theme.spacing.sm,
-    padding: theme.spacing.md,
-  },
+  body: { color: theme.colors.ink, fontSize: 15, fontWeight: "600", lineHeight: 22 },
   csvInput: {
-    backgroundColor: theme.colors.background,
-    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.borderStrong,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     color: theme.colors.ink,
@@ -335,45 +329,71 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     textAlignVertical: "top",
   },
-  error: { color: theme.colors.danger, fontSize: 14, lineHeight: 20 },
-  eyebrow: { color: theme.colors.accent, fontSize: 13, fontWeight: "800" },
-  heading: {
-    color: theme.colors.ink,
-    fontSize: 18,
-    fontWeight: "800",
-    marginTop: theme.spacing.sm,
+  error: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.danger,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+    padding: theme.spacing.sm,
   },
-  label: { color: theme.colors.ink, fontSize: 15, fontWeight: "700" },
-  muted: { color: theme.colors.muted, fontSize: 13, lineHeight: 19 },
+  eyebrow: {
+    color: theme.colors.accent,
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  label: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
+  muted: { color: theme.colors.muted, fontSize: 13, fontWeight: "600", lineHeight: 19 },
   preview: {
-    borderTopColor: theme.colors.border,
-    borderTopWidth: 1,
-    gap: theme.spacing.xs,
-    paddingTop: theme.spacing.sm,
-  },
-  queueItem: {
+    backgroundColor: theme.colors.surfaceMuted,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    gap: theme.spacing.xs,
-    padding: theme.spacing.sm,
+    gap: 4,
+    padding: theme.spacing.md,
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
   stack: { gap: theme.spacing.lg },
-  success: { color: theme.colors.success, fontSize: 14, fontWeight: "700" },
-  switchCopy: { flex: 1, gap: 2 },
-  switchRow: { alignItems: "center", flexDirection: "row", gap: theme.spacing.md },
-  switchTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
   tab: {
     backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
     borderRadius: theme.radius.md,
     borderWidth: 1,
+    minHeight: 44,
+    justifyContent: "center",
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: 10,
   },
-  tabActive: { backgroundColor: theme.colors.primary },
-  tabText: { color: theme.colors.primary, fontSize: 15, fontWeight: "800" },
+  tabActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.gold,
+  },
+  tabBar: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.sm,
+    padding: theme.spacing.xs,
+  },
+  tabText: { color: theme.colors.primary, fontSize: 14, fontWeight: "800" },
   tabTextActive: { color: theme.colors.surface },
-  warning: { color: theme.colors.accent, fontSize: 14, lineHeight: 20 },
+  warning: {
+    backgroundColor: theme.colors.warningSoft,
+    borderColor: theme.colors.warningBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.warning,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+    padding: theme.spacing.sm,
+  },
 });

@@ -1,16 +1,46 @@
 export const theme = {
   colors: {
-    background: "#F4F7FA",
+    // Civil Air Patrol core palette
+    background: "#F0F4F8",
     surface: "#FFFFFF",
-    primary: "#102A43",
-    primarySoft: "#D9E8F5",
-    accent: "#A23E48",
-    accentSoft: "#F8E6E8",
-    ink: "#102A43",
-    muted: "#526777",
-    border: "#D5DEE5",
-    success: "#2D6A4F",
-    danger: "#9B2C2C",
+    surfaceAlt: "#F7FAFC",
+    surfaceElevated: "#FFFFFF",
+    // CAP Deep Command Navy
+    primary: "#0B2545",
+    primaryDark: "#06162B",
+    primaryLight: "#1D4E89",
+    primarySoft: "#DCEBFA",
+    primaryMuted: "#2B4C7E",
+    // CAP Valor Crimson / Red
+    accent: "#B8293D",
+    accentDark: "#8E1C2C",
+    accentSoft: "#FCE8EB",
+    // CAP Insignia Gold / Brass
+    gold: "#C89211",
+    goldBright: "#EAB308",
+    goldSoft: "#FEF6DF",
+    goldBorder: "#F3D58D",
+    // Text & Ink hierarchy
+    ink: "#0B2545",
+    inkSecondary: "#243B53",
+    muted: "#486581",
+    subtle: "#829AB1",
+    // Borders & Dividers
+    border: "#CFDCE6",
+    borderStrong: "#9FB3C8",
+    borderSoft: "#E2ECF3",
+    // Semantic feedback
+    success: "#1E7E52",
+    successSoft: "#E3F6EC",
+    successBorder: "#8CE0B5",
+    warning: "#B45309",
+    warningSoft: "#FEF3C7",
+    warningBorder: "#FCD34D",
+    danger: "#B8293D",
+    dangerSoft: "#FCE8EB",
+    dangerBorder: "#F5B2BC",
+    info: "#1D4E89",
+    infoSoft: "#E1EFFA",
   },
   spacing: {
     xs: 6,
@@ -21,8 +51,11 @@ export const theme = {
     xxl: 48,
   },
   radius: {
+    xs: 6,
     sm: 8,
-    md: 14,
-    lg: 22,
+    md: 12,
+    lg: 18,
+    xl: 24,
+    pill: 999,
   },
 } as const;

@@ -90,18 +90,32 @@ export function ChallengeWorkspace({ audience }: { audience: "guardian" | "stude
               {safeError(achievements.error)}
             </Text>
           ) : null}
-          {achievements.data?.map((achievement) => (
-            <View
-              key={achievement.achievement_id}
-              style={[styles.achievement, achievement.earned && styles.achievementEarned]}
-            >
-              <Text style={styles.itemTitle}>
-                {achievement.earned ? "Earned · " : ""}
-                {achievement.title}
-              </Text>
-              <Text style={styles.muted}>{achievement.description}</Text>
-            </View>
-          ))}
+          <View style={styles.achievementStack}>
+            {achievements.data?.map((achievement) => (
+              <View
+                key={achievement.achievement_id}
+                style={[styles.achievement, achievement.earned && styles.achievementEarned]}
+              >
+                <View
+                  style={[
+                    styles.achievementRibbon,
+                    achievement.earned && styles.achievementRibbonEarned,
+                  ]}
+                >
+                  <Text style={styles.achievementRibbonText}>
+                    {achievement.earned ? "★" : "☆"}
+                  </Text>
+                </View>
+                <View style={styles.achievementCopy}>
+                  <Text style={styles.itemTitle}>
+                    {achievement.earned ? "Earned · " : ""}
+                    {achievement.title}
+                  </Text>
+                  <Text style={styles.muted}>{achievement.description}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         </AppCard>
       ) : null}
     </AppScreen>
@@ -169,22 +183,24 @@ function CreateChallengeCard() {
 
       <Text style={styles.fieldLabel}>Choose exactly two students</Text>
       {students.isPending ? <Text style={styles.muted}>Loading challenge links…</Text> : null}
-      {students.data?.map((student) => {
-        const selected = studentIds.includes(student.student_id);
-        return (
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: selected }}
-            key={student.student_id}
-            onPress={() => toggleStudent(student.student_id)}
-            style={[styles.option, selected && styles.optionSelected]}
-          >
-            <Text style={selected ? styles.optionTextSelected : styles.optionText}>
-              {student.display_name}
-            </Text>
-          </Pressable>
-        );
-      })}
+      <View style={styles.optionStack}>
+        {students.data?.map((student) => {
+          const selected = studentIds.includes(student.student_id);
+          return (
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: selected }}
+              key={student.student_id}
+              onPress={() => toggleStudent(student.student_id)}
+              style={[styles.option, selected && styles.optionSelected]}
+            >
+              <Text style={selected ? styles.optionTextSelected : styles.optionText}>
+                {student.display_name}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
       {students.data && students.data.length < 2 ? (
         <Text style={styles.warning}>
           Two active guardian links with challenge permission are required.
@@ -198,36 +214,38 @@ function CreateChallengeCard() {
         </Text>
       ) : null}
       {exams.isPending ? <Text style={styles.muted}>Loading available exams…</Text> : null}
-      {exams.data?.map((exam) => {
-        const selected = exam.exam_id === examId;
-        return (
-          <Pressable
-            accessibilityRole="radio"
-            accessibilityState={{ checked: selected }}
-            key={exam.exam_id}
-            onPress={() => {
-              setValue("examId", exam.exam_id, { shouldValidate: true });
-              const supportedCounts = [3, 5, 10, 15, 20].filter(
-                (count) => count <= exam.available_question_count,
-              );
-              if (!supportedCounts.includes(questionCount)) {
-                setValue(
-                  "questionCount",
-                  supportedCounts.includes(5) ? 5 : (supportedCounts[0] ?? 3),
-                  {
-                    shouldValidate: true,
-                  },
+      <View style={styles.optionStack}>
+        {exams.data?.map((exam) => {
+          const selected = exam.exam_id === examId;
+          return (
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              key={exam.exam_id}
+              onPress={() => {
+                setValue("examId", exam.exam_id, { shouldValidate: true });
+                const supportedCounts = [3, 5, 10, 15, 20].filter(
+                  (count) => count <= exam.available_question_count,
                 );
-              }
-            }}
-            style={[styles.option, selected && styles.optionSelected]}
-          >
-            <Text style={selected ? styles.optionTextSelected : styles.optionText}>
-              {exam.exam_title} · {exam.available_question_count} available
-            </Text>
-          </Pressable>
-        );
-      })}
+                if (!supportedCounts.includes(questionCount)) {
+                  setValue(
+                    "questionCount",
+                    supportedCounts.includes(5) ? 5 : (supportedCounts[0] ?? 3),
+                    {
+                      shouldValidate: true,
+                    },
+                  );
+                }
+              }}
+              style={[styles.option, selected && styles.optionSelected]}
+            >
+              <Text style={selected ? styles.optionTextSelected : styles.optionText}>
+                {exam.exam_title} · {exam.available_question_count} available
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
       {exams.data?.length === 0 ? (
         <Text style={styles.warning}>
           At least three approved questions or questions from a private pilot package assigned to
@@ -310,16 +328,27 @@ function ChallengeCard({
           </Text>
         </View>
       ) : (
-        <Text style={styles.success}>Both students finished. Supportive results are unlocked.</Text>
+        <View style={styles.unlockedNotice}>
+          <Text style={styles.success}>
+            Both students finished. Supportive results are unlocked.
+          </Text>
+        </View>
       )}
 
       {challenge.participants.map((participant) => (
         <View key={participant.studentId} style={styles.participant}>
           <View style={styles.participantHeader}>
             <Text style={styles.itemTitle}>{participant.name}</Text>
-            <Text style={participant.completed ? styles.success : styles.muted}>
-              {participant.completed ? "Finished" : "In progress"}
-            </Text>
+            <View
+              style={[
+                styles.statusPill,
+                participant.completed ? styles.statusPillDone : styles.statusPillPending,
+              ]}
+            >
+              <Text style={participant.completed ? styles.success : styles.muted}>
+                {participant.completed ? "Finished" : "In progress"}
+              </Text>
+            </View>
           </View>
           {challenge.results_revealed ? (
             <View style={styles.resultGrid}>
@@ -417,51 +446,95 @@ function safeError(error: unknown) {
 
 const styles = StyleSheet.create({
   achievement: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceAlt,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    gap: theme.spacing.xs,
-    opacity: 0.72,
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    opacity: 0.78,
     padding: theme.spacing.md,
   },
+  achievementCopy: {
+    flex: 1,
+    gap: 2,
+  },
   achievementEarned: {
-    backgroundColor: "#E4F3EA",
-    borderColor: theme.colors.success,
+    backgroundColor: theme.colors.goldSoft,
+    borderColor: theme.colors.gold,
     opacity: 1,
   },
-  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
-  countOption: {
+  achievementRibbon: {
+    alignItems: "center",
+    backgroundColor: theme.colors.borderSoft,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.sm,
     borderWidth: 1,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  achievementRibbonEarned: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.gold,
+  },
+  achievementRibbonText: {
+    color: theme.colors.goldBright,
+    fontSize: 18,
+    fontWeight: "900",
+  },
+  achievementStack: {
+    gap: theme.spacing.sm,
+  },
+  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
+  countOption: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.md,
+    borderWidth: 1.5,
     minWidth: 52,
     padding: theme.spacing.sm,
   },
-  encouragementList: { gap: theme.spacing.xs },
-  error: { color: theme.colors.danger, fontSize: 14, lineHeight: 20 },
+  encouragementList: {
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.borderSoft,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.xs,
+    padding: theme.spacing.md,
+  },
+  error: { color: theme.colors.danger, fontSize: 14, fontWeight: "700", lineHeight: 20 },
   fieldLabel: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
   itemTitle: { color: theme.colors.ink, fontSize: 16, fontWeight: "900" },
   muted: { color: theme.colors.muted, fontSize: 13, lineHeight: 19 },
   notice: {
     backgroundColor: theme.colors.primarySoft,
-    borderRadius: theme.radius.sm,
-    padding: theme.spacing.sm,
-  },
-  noticeText: { color: theme.colors.primary, fontSize: 13, lineHeight: 19 },
-  option: {
-    borderColor: theme.colors.border,
+    borderColor: "#B3D4F0",
     borderRadius: theme.radius.md,
     borderWidth: 1,
+    padding: 12,
+  },
+  noticeText: { color: theme.colors.primary, fontSize: 13, fontWeight: "600", lineHeight: 19 },
+  option: {
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.borderStrong,
+    borderRadius: theme.radius.md,
+    borderWidth: 1.5,
     padding: theme.spacing.md,
   },
   optionSelected: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  optionStack: { gap: theme.spacing.xs },
   optionText: { color: theme.colors.primary, fontSize: 15, fontWeight: "800" },
   optionTextSelected: { color: theme.colors.surface, fontSize: 15, fontWeight: "800" },
   participant: {
-    borderTopColor: theme.colors.border,
-    borderTopWidth: 1,
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.borderSoft,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
     gap: theme.spacing.sm,
-    paddingTop: theme.spacing.md,
+    padding: theme.spacing.md,
   },
   participantHeader: {
     alignItems: "center",
@@ -469,20 +542,48 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   reaction: {
-    backgroundColor: theme.colors.background,
-    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.borderStrong,
     borderRadius: 999,
     borderWidth: 1,
-    paddingHorizontal: theme.spacing.sm,
+    paddingHorizontal: 12,
     paddingVertical: 7,
   },
   reactionText: { color: theme.colors.primary, fontSize: 12, fontWeight: "800" },
   reactions: { gap: theme.spacing.xs },
   recognition: { color: theme.colors.accent, fontSize: 14, fontWeight: "900" },
-  result: { minWidth: 120 },
-  resultGrid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.md },
+  result: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.borderSoft,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    minWidth: 120,
+    padding: 10,
+  },
+  resultGrid: { flexDirection: "row", flexWrap: "wrap", gap: theme.spacing.sm },
   resultValue: { color: theme.colors.primary, fontSize: 19, fontWeight: "900" },
   smallLabel: { color: theme.colors.muted, fontSize: 12, fontWeight: "800" },
+  statusPill: {
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  statusPillDone: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+  },
+  statusPillPending: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+  },
   success: { color: theme.colors.success, fontSize: 14, fontWeight: "800" },
-  warning: { color: theme.colors.accent, fontSize: 13, lineHeight: 19 },
+  unlockedNotice: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    padding: 12,
+  },
+  warning: { color: theme.colors.accent, fontSize: 13, fontWeight: "700", lineHeight: 19 },
 });

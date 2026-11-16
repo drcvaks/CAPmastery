@@ -11,10 +11,12 @@ type AppCardProps = PropsWithChildren<{
 export function AppCard({ title, description, children }: AppCardProps) {
   return (
     <View style={styles.card}>
-      <Text accessibilityRole="header" style={styles.title}>
-        {title}
-      </Text>
-      {description ? <Text style={styles.description}>{description}</Text> : null}
+      <View style={styles.headerBlock}>
+        <Text accessibilityRole="header" style={styles.title}>
+          {title}
+        </Text>
+        {description ? <Text style={styles.description}>{description}</Text> : null}
+      </View>
       {children}
     </View>
   );
@@ -26,17 +28,27 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
-    gap: theme.spacing.sm,
-    padding: theme.spacing.lg,
+    gap: theme.spacing.md,
+    padding: 20,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  headerBlock: {
+    gap: 4,
   },
   title: {
     color: theme.colors.ink,
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: "800",
+    letterSpacing: -0.2,
+    lineHeight: 23,
   },
   description: {
     color: theme.colors.muted,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
