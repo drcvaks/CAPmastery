@@ -1,5 +1,30 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Remember the selected exam track
+
+- Home and Study share a device-local, per-user exam-track preference. The
+  cadet's explicit choice survives navigation and reloads; other users' choices
+  are isolated. Direct chapter links count as an explicit choice. If a remembered
+  track is unavailable, the screen safely falls back to accessible content.
+- Progress still shows all accessible exam results. Starting a chapter there
+  explicitly selects its track; simply visiting Progress does not change it.
+  No Supabase migration or authorization changes.
+- TypeScript, targeted lint, and the 11 tests across ContentBrowser, Home,
+  selected-track store and shared-selection suites passed. Progress-specific
+  tests were started but not confirmed at handoff. Device smoke testing and
+  cross-device synchronization are not covered by this local preference.
+
+## Post-Checkpoint 10 — Browse modules independently of chapter selection
+
+- Fixed the Study catalog's selected-chapter module overriding every subsequent
+  module click. Explicit module browsing and collapsing now take precedence,
+  while a routed chapter still opens its module on initial load.
+- Browsing does not change the selected question scope; selecting a chapter does.
+  Added a two-module regression covering selection, switching and collapse.
+  No Supabase or migration changes.
+- Validation: TypeScript, changed-file formatting and whitespace checks passed;
+  all four ContentBrowser tests passed, including the new regression.
+
 ## Post-Checkpoint 10 — Antigravity presentation refresh
 
 - Ported the branch's branding, responsive auth and navigation shell, shared

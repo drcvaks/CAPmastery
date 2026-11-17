@@ -20,6 +20,10 @@ Use Expo SDK 57 and Expo Router for Android and responsive web, with React Nativ
 - Server state: TanStack Query is approved for caching, invalidation, loading, and retry when Supabase integration begins. It is not installed before it is used.
 - Form state: React Hook Form plus Zod.
 - Local transient UI: component state or narrowly scoped context.
+- Home and Study share a per-user, device-local selected exam track. Explicit
+  choices persist through navigation and app reloads; permissions still come
+  from the live catalog. Progress continues showing all accessible exams;
+  starting a chapter from Progress explicitly selects that exam track.
 - Adaptive calculations: pure deterministic functions with injected time/randomness where necessary for deterministic tests.
 
 Do not recreate mySCP's single global provider that loads unrelated tables at startup. Fetch per route/use case and invalidate narrow query keys after mutations.
@@ -37,6 +41,9 @@ Question delivery uses the typed `contentService`, narrow TanStack Query keys, a
   it never assigns a workspace role or content package.
 - `(student)`: authenticated users with the global `student` role; Home and Progress consume the protected progress projection.
 - The Study tab owns a nested stack containing the catalog and active session. Switching to Progress/Home preserves that stack, so returning to Study resumes the same question rather than targeting the catalog or creating another session.
+- Study catalog module expansion is independent of the selected chapter filter.
+  A routed chapter initially opens its module; subsequent module clicks take
+  precedence and can collapse it without clearing the chosen question scope.
 - Ordinary study sessions expose a Back to study catalog action above the question, allowing a cadet to choose another chapter before finishing the set. It navigates to `/study` without completing or deleting the session; submitted answers remain persisted. The action is disabled during answer submission. Timed practice-test and challenge controls are separate.
 - Student navigation is platform-responsive: Android and narrow web retain native bottom tabs, while web viewports at least 900 pixels wide render the same tab navigator through a persistent left sidebar. The custom sidebar uses tab-navigation events rather than direct route replacement, so the active nested Study stack remains preserved. It also incorporates authorized multi-role workspace links, avoiding a duplicate page-level workspace rail.
 - `(parent)`: authenticated users with a global `parent` or `coach` role; the family dashboard can select only students returned by the linked-progress projection.

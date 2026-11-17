@@ -12,6 +12,7 @@ import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { READINESS_DISCLAIMER } from "../readiness";
 import type { ExamProgress, LatestPracticeTopicResult, TopicProgress } from "../schemas";
 import { useProgressDashboard, useProgressStudents } from "../hooks/useProgress";
+import { useSelectedExamTrack } from "../../content/hooks/useSelectedExamTrack";
 
 type ProgressDashboardProps = {
   audience: "guardian" | "student";
@@ -26,6 +27,9 @@ export function ProgressDashboard({ audience, compact = false }: ProgressDashboa
   const [selectedStudentOverride, setSelectedStudentId] = useState<string>();
   const selectedStudentId = selectedStudentOverride ?? students.data?.[0]?.student_id;
   const dashboard = useProgressDashboard(selectedStudentId);
+  const [, selectTrack] = useSelectedExamTrack(
+    audience === "student" ? (dashboard.data?.map((exam) => exam.exam_id) ?? []) : [],
+  );
 
   const title = compact
     ? "Student dashboard"
@@ -110,6 +114,7 @@ export function ProgressDashboard({ audience, compact = false }: ProgressDashboa
                 onStudyTopic={
                   audience === "student"
                     ? (topicId) => {
+                        selectTrack(exam.exam_id);
                         setCreatingTopicId(topicId);
                         void createStudySession
                           .mutateAsync({ examId: exam.exam_id, topicId })

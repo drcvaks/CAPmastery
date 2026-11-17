@@ -3,6 +3,10 @@ import { render, screen, userEvent } from "@testing-library/react-native";
 import { ProgressDashboard } from "../features/progress/components/ProgressDashboard";
 import { useProgressDashboard, useProgressStudents } from "../features/progress/hooks/useProgress";
 import { useCreateStudySession } from "../features/study/hooks/useStudySession";
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock("../features/progress/hooks/useProgress", () => ({
   useProgressDashboard: jest.fn(),

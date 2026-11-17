@@ -6,6 +6,10 @@ import {
   useContentCatalog,
 } from "../features/content/hooks/useContentCatalog";
 import { useCreateStudySession } from "../features/study/hooks/useStudySession";
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock("../features/content/hooks/useContentCatalog", () => ({
   useApprovedQuestionPreviews: jest.fn(),
@@ -88,7 +92,26 @@ describe("ContentBrowser", () => {
           title: "Billy Mitchell Aerospace",
           description: null,
           sort_order: 30,
-          topics: [topic(3, 30), topic(1, 10), topic(2, 20)],
+          topics: [
+            topic(3, 30),
+            topic(1, 10),
+            topic(2, 20),
+            {
+              ...topic(1, 10),
+              id: "40000000-0000-4000-8000-000000000201",
+              code: "AD_M2_C1",
+              title: "Aerospace Dimensions, Module 2, Chapter 1",
+              volume_id: "50000000-0000-4000-8000-000000000002",
+              volume: {
+                ...topic(1, 10).volume,
+                id: "50000000-0000-4000-8000-000000000002",
+                code: "AD_M2",
+                title: "Aerospace Dimensions, Module 2: Aircraft Systems and Airports",
+                sort_order: 20,
+              },
+              chapter: { ...topic(1, 10).chapter, code: "AD_M2_C1", title: "Airplane Systems" },
+            },
+          ],
         },
         {
           id: "20000000-0000-4000-8000-000000000004",
@@ -184,6 +207,37 @@ describe("ContentBrowser", () => {
     ]);
     expect(screen.queryByText("Aerospace content coming soon")).toBeNull();
     expect(screen.queryByText("Leadership content coming soon")).toBeNull();
+  });
+
+  it("allows browsing and collapsing other modules without clearing the chapter filter", async () => {
+    const user = userEvent.setup();
+    await render(<ContentBrowser />);
+    await user.press(screen.getByText("Billy Mitchell Aerospace"));
+    await user.press(screen.getByText("Module 1"));
+    await user.press(screen.getByText("Chapter 1: Flight"));
+
+    await user.press(screen.getByText("Module 2"));
+    expect(screen.getByText("Chapter 1: Airplane Systems")).toBeVisible();
+    expect(screen.queryByText("Chapter 1: Flight")).toBeNull();
+    expect(useApprovedQuestionPreviews).toHaveBeenLastCalledWith(
+      "20000000-0000-4000-8000-000000000002",
+      topic(1, 10).id,
+    );
+
+    await user.press(screen.getByText("Chapter 1: Airplane Systems"));
+    await user.press(screen.getByText("Module 1"));
+    expect(screen.getByText("Chapter 1: Flight")).toBeVisible();
+    expect(screen.queryByText("Chapter 1: Airplane Systems")).toBeNull();
+    expect(useApprovedQuestionPreviews).toHaveBeenLastCalledWith(
+      "20000000-0000-4000-8000-000000000002",
+      "40000000-0000-4000-8000-000000000201",
+    );
+    await user.press(screen.getByText("Module 1"));
+    expect(screen.queryByText("Chapter 1: Flight")).toBeNull();
+    await user.press(screen.getByText("Module 2"));
+    expect(screen.getByText("Chapter 1: Airplane Systems")).toBeVisible();
+    await user.press(screen.getByText("Module 2"));
+    expect(screen.queryByText("Chapter 1: Airplane Systems")).toBeNull();
   });
 
   it("shows Wright Brothers first and keeps Volume 1 Chapter 1 in that track", async () => {

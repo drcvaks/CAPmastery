@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import {
   ActivityIndicator,
@@ -16,12 +16,9 @@ import { theme } from "../../../lib/constants/theme";
 import { PracticeTestLauncher } from "../../practice/components/PracticeTestLauncher";
 import { getSafeStudyMessage } from "../../study/errors";
 import { useCreateStudySession } from "../../study/hooks/useStudySession";
-import {
-  chapterButtonLabel,
-  groupTopicsByModule,
-  moduleButtonLabel,
-} from "../catalog";
+import { chapterButtonLabel, groupTopicsByModule, moduleButtonLabel } from "../catalog";
 import { useApprovedQuestionPreviews, useContentCatalog } from "../hooks/useContentCatalog";
+import { useSelectedExamTrack } from "../hooks/useSelectedExamTrack";
 
 function cleanModuleSubtitle(title: string): string {
   return title.replace(/^Aerospace Dimensions,\s*Module\s*\d+\s*:\s*/i, "").trim();
@@ -34,23 +31,36 @@ export function ContentBrowser() {
   const params = useLocalSearchParams<{ topicId?: string }>();
   const catalog = useContentCatalog();
   const createSession = useCreateStudySession();
-  const [selectedExamId, setSelectedExamId] = useState<string>();
-  const [expandedModuleId, setExpandedModuleId] = useState<string>();
+  const [expandedModuleId, setExpandedModuleId] = useState<string | null>();
   const [selectedTopicId, setSelectedTopicId] = useState<string | undefined>(
     typeof params.topicId === "string" ? params.topicId : undefined,
   );
   const routedExamId = catalog.data?.find((exam) =>
     exam.topics.some((topic) => topic.id === selectedTopicId),
   )?.id;
-  const activeExamId = selectedExamId ?? routedExamId ?? catalog.data?.[0]?.id;
+  const [activeExamId, setSelectedExamId] = useSelectedExamTrack(
+    catalog.data?.map((exam) => exam.id) ?? [],
+    routedExamId ?? catalog.data?.[0]?.id,
+  );
+  // A direct chapter link is an explicit track choice.
+  useEffect(() => {
+    if (routedExamId) setSelectedExamId(routedExamId);
+    // Only respond to the routed chapter becoming available, not other screens' selections.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routedExamId]);
   const activeExam = catalog.data?.find(({ id }) => id === activeExamId);
   const aerospaceModules =
     activeExam?.code === "MITCHELL_AEROSPACE" ? groupTopicsByModule(activeExam.topics) : [];
   const selectedModuleId = aerospaceModules.find((module) =>
     module.topics.some((topic) => topic.id === selectedTopicId),
   )?.id;
-  const openModuleId = selectedModuleId ?? expandedModuleId;
-  const questions = useApprovedQuestionPreviews(activeExamId, selectedTopicId);
+  // A routed chapter opens its module initially; explicit browsing wins afterward.
+  // null means the cadet deliberately collapsed the open module.
+  const openModuleId = expandedModuleId === undefined ? selectedModuleId : expandedModuleId;
+  const scopedTopicId = activeExam?.topics.some((topic) => topic.id === selectedTopicId)
+    ? selectedTopicId
+    : undefined;
+  const questions = useApprovedQuestionPreviews(activeExamId, scopedTopicId);
 
   if (catalog.isPending) {
     return (
@@ -91,7 +101,7 @@ export function ContentBrowser() {
 
   function handleStartStudy(topicIdOverride?: string) {
     if (!activeExam) return;
-    const targetTopicId = topicIdOverride !== undefined ? topicIdOverride : selectedTopicId;
+    const targetTopicId = topicIdOverride !== undefined ? topicIdOverride : scopedTopicId;
     void createSession
       .mutateAsync({ examId: activeExam.id, topicId: targetTopicId })
       .then((sessionId) => router.push(`/study/session/${sessionId}` as Href))
@@ -199,9 +209,7 @@ export function ContentBrowser() {
               <View style={styles.moduleSection}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={styles.sectionHeaderCopy}>
-                    <Text style={styles.sectionLabel}>
-                      2. Filter Questions by Module & Chapter
-                    </Text>
+                    <Text style={styles.sectionLabel}>2. Filter Questions by Module & Chapter</Text>
                     <Text style={styles.sectionSubLabel}>
                       Open a module and select a chapter to practice only that chapter’s questions.
                     </Text>
@@ -213,7 +221,7 @@ export function ContentBrowser() {
                       setSelectedTopicId(undefined);
                       setExpandedModuleId(undefined);
                     }}
-                    selected={!selectedTopicId}
+                    selected={!scopedTopicId}
                   />
                 </View>
 
@@ -237,15 +245,8 @@ export function ContentBrowser() {
                         <Pressable
                           accessibilityRole="button"
                           accessibilityState={{ expanded }}
-                          onPress={() =>
-                            setExpandedModuleId((current) =>
-                              current === module.id ? undefined : module.id,
-                            )
-                          }
-                          style={[
-                            styles.moduleButton,
-                            expanded && styles.moduleButtonExpanded,
-                          ]}
+                          onPress={() => setExpandedModuleId(expanded ? null : module.id)}
+                          style={[styles.moduleButton, expanded && styles.moduleButtonExpanded]}
                         >
                           <View style={styles.moduleHeaderLeft}>
                             <View
@@ -345,9 +346,7 @@ export function ContentBrowser() {
               <View style={styles.topicSection}>
                 <View style={styles.sectionHeaderRow}>
                   <View style={styles.sectionHeaderCopy}>
-                    <Text style={styles.sectionLabel}>
-                      2. Filter Questions by Chapter
-                    </Text>
+                    <Text style={styles.sectionLabel}>2. Filter Questions by Chapter</Text>
                     <Text style={styles.sectionSubLabel}>
                       Select a chapter below to practice only questions from that chapter, or keep
                       all chapters selected.

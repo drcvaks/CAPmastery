@@ -5,6 +5,10 @@ import {
   useSetWeeklyMission,
 } from "../features/progress/hooks/useStudentMissions";
 import { useCreateStudySession } from "../features/study/hooks/useStudySession";
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockPush = jest.fn();
 jest.mock("expo-router", () => ({

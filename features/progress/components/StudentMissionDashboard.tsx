@@ -9,6 +9,7 @@ import { useCreateStudySession } from "../../study/hooks/useStudySession";
 import { useStudentMissions, useSetWeeklyMission } from "../hooks/useStudentMissions";
 import { crossedMissionCheckpoint, nextMissionCheckpoint } from "../missions";
 import { TrackCoverageCard } from "./TrackCoverageCard";
+import { useSelectedExamTrack } from "../../content/hooks/useSelectedExamTrack";
 
 const goals = [
   { label: "Light", count: 25 },
@@ -23,16 +24,18 @@ export function StudentMissionDashboard() {
   const mission = useStudentMissions();
   const weekly = useSetWeeklyMission();
   const launch = useCreateStudySession();
-  const [examId, setExamId] = useState<string>();
   const [questionCount, setQuestionCount] = useState<5 | 10 | 20>(10);
   const data = mission.data;
-  const selectedExam =
-    data?.exams.find((exam) => exam.id === examId) ??
+  const defaultExam =
     data?.exams.find(
       (exam) =>
         exam.active_session_id === data.active_session_id && exam.active_session_id !== null,
-    ) ??
-    data?.exams[0];
+    ) ?? data?.exams[0];
+  const [examId, setExamId] = useSelectedExamTrack(
+    data?.exams.map((exam) => exam.id) ?? [],
+    defaultExam?.id,
+  );
+  const selectedExam = data?.exams.find((exam) => exam.id === examId);
   const activeSessionId = selectedExam?.active_session_id;
   const checkpoint = nextMissionCheckpoint(data?.today_count ?? 0);
   const reached = crossedMissionCheckpoint(0, data?.today_count ?? 0);
