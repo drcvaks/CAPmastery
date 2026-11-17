@@ -24,13 +24,15 @@ export function LearningAccessEditor(props: Props) {
   });
   return (
     <View style={styles.stack}>
-      <View style={{ alignItems: "flex-start" }}>
+      <View style={styles.backRow}>
         <AppButton label="Back to all users" onPress={props.onBack} variant="secondary" />
       </View>
       <AppCard title={props.user.display_name} description={props.user.email ?? "No email address"}>
         {access.isError ? (
           <>
-            <Text accessibilityRole="alert">Could not load content access.</Text>
+            <Text accessibilityRole="alert" style={styles.errorAlert}>
+              Could not load content access.
+            </Text>
             <AppButton
               label="Try again"
               onPress={() => void access.refetch()}
@@ -40,7 +42,7 @@ export function LearningAccessEditor(props: Props) {
         ) : access.data ? (
           <Assignments {...props} data={access.data} />
         ) : (
-          <Text>Loading study and review access…</Text>
+          <Text style={styles.muted}>Loading study and review access…</Text>
         )}
       </AppCard>
     </View>
@@ -166,7 +168,7 @@ function Assignments({ user, packets, data }: Props & { data: Access }) {
 
   return (
     <View style={styles.stack}>
-      <Text style={styles.heading}>Study & Content Review access</Text>
+      <Text style={styles.sectionTitle}>Study & Content Review access</Text>
       <Text style={styles.muted}>
         Study packets open in Student. Review permissions open in Content Review, where question
         reviewers can see answer keys. Grant them separately.
@@ -265,9 +267,13 @@ function Assignments({ user, packets, data }: Props & { data: Access }) {
         loading={save.isPending}
         onPress={() => save.mutate()}
       />
-      {save.isSuccess ? <Text accessibilityRole="alert">Access saved.</Text> : null}
+      {save.isSuccess ? (
+        <Text accessibilityRole="alert" style={styles.successAlert}>
+          Access saved.
+        </Text>
+      ) : null}
       {save.isError ? (
-        <Text accessibilityRole="alert">
+        <Text accessibilityRole="alert" style={styles.errorAlert}>
           Could not confirm the save. Try again or reopen this account to check its access.
         </Text>
       ) : null}
@@ -290,13 +296,13 @@ function Disclosure({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <View style={styles.disclosure}>
+    <View style={[styles.disclosure, open && styles.disclosureOpen]}>
       <Pressable
         accessibilityLabel={title}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen(!open)}
-        style={styles.header}
+        style={[styles.header, open && styles.headerOpen]}
       >
         <Text style={styles.heading}>
           {open ? "▾" : "▸"} {title}
@@ -324,8 +330,8 @@ function AccessSwitch({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <View style={styles.row}>
-      <View style={{ flex: 1 }}>
+    <View style={[styles.row, value && styles.rowActive]}>
+      <View style={styles.rowCopy}>
         <Text style={styles.heading}>{title}</Text>
         {detail ? <Text style={styles.muted}>{detail}</Text> : null}
       </View>
@@ -341,16 +347,73 @@ function AccessSwitch({
 }
 
 const styles = StyleSheet.create({
-  stack: { gap: theme.spacing.md },
-  heading: { color: theme.colors.ink, fontWeight: "800" },
-  muted: { color: theme.colors.muted, fontSize: 13, lineHeight: 18 },
-  disclosure: { borderColor: theme.colors.border, borderWidth: 1, borderRadius: theme.radius.md },
-  header: { padding: theme.spacing.sm, gap: 2, minHeight: 44, justifyContent: "center" },
+  backRow: { alignItems: "flex-start" },
   body: {
-    padding: theme.spacing.sm,
-    gap: theme.spacing.xs,
-    borderTopWidth: 1,
+    backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
+    borderTopWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
   },
-  row: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: theme.spacing.sm },
+  disclosure: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  disclosureOpen: {
+    borderColor: theme.colors.borderStrong,
+  },
+  errorAlert: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.danger,
+    fontSize: 14,
+    fontWeight: "700",
+    padding: theme.spacing.sm,
+  },
+  header: {
+    gap: 2,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
+  headerOpen: {
+    backgroundColor: theme.colors.primarySoft,
+  },
+  heading: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
+  muted: { color: theme.colors.muted, fontSize: 13, lineHeight: 19 },
+  row: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+  },
+  rowActive: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.borderStrong,
+  },
+  rowCopy: { flex: 1, gap: 2 },
+  sectionTitle: { color: theme.colors.primary, fontSize: 18, fontWeight: "900" },
+  stack: { gap: theme.spacing.md },
+  successAlert: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.success,
+    fontSize: 14,
+    fontWeight: "800",
+    padding: theme.spacing.sm,
+  },
 });

@@ -1,10 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { type Href, Link, usePathname } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { theme } from "../../../lib/constants/theme";
 import { canAccessArea, type ProtectedArea } from "../access";
 import { useOptionalAuth } from "../AuthContext";
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const capMasteryBanner = require("../../../assets/cap-mastery-banner.png");
 
 type Workspace = {
   area: ProtectedArea;
@@ -47,6 +50,9 @@ export function WorkspaceSwitcher({
   )
     return null;
 
+  const isStandaloneSidebar = vertical && tone === "light";
+  const darkSurface = tone === "dark" || isStandaloneSidebar;
+
   return (
     <View
       accessibilityLabel="Available workspaces"
@@ -56,7 +62,21 @@ export function WorkspaceSwitcher({
         tone === "dark" && styles.containerDark,
       ]}
     >
-      <Text style={[styles.heading, tone === "dark" && styles.headingDark]}>Workspaces</Text>
+      {isStandaloneSidebar ? (
+        <>
+          <View style={styles.brandBannerCard}>
+            <Image
+              accessibilityLabel="CAP Mastery — Mastering Cadet Milestone Tests"
+              resizeMode="contain"
+              source={capMasteryBanner}
+              style={styles.brandBannerImage}
+            />
+          </View>
+          <View style={styles.silverRule} />
+        </>
+      ) : null}
+
+      <Text style={[styles.heading, darkSurface && styles.headingDark]}>Workspaces</Text>
       <View style={[styles.links, vertical ? styles.linksVertical : styles.linksHorizontal]}>
         {available.map((workspace) => {
           const active = isWorkspaceActive(pathname, workspace.area);
@@ -67,16 +87,16 @@ export function WorkspaceSwitcher({
                 accessibilityState={{ selected: active }}
                 style={StyleSheet.flatten([
                   styles.link,
-                  tone === "dark" && styles.linkDark,
-                  active && (tone === "dark" ? styles.linkActiveDark : styles.linkActive),
+                  darkSurface && styles.linkDark,
+                  active && (darkSurface ? styles.linkActiveDark : styles.linkActive),
                 ])}
               >
                 <Ionicons
                   color={
-                    tone === "dark"
+                    darkSurface
                       ? active
-                        ? theme.colors.primary
-                        : "#D8E6F0"
+                        ? "#FFFFFF"
+                        : "#CBD5E1"
                       : active
                         ? theme.colors.surface
                         : theme.colors.primary
@@ -87,12 +107,13 @@ export function WorkspaceSwitcher({
                 <Text
                   style={[
                     styles.linkText,
-                    tone === "dark" && styles.linkTextDark,
-                    active && (tone === "dark" ? styles.linkTextActiveDark : styles.linkTextActive),
+                    darkSurface && styles.linkTextDark,
+                    active && (darkSurface ? styles.linkTextActiveDark : styles.linkTextActive),
                   ]}
                 >
                   {workspace.label}
                 </Text>
+                {active && darkSurface ? <View style={styles.activeDot} /> : null}
               </Pressable>
             </Link>
           );
@@ -115,6 +136,37 @@ function isWorkspaceActive(pathname: string, area: ProtectedArea) {
 }
 
 const styles = StyleSheet.create({
+  activeDot: {
+    backgroundColor: "#BA121A",
+    borderColor: "#FFFFFF",
+    borderRadius: 5,
+    borderWidth: 1.5,
+    height: 9,
+    marginLeft: "auto",
+    width: 9,
+  },
+  brandBannerCard: {
+    alignItems: "center",
+    backgroundColor: "#ECF0F5",
+    borderColor: "#CBD5E1",
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    height: 74,
+    justifyContent: "center",
+    overflow: "hidden",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    width: "100%",
+  },
+  brandBannerImage: {
+    height: "100%",
+    width: "100%",
+  },
+  silverRule: {
+    backgroundColor: "#183B70",
+    height: 1,
+    marginVertical: 2,
+  },
   container: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -125,37 +177,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.sm,
   },
-  containerDark: { backgroundColor: "transparent", borderColor: "#365169" },
+  containerDark: {
+    backgroundColor: "transparent",
+    borderColor: "#183B70",
+    borderRightWidth: 0,
+    borderTopWidth: 1,
+    minWidth: 0,
+    paddingHorizontal: 0,
+    paddingTop: theme.spacing.md,
+    width: "100%",
+  },
   containerVertical: {
+    backgroundColor: theme.colors.primary,
+    borderRightColor: "#163564",
     borderRightWidth: 1,
-    minWidth: 152,
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.xl,
+    gap: theme.spacing.md,
+    minWidth: 280,
+    paddingBottom: theme.spacing.lg,
+    paddingHorizontal: 12,
+    paddingTop: theme.spacing.lg,
+    width: 280,
   },
   heading: {
     color: theme.colors.muted,
     fontSize: 11,
     fontWeight: "900",
-    letterSpacing: 0.7,
+    letterSpacing: 0.9,
+    paddingHorizontal: 4,
     textTransform: "uppercase",
   },
-  headingDark: { color: "#8FB1C8" },
+  headingDark: { color: "#94A3B8" },
   link: {
     alignItems: "center",
-    borderRadius: theme.radius.sm,
+    borderColor: "transparent",
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
     flexDirection: "row",
-    gap: theme.spacing.xs,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: 10,
+    gap: 10,
+    minHeight: 44,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
   },
-  linkActive: { backgroundColor: theme.colors.primary },
-  linkActiveDark: { backgroundColor: theme.colors.surface },
+  linkActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  linkActiveDark: {
+    backgroundColor: "#0D3573",
+    borderColor: "#265399",
+  },
   linkDark: { minHeight: 44 },
   linkText: { color: theme.colors.primary, fontSize: 14, fontWeight: "800" },
   linkTextActive: { color: theme.colors.surface },
-  linkTextActiveDark: { color: theme.colors.primary },
-  linkTextDark: { color: "#D8E6F0" },
-  links: { gap: theme.spacing.xs },
+  linkTextActiveDark: { color: "#FFFFFF", fontWeight: "900" },
+  linkTextDark: { color: "#CBD5E1" },
+  links: { gap: 6 },
   linksHorizontal: { flexDirection: "row", flexWrap: "wrap" },
   linksVertical: { alignItems: "stretch" },
 });

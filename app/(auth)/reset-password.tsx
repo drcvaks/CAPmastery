@@ -4,10 +4,9 @@ import { Controller, useForm } from "react-hook-form";
 import { useState } from "react";
 
 import { AppButton } from "../../components/common/AppButton";
-import { AppCard } from "../../components/common/AppCard";
 import { AppLinkButton } from "../../components/common/AppLinkButton";
-import { AppScreen } from "../../components/common/AppScreen";
 import { AppTextField } from "../../components/common/AppTextField";
+import { AuthShowcaseFrame } from "../../features/auth/components/AuthShowcaseFrame";
 import { updatePasswordSchema, type UpdatePasswordValues } from "../../features/auth/schemas";
 import { useAuth } from "../../features/auth/AuthProvider";
 import { getSafeAuthMessage, updatePassword } from "../../services/authService";
@@ -26,15 +25,13 @@ export default function ResetPasswordScreen() {
 
   if (!auth.session || !auth.passwordRecovery) {
     return (
-      <AppScreen
-        eyebrow="Account recovery"
+      <AuthShowcaseFrame
+        activeTab="recovery"
+        subtitle="This password-reset link is missing, invalid, or expired. Request a new link from the sign-in screen."
         title="Open a valid reset link"
-        description="This password-reset link is missing, invalid, or expired. Request a new link from the sign-in screen."
       >
-        <AppCard title="Recovery session required">
-          <AppLinkButton href="/forgot-password" label="Request another link" />
-        </AppCard>
-      </AppScreen>
+        <AppLinkButton href="/forgot-password" label="Request another link" />
+      </AuthShowcaseFrame>
     );
   }
 
@@ -50,44 +47,43 @@ export default function ResetPasswordScreen() {
   });
 
   return (
-    <AppScreen
-      eyebrow="Account recovery"
+    <AuthShowcaseFrame
+      activeTab="recovery"
+      errorMessage={requestError}
+      subtitle="Use at least 10 characters with at least one letter and one number."
       title="Choose a new password"
-      description="Use at least 10 characters with at least one letter and one number."
     >
-      <AppCard title="New password" description={requestError ?? undefined}>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field, fieldState }) => (
-            <AppTextField
-              autoComplete="new-password"
-              error={fieldState.error?.message}
-              label="Password"
-              onBlur={field.onBlur}
-              onChangeText={field.onChange}
-              secureTextEntry
-              value={field.value}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="confirmPassword"
-          render={({ field, fieldState }) => (
-            <AppTextField
-              autoComplete="new-password"
-              error={fieldState.error?.message}
-              label="Confirm password"
-              onBlur={field.onBlur}
-              onChangeText={field.onChange}
-              secureTextEntry
-              value={field.value}
-            />
-          )}
-        />
-        <AppButton label="Save password" loading={isSubmitting} onPress={() => void submit()} />
-      </AppCard>
-    </AppScreen>
+      <Controller
+        control={control}
+        name="password"
+        render={({ field, fieldState }) => (
+          <AppTextField
+            autoComplete="new-password"
+            error={fieldState.error?.message}
+            label="Password"
+            onBlur={field.onBlur}
+            onChangeText={field.onChange}
+            secureTextEntry
+            value={field.value}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="confirmPassword"
+        render={({ field, fieldState }) => (
+          <AppTextField
+            autoComplete="new-password"
+            error={fieldState.error?.message}
+            label="Confirm password"
+            onBlur={field.onBlur}
+            onChangeText={field.onChange}
+            secureTextEntry
+            value={field.value}
+          />
+        )}
+      />
+      <AppButton label="Save password" loading={isSubmitting} onPress={() => void submit()} />
+    </AuthShowcaseFrame>
   );
 }

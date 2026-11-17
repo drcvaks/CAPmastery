@@ -31,26 +31,30 @@ export function AppLinkButton({ href, label, variant = "primary" }: AppLinkButto
 
 const styles = StyleSheet.create({
   button: {
+    alignItems: "center",
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
-    borderRadius: theme.radius.md,
+    borderRadius: 10,
     borderWidth: 1,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: 13,
+    justifyContent: "center",
+    minHeight: 42,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
   },
   secondaryButton: {
     backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
   },
   pressed: {
-    opacity: 0.76,
+    opacity: 0.85,
   },
   label: {
     color: theme.colors.surface,
-    fontSize: 16,
-    fontWeight: "800",
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: 0.1,
   },
   secondaryLabel: {
-    color: theme.colors.primary,
+    color: theme.colors.inkSecondary,
   },
 });

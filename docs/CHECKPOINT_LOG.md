@@ -1,5 +1,23 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Antigravity presentation refresh
+
+- Ported the branch's branding, responsive auth and navigation shell, shared
+  controls, and Study, Progress, Challenge, and administrative views. Only the
+  canonical in-app image assets were imported.
+- Preserved the existing Study session state machine, including practice timing,
+  resume, completion, and missed-answer review. Ported the choice badges,
+  progress presentation, and issue-report placement separately.
+- The account menu uses Auth session email rather than a nonexistent profile
+  column. No Supabase, services, types, scripts, or dependency files changed.
+  No migration is required. After deploy, smoke-test desktop and Android sign-in,
+  role navigation, Study/exam controls, and administrator review.
+- The `npm run check` gates passed: TypeScript, Expo lint, 267/267 Jest tests
+  across 44 suites, and repository formatting. Expo public configuration,
+  whitespace checks, and web and Android production exports also passed.
+  Both bundles include the new logo and banner.
+  No linked database tests were rerun for this UI-only change.
+
 ## Post-Checkpoint 10 — Study issue reporting
 
 - Answered Study questions offer **Report an issue** with multiple categories,

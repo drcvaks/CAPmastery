@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { AppButton } from "../../../components/common/AppButton";
 import { AppCard } from "../../../components/common/AppCard";
 import { AppTextField } from "../../../components/common/AppTextField";
+import { theme } from "../../../lib/constants/theme";
 import { adminFamilyLinks } from "../../../services/adminAccessService";
 import { adminUserAccessKeys } from "../hooks/useAdminUserAccess";
 import type { AdminAccessUser } from "../schemas";
@@ -59,22 +60,26 @@ export function FamilyLinksEditor({
   };
 
   return (
-    <View style={{ gap: 16 }}>
-      <AppButton
-        label="Back to all users"
-        onPress={onBack}
-        disabled={save.isPending}
-        variant="secondary"
-      />
+    <View style={styles.stack}>
+      <View style={styles.backRow}>
+        <AppButton
+          label="Back to all users"
+          onPress={onBack}
+          disabled={save.isPending}
+          variant="secondary"
+        />
+      </View>
       <AppCard title="Family links" description={`Parent account: ${identify(parent.user_id)}`}>
-        <Text>
+        <Text style={styles.body}>
           New links grant read-only access to Family Progress for the selected cadet. They do not
           grant answer keys, content assignment, or challenge management.
         </Text>
-        {links.isPending ? <Text>Loading family links…</Text> : null}
+        {links.isPending ? <Text style={styles.muted}>Loading family links…</Text> : null}
         {links.isError ? (
           <>
-            <Text accessibilityRole="alert">Could not load family links.</Text>
+            <Text accessibilityRole="alert" style={styles.errorAlert}>
+              Could not load family links.
+            </Text>
             <AppButton
               label="Retry family links"
               onPress={() => void links.refetch()}
@@ -82,13 +87,17 @@ export function FamilyLinksEditor({
             />
           </>
         ) : null}
-        {links.data?.length === 0 ? <Text>No active family links.</Text> : null}
+        {links.data?.length === 0 ? (
+          <Text style={styles.muted}>No active family links.</Text>
+        ) : null}
         {links.data?.map((link) => (
-          <View key={link.student_id} style={{ gap: 6 }}>
-            <Text>
+          <View key={link.student_id} style={styles.linkCard}>
+            <Text style={styles.linkTitle}>
               {identify(link.student_id)} · {link.relationship_type}
             </Text>
-            <Text>{link.can_view_progress ? "Can view progress" : "Progress sharing off"}</Text>
+            <Text style={styles.linkBadge}>
+              {link.can_view_progress ? "Can view progress" : "Progress sharing off"}
+            </Text>
             <AppButton
               label={`Revoke link: ${identify(link.student_id)}`}
               disabled={save.isPending}
@@ -115,15 +124,19 @@ export function FamilyLinksEditor({
                 variant="secondary"
               />
             ))}
-            {term && !matches.length ? <Text>No eligible cadets match.</Text> : null}
+            {term && !matches.length ? (
+              <Text style={styles.muted}>No eligible cadets match.</Text>
+            ) : null}
             {matches.length > 10 ? (
-              <Text>Showing 10 matches. Refine your search to see others.</Text>
+              <Text style={styles.muted}>
+                Showing 10 matches. Refine your search to see others.
+              </Text>
             ) : null}
           </>
         ) : null}
         {pending ? (
-          <View style={{ gap: 8 }}>
-            <Text>
+          <View style={styles.confirmBox}>
+            <Text style={styles.confirmTitle}>
               {pending.enabled ? "Share progress for" : "Revoke this family link for"}{" "}
               {identify(pending.studentId)}?
             </Text>
@@ -143,9 +156,13 @@ export function FamilyLinksEditor({
             />
           </View>
         ) : null}
-        {save.isSuccess ? <Text accessibilityRole="alert">Family links updated.</Text> : null}
+        {save.isSuccess ? (
+          <Text accessibilityRole="alert" style={styles.successAlert}>
+            Family links updated.
+          </Text>
+        ) : null}
         {save.isError ? (
-          <Text accessibilityRole="alert">
+          <Text accessibilityRole="alert" style={styles.errorAlert}>
             Could not confirm the update. Check the accounts and try again.
           </Text>
         ) : null}
@@ -153,3 +170,61 @@ export function FamilyLinksEditor({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  backRow: { alignItems: "flex-start" },
+  body: { color: theme.colors.inkSecondary, fontSize: 14, lineHeight: 21 },
+  confirmBox: {
+    backgroundColor: theme.colors.goldSoft,
+    borderColor: theme.colors.goldBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
+  confirmTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800", lineHeight: 22 },
+  errorAlert: {
+    backgroundColor: theme.colors.dangerSoft,
+    borderColor: theme.colors.dangerBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.danger,
+    fontSize: 14,
+    fontWeight: "700",
+    padding: theme.spacing.sm,
+  },
+  linkBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    color: theme.colors.success,
+    fontSize: 12,
+    fontWeight: "800",
+    overflow: "hidden",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  linkCard: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
+  linkTitle: { color: theme.colors.ink, fontSize: 15, fontWeight: "800" },
+  muted: { color: theme.colors.muted, fontSize: 14, lineHeight: 20 },
+  stack: { gap: theme.spacing.md },
+  successAlert: {
+    backgroundColor: theme.colors.successSoft,
+    borderColor: theme.colors.successBorder,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    color: theme.colors.success,
+    fontSize: 14,
+    fontWeight: "800",
+    padding: theme.spacing.sm,
+  },
+});

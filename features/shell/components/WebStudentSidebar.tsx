@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Tabs } from "expo-router";
 
 import { theme } from "../../../lib/constants/theme";
@@ -9,11 +9,14 @@ import { WorkspaceSwitcher } from "../../auth/components/WorkspaceSwitcher";
 
 type StudentTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const capMasteryBanner = require("../../../assets/cap-mastery-banner.png");
+
 const routePresentation = {
-  home: { label: "Home", icon: "home", color: "#53B7E8", soft: "#DDF4FF" },
-  study: { label: "Study", icon: "book", color: "#E96472", soft: "#FCE4E7" },
-  progress: { label: "Progress", icon: "trending-up", color: "#42B983", soft: "#DDF6E9" },
-  challenge: { label: "Challenge", icon: "trophy", color: "#E6A82D", soft: "#FFF1C9" },
+  home: { label: "Home", icon: "compass", color: "#FFFFFF", soft: "#123C7A" },
+  study: { label: "Study", icon: "book", color: "#FCA5A5", soft: "#7F1D1D" },
+  progress: { label: "Progress", icon: "stats-chart", color: "#6EE7B7", soft: "#064E3B" },
+  challenge: { label: "Challenge", icon: "trophy", color: "#E2E8F0", soft: "#1E3A5F" },
 } as const;
 
 export function WebStudentSidebar({ state, descriptors, navigation }: StudentTabBarProps) {
@@ -22,15 +25,20 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
 
   return (
     <View accessibilityLabel="Student navigation" style={styles.sidebar}>
-      <View style={styles.brand}>
-        <View style={styles.brandMark}>
-          <Ionicons color={theme.colors.primary} name="school" size={22} />
-        </View>
-        <View style={styles.brandCopy}>
-          <Text style={styles.brandName}>CAP Mastery</Text>
-          <Text style={styles.brandTagline}>Cadet study coach</Text>
+      <View style={styles.brandBannerCard}>
+        <Image
+          accessibilityLabel="CAP Mastery — Mastering Cadet Milestone Tests"
+          resizeMode="contain"
+          source={capMasteryBanner}
+          style={styles.brandBannerImage}
+        />
+        <View style={styles.srOnly}>
+          <Text>CAP Mastery</Text>
+          <Text>Cadet study coach</Text>
         </View>
       </View>
+
+      <View style={styles.silverRule} />
 
       <Text style={styles.sectionLabel}>Study tools</Text>
       <View style={styles.navigationLinks}>
@@ -68,15 +76,13 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
                 <Ionicons
                   color={presentation.color}
                   name={presentation.icon as keyof typeof Ionicons.glyphMap}
-                  size={20}
+                  size={19}
                 />
               </View>
               <Text style={[styles.navigationText, focused && styles.navigationTextActive]}>
                 {label}
               </Text>
-              {focused ? (
-                <View style={[styles.activeDot, { backgroundColor: presentation.color }]} />
-              ) : null}
+              {focused ? <View style={styles.activeDot} /> : null}
             </Pressable>
           );
         })}
@@ -102,77 +108,117 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
 }
 
 const styles = StyleSheet.create({
-  activeDot: { borderRadius: 4, height: 8, marginLeft: "auto", width: 8 },
+  activeDot: {
+    backgroundColor: "#BA121A",
+    borderColor: "#FFFFFF",
+    borderRadius: 5,
+    borderWidth: 1.5,
+    height: 9,
+    marginLeft: "auto",
+    width: 9,
+  },
   avatar: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
+    borderColor: "#CBD5E1",
     borderRadius: 20,
-    height: 38,
+    borderWidth: 1.5,
+    height: 40,
     justifyContent: "center",
-    width: 38,
+    width: 40,
   },
   avatarText: { color: theme.colors.surface, fontSize: 16, fontWeight: "900" },
-  brand: { alignItems: "center", flexDirection: "row", gap: theme.spacing.sm },
-  brandCopy: { flex: 1 },
-  brandMark: {
+  brandBannerCard: {
     alignItems: "center",
-    backgroundColor: "#CFF5F2",
+    backgroundColor: "#ECF0F5",
+    borderColor: "#CBD5E1",
     borderRadius: theme.radius.md,
-    height: 42,
+    borderWidth: 1,
+    height: 74,
     justifyContent: "center",
-    width: 42,
+    overflow: "hidden",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    width: "100%",
   },
-  brandName: { color: theme.colors.surface, fontSize: 20, fontWeight: "900" },
-  brandTagline: { color: "#B9CFDF", fontSize: 11, fontWeight: "700" },
+  brandBannerImage: {
+    height: "100%",
+    width: "100%",
+  },
+  srOnly: {
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    width: 1,
+  },
+  silverRule: {
+    backgroundColor: "#183B70",
+    height: 1,
+    marginVertical: 2,
+  },
   iconTile: {
     alignItems: "center",
     borderRadius: theme.radius.sm,
-    height: 34,
+    height: 36,
     justifyContent: "center",
-    width: 34,
+    width: 36,
   },
   identity: {
     alignItems: "center",
-    borderTopColor: "#365169",
-    borderTopWidth: 1,
+    backgroundColor: "#021636",
+    borderColor: "#163564",
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
     flexDirection: "row",
     gap: theme.spacing.sm,
-    paddingTop: theme.spacing.md,
+    padding: 12,
   },
-  identityCopy: { flex: 1 },
+  identityCopy: { flex: 1, gap: 2 },
   identityName: { color: theme.colors.surface, fontSize: 14, fontWeight: "900" },
-  identityRole: { color: "#B9CFDF", fontSize: 11 },
+  identityRole: {
+    color: "#94A3B8",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
   navigationLink: {
     alignItems: "center",
+    borderColor: "transparent",
     borderRadius: theme.radius.md,
+    borderWidth: 1,
     flexDirection: "row",
     gap: theme.spacing.sm,
     minHeight: 50,
-    paddingHorizontal: theme.spacing.sm,
+    paddingHorizontal: 10,
   },
-  navigationLinkActive: { backgroundColor: "#FFFFFF1F" },
-  navigationLinks: { gap: theme.spacing.xs },
-  navigationText: { color: "#D8E6F0", fontSize: 15, fontWeight: "700" },
+  navigationLinkActive: {
+    backgroundColor: "#0D3573",
+    borderColor: "#265399",
+  },
+  navigationLinks: { gap: 6 },
+  navigationText: { color: "#CBD5E1", fontSize: 15, fontWeight: "700" },
   navigationTextActive: { color: theme.colors.surface, fontWeight: "900" },
-  pressed: { opacity: 0.78 },
+  pressed: { opacity: 0.8 },
   sectionLabel: {
-    color: "#8FB1C8",
+    color: "#94A3B8",
     fontSize: 11,
     fontWeight: "900",
-    letterSpacing: 1,
-    marginTop: theme.spacing.lg,
+    letterSpacing: 1.1,
+    marginTop: theme.spacing.sm,
+    paddingHorizontal: 4,
     textTransform: "uppercase",
   },
   sidebar: {
     backgroundColor: theme.colors.primary,
-    borderRightColor: "#29465F",
+    borderRightColor: "#163564",
     borderRightWidth: 1,
     gap: theme.spacing.md,
-    minWidth: 238,
+    minWidth: 280,
     paddingBottom: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: 12,
     paddingTop: theme.spacing.lg,
-    width: 238,
+    width: 280,
   },
   spacer: { flex: 1, minHeight: theme.spacing.lg },
 });

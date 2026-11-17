@@ -358,21 +358,33 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         </View>
       ) : null}
 
-      <View style={styles.progressRow}>
-        <Text style={styles.progress}>
-          Question {currentQuestion.question_position} of {session.questionCount}
-        </Text>
-        {session.mode === "practice_test" && session.timed ? (
-          <View style={styles.timerBadge}>
-            <Text
-              accessibilityLabel={`Time remaining ${formatTimer(remainingSeconds ?? 0)}`}
-              style={styles.timer}
-            >
-              Time remaining: {formatTimer(remainingSeconds ?? 0)}
-            </Text>
-          </View>
-        ) : null}
-        <Text style={styles.progress}>{session.answeredCount} answered</Text>
+      <View style={styles.sessionTopCard}>
+        <View style={styles.progressRow}>
+          <Text style={styles.progress}>
+            Question {currentQuestion.question_position} of {session.questionCount}
+          </Text>
+          {session.mode === "practice_test" && session.timed ? (
+            <View style={styles.timerBadge}>
+              <Text
+                accessibilityLabel={`Time remaining ${formatTimer(remainingSeconds ?? 0)}`}
+                style={styles.timer}
+              >
+                Time remaining: {formatTimer(remainingSeconds ?? 0)}
+              </Text>
+            </View>
+          ) : null}
+          <Text style={styles.progress}>{session.answeredCount} answered</Text>
+        </View>
+        <View style={styles.sessionBarTrack}>
+          <View
+            style={[
+              styles.sessionBarFill,
+              {
+                width: `${Math.min(100, (currentQuestion.question_position / Math.max(1, session.questionCount)) * 100)}%`,
+              },
+            ]}
+          />
+        </View>
       </View>
 
       <AppCard title={currentQuestion.question_text}>
@@ -407,7 +419,23 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
                 incorrectSelection && styles.choiceIncorrect,
               ]}
             >
-              <Text style={styles.choiceKey}>{choice.key}</Text>
+              <View
+                style={[
+                  styles.choiceKeyBadge,
+                  selected && styles.choiceKeySelected,
+                  correct && styles.choiceKeyCorrect,
+                  incorrectSelection && styles.choiceKeyIncorrect,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.choiceKey,
+                    (selected || correct || incorrectSelection) && styles.choiceKeyLight,
+                  ]}
+                >
+                  {choice.key}
+                </Text>
+              </View>
               <Text style={styles.choiceText}>{choice.text}</Text>
             </Pressable>
           );
@@ -483,6 +511,14 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
             explanation={currentQuestion.explanation}
             isCorrect={Boolean(currentQuestion.is_correct)}
             key={currentQuestion.session_question_id}
+            issueSlot={
+              session.mode === "study" ? (
+                <StudyIssueForm
+                  id={currentQuestion.session_question_id}
+                  prompt={currentQuestion.question_text}
+                />
+              ) : null
+            }
             memoryAid={currentQuestion.memory_aid}
             nextLabel={nextLabel(
               session.mode,
@@ -513,13 +549,6 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
                 : null
             }
           />
-          {session.mode === "study" ? (
-            <StudyIssueForm
-              key={currentQuestion.session_question_id}
-              id={currentQuestion.session_question_id}
-              prompt={currentQuestion.question_text}
-            />
-          ) : null}
           {markReviewed.isError ? (
             <Text accessibilityRole="alert" style={styles.error}>
               Review progress could not be saved. Please try again before continuing.
@@ -723,9 +752,21 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
     padding: theme.spacing.md,
   },
-  choiceCorrect: { backgroundColor: "#E4F3EA", borderColor: theme.colors.success },
+  choiceCorrect: { backgroundColor: theme.colors.successSoft, borderColor: theme.colors.success },
   choiceIncorrect: { backgroundColor: theme.colors.accentSoft, borderColor: theme.colors.danger },
-  choiceKey: { color: theme.colors.accent, fontSize: 16, fontWeight: "900" },
+  choiceKey: { color: theme.colors.primary, fontSize: 16, fontWeight: "900" },
+  choiceKeyBadge: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 36,
+    height: 36,
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.primarySoft,
+  },
+  choiceKeySelected: { backgroundColor: theme.colors.primary },
+  choiceKeyCorrect: { backgroundColor: theme.colors.success },
+  choiceKeyIncorrect: { backgroundColor: theme.colors.danger },
+  choiceKeyLight: { color: theme.colors.surface },
   choiceSelected: { borderColor: theme.colors.primary, borderWidth: 2 },
   choiceText: { color: theme.colors.ink, flex: 1, fontSize: 16, lineHeight: 23 },
   contextChapter: { color: theme.colors.primary, fontSize: 18, fontWeight: "900", lineHeight: 25 },
@@ -750,6 +791,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: theme.spacing.xs,
     padding: theme.spacing.md,
+  },
+  sessionTopCard: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    gap: theme.spacing.sm,
+  },
+  sessionBarTrack: {
+    height: 7,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primarySoft,
+    overflow: "hidden",
+  },
+  sessionBarFill: {
+    height: "100%",
+    backgroundColor: theme.colors.accent,
+    borderRadius: theme.radius.pill,
   },
   stack: { gap: theme.spacing.lg },
   supportive: { color: theme.colors.ink, fontSize: 15, lineHeight: 22 },
