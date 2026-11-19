@@ -24,6 +24,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const sessionQuery = useStudySession(sessionId);
   const submitAnswer = useSubmitStudyAnswer(sessionId);
+  const answerInFlight = useRef(false);
   const completePractice = useCompletePracticeTest(sessionId);
   const setPaused = useSetPracticeTestPaused(sessionId);
   const setFlag = useSetPracticeTestQuestionFlag(sessionId);
@@ -205,7 +206,14 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
   }
 
   const answered = Boolean(currentQuestion.attempt_id);
-  const chosenChoiceId = currentQuestion.selected_choice_id ?? selectedChoiceId;
+  const canReviseAnswer = session.mode === "practice_test" && session.status === "active";
+  const practiceSaveUnconfirmed =
+    canReviseAnswer &&
+    Boolean(selectedChoiceId) &&
+    selectedChoiceId !== currentQuestion.selected_choice_id;
+  const chosenChoiceId = canReviseAnswer
+    ? (selectedChoiceId ?? currentQuestion.selected_choice_id)
+    : (currentQuestion.selected_choice_id ?? selectedChoiceId);
   const delayedFeedbackActive =
     (session.mode === "practice_test" || session.mode === "challenge") &&
     session.status === "active";
@@ -214,12 +222,13 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
     (session.questionCount === 50 || session.questionCount === 30);
   const isLastQuestion = currentQuestion.question_position === session.questionCount;
 
-  async function handleSubmit() {
-    if (!selectedChoiceId || !currentQuestion) return;
+  async function handleSubmit(choiceId = selectedChoiceId) {
+    if (!choiceId || !currentQuestion || answerInFlight.current) return;
+    answerInFlight.current = true;
     try {
       const result = await submitAnswer.mutateAsync({
         sessionQuestionId: currentQuestion.session_question_id,
-        selectedChoiceId,
+        selectedChoiceId: choiceId,
         responseTimeMs: Date.now() - (questionStartedAt.current ?? Date.now()),
       });
       if (session?.mode === "study" && !currentQuestion.attempt_id) {
@@ -228,7 +237,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       const refreshed = await sessionQuery.refetch();
       if (refreshed.data?.status === "completed") {
         setShowResults(true);
-      } else if (refreshed.data?.mode === "practice_test") {
+      } else if (refreshed.data?.mode === "practice_test" && !currentQuestion.attempt_id) {
         const questions = refreshed.data.questions;
         const nextUnanswered = questions.findIndex(
           (question, index) => index > currentIndex && !question.attempt_id,
@@ -241,6 +250,8 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
       }
     } catch {
       // The mutation retains its error for the retry state below.
+    } finally {
+      answerInFlight.current = false;
     }
   }
 
@@ -333,6 +344,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         >
           {session.allowPause ? (
             <AppButton
+              disabled={submitAnswer.isPending}
               label={session.isPaused ? "Resume test" : "Pause test"}
               loading={setPaused.isPending}
               onPress={() => void setPaused.mutateAsync(!session.isPaused)}
@@ -402,16 +414,27 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
               accessibilityRole="radio"
               accessibilityState={{
                 checked: selected,
-                disabled: answered || session.isPaused,
+                disabled:
+                  (answered && !canReviseAnswer) || submitAnswer.isPending || session.isPaused,
               }}
-              disabled={answered || submitAnswer.isPending || session.isPaused}
+              disabled={
+                (answered && !canReviseAnswer) || submitAnswer.isPending || session.isPaused
+              }
               key={choice.id}
-              onPress={() =>
+              onPress={() => {
+                if (answerInFlight.current) return;
+                if (
+                  answered &&
+                  choice.id === currentQuestion.selected_choice_id &&
+                  !practiceSaveUnconfirmed
+                )
+                  return;
                 setSelectedChoices((current) => ({
                   ...current,
                   [currentQuestion.session_question_id]: choice.id,
-                }))
-              }
+                }));
+                if (session.mode === "practice_test") void handleSubmit(choice.id);
+              }}
               style={[
                 styles.choice,
                 selected && styles.choiceSelected,
@@ -441,7 +464,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
           );
         })}
 
-        {!answered ? (
+        {!answered && session.mode !== "practice_test" ? (
           <AppButton
             disabled={!selectedChoiceId || session.isPaused}
             label="Submit answer"
@@ -449,12 +472,32 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
             onPress={() => void handleSubmit()}
           />
         ) : null}
+        {session.mode === "practice_test" && session.status === "active" ? (
+          <Text
+            accessibilityRole={submitAnswer.isPending ? "alert" : undefined}
+            style={styles.muted}
+          >
+            {submitAnswer.isPending
+              ? "Saving answer…"
+              : answered && !practiceSaveUnconfirmed
+                ? "Answer saved."
+                : "Select an answer to save it and continue."}
+          </Text>
+        ) : null}
+        {canReviseAnswer && answered ? (
+          <Text style={styles.muted}>You can change this answer until you finish the test.</Text>
+        ) : null}
 
         {session.mode === "practice_test" && session.status === "active" ? (
           <View style={styles.testNavigation}>
             <View style={styles.navigationControl}>
               <AppButton
-                disabled={currentIndex === 0 || session.isPaused}
+                disabled={
+                  currentIndex === 0 ||
+                  session.isPaused ||
+                  submitAnswer.isPending ||
+                  practiceSaveUnconfirmed
+                }
                 label="Back"
                 onPress={goPrevious}
                 variant="secondary"
@@ -462,7 +505,7 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
             </View>
             <View style={styles.navigationControl}>
               <AppButton
-                disabled={session.isPaused}
+                disabled={session.isPaused || submitAnswer.isPending}
                 label={currentQuestion.flagged ? "Remove flag" : "Flag question"}
                 loading={setFlag.isPending}
                 onPress={() =>
@@ -478,7 +521,12 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
             </View>
             <View style={styles.navigationControl}>
               <AppButton
-                disabled={currentIndex + 1 === session.questions.length || session.isPaused}
+                disabled={
+                  practiceSaveUnconfirmed ||
+                  currentIndex + 1 === session.questions.length ||
+                  session.isPaused ||
+                  submitAnswer.isPending
+                }
                 label="Next"
                 onPress={goNext}
                 variant="secondary"
@@ -490,17 +538,27 @@ export function StudySessionView({ sessionId }: { sessionId: string }) {
         {session.mode === "practice_test" && session.status === "active" && isLastQuestion ? (
           <AppButton
             label="Finish test and review answers"
+            disabled={submitAnswer.isPending || practiceSaveUnconfirmed}
             loading={completePractice.isPending}
             onPress={() => void finishPracticeTest()}
           />
         ) : null}
 
-        {submitAnswer.isError && !answered ? (
+        {submitAnswer.isError && (!answered || practiceSaveUnconfirmed) ? (
           <View accessibilityRole="alert" style={styles.errorBox}>
             <Text style={styles.error}>{getSafeStudyMessage(submitAnswer.error)}</Text>
             <Text style={styles.muted}>
               Your selected choice remains selected. Try submitting again.
             </Text>
+            {session.mode === "practice_test" ? (
+              <AppButton
+                label="Retry saving answer"
+                disabled={!selectedChoiceId || session.isPaused}
+                loading={submitAnswer.isPending}
+                onPress={() => void handleSubmit()}
+                variant="secondary"
+              />
+            ) : null}
           </View>
         ) : null}
       </AppCard>
@@ -700,11 +758,11 @@ function nextLabel(
   mode: "study" | "practice_test" | "challenge",
   status: "active" | "completed" | "abandoned",
   currentIndex: number,
-  questions: Array<{
+  questions: {
     attempt_id: string | null;
     is_correct: boolean | null;
     session_question_id: string;
-  }>,
+  }[],
   reviewProgress?: import("../../practice/schemas").PracticeReviewProgress,
 ): string {
   if (mode === "practice_test" && status === "completed") {

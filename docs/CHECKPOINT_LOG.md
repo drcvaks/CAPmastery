@@ -1,5 +1,63 @@
 # Checkpoint Log
 
+## Post-Checkpoint 10 — Installable web app
+
+- Added manifest, generated install icons from the sign-in logo, Apple Home
+  Screen metadata, filesystem-first Vercel routing and a no-cache service worker.
+- Install actions appear in the left rail and account menu; a first eligible
+  sign-in offers a once-per-user/device invitation. Native and installed windows
+  do not show it. Browser prompts have manual platform-specific fallbacks.
+- No Supabase, grading, role, Auth redirect, or dependency changes. Web remains
+  online-required. See `docs/PWA_INSTALLATION.md` for deployment acceptance;
+  physical iOS/Android and hosted HTTPS installation must be checked after deploy.
+- Validation: TypeScript, targeted lint/formatting, worker syntax and whitespace
+  checks passed. Jest passed 279/279 tests in 48 suites (120-second per-test
+  allowance on this machine). Web and Android production exports passed; the
+  web output contains the manifest, icon PNGs, worker and Apple metadata.
+  No linked SQL rerun is needed for this frontend-only change. No later
+  checkpoint was started.
+
+## Post-Checkpoint 10 — Practice revision fixture and null validation
+
+- Owner's linked run of migration 064 reached 70/74 practice assertions. Two
+  new revision fixtures read replacement IDs through student-filtered choices,
+  producing NULL; NULL comparison then skipped the revision branch.
+- Tests now use their existing synthetic fixture IDs, preserving RLS. Forward
+  migration `202611180065` explicitly rejects NULL before inspecting an attempt.
+  Migration 064 is unchanged because it was already applied.
+- Added three guards: non-null revision fixtures and NULL-input rejection.
+  Practice suite now plans 77 assertions; expected linked total is 785.
+  Whitespace and static assertion counts passed. Linked tests were not rerun
+  locally because no database password is present. Apply 065 using the previous
+  password-safe PowerShell script and rerun the linked suite.
+
+## Post-Checkpoint 10 — Revise practice answers before finishing
+
+- Active practice answers remain selectable. A changed choice autosaves through
+  the existing grading RPC and stays on the current question. Study, challenge,
+  and completed-test answers stay locked.
+- Migration `202611180064` permits owned, unpaused, unexpired practice revisions,
+  updates the existing attempt and score atomically, and stops automatic practice
+  completion at the last saved answer. Finish/expiry still release results.
+- Added 18 linked SQL assertions (practice_tests: 74, expected total 782 from
+  the owner's prior 764) and a UI revision regression. Apply migration 064 before
+  deploying the frontend, run linked tests, and smoke-test Back → change answer →
+  Finish on test accounts. No live accounts or exams were changed here.
+- TypeScript and all 12 StudySession tests passed. Linked SQL tests were not run
+  here: this process has no database password and no local PostgreSQL/Docker.
+
+## Post-Checkpoint 10 — Practice answers save on selection
+
+- A choice tap now submits the practice-test answer securely and advances after
+  confirmation. Removed the redundant practice Submit button; saving feedback,
+  retry, and in-flight navigation/finish guards prevent accidental unsaved exits.
+- Study and challenge submission, server grading, and delayed practice feedback
+  remain unchanged. Saved answers stay locked as in the prior workflow.
+  No database migration. Added selection/auto-advance and failed-save regressions.
+- TypeScript and all 11 StudySession tests passed; targeted lint was rerun after
+  replacing the pre-existing Array<T> style warning. Device acceptance remains
+  to verify a completed practice test includes tap-saved answers.
+
 ## Post-Checkpoint 10 — Remember the selected exam track
 
 - Home and Study share a device-local, per-user exam-track preference. The

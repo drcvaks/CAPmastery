@@ -6,10 +6,10 @@ import { Tabs } from "expo-router";
 import { theme } from "../../../lib/constants/theme";
 import { useOptionalAuth } from "../../auth/AuthContext";
 import { WorkspaceSwitcher } from "../../auth/components/WorkspaceSwitcher";
+import { InstallButton } from "../../install/InstallButton";
 
 type StudentTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const capMasteryBanner = require("../../../assets/cap-mastery-banner.png");
 
 const routePresentation = {
@@ -90,6 +90,7 @@ export function WebStudentSidebar({ state, descriptors, navigation }: StudentTab
 
       <View style={styles.spacer} />
       <WorkspaceSwitcher hideSingle tone="dark" vertical />
+      <InstallButton dark />
       {displayName ? (
         <View style={styles.identity}>
           <View style={styles.avatar}>

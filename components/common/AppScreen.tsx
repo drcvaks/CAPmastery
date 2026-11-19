@@ -18,6 +18,7 @@ import { useOptionalAuth } from "../../features/auth/AuthContext";
 import type { AppRole } from "../../features/auth/types";
 import { WorkspaceSwitcher } from "../../features/auth/components/WorkspaceSwitcher";
 import { theme } from "../../lib/constants/theme";
+import { InstallButton } from "../../features/install/InstallButton";
 
 type AppScreenProps = PropsWithChildren<{
   eyebrow?: string;
@@ -245,6 +246,7 @@ export function AppScreen({
               </View>
 
               <View style={styles.dropdownDivider} />
+              <InstallButton onOpen={() => setMenuOpen(false)} />
 
               <Pressable
                 accessibilityLabel="Sign Out"

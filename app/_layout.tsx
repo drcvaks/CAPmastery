@@ -8,6 +8,7 @@ import { RouteErrorBoundary } from "../components/common/RouteErrorBoundary";
 import { AuthProvider } from "../features/auth/AuthProvider";
 import { theme } from "../lib/constants/theme";
 import { queryClient } from "../lib/queryClient";
+import { InstallProvider } from "../features/install/InstallProvider";
 
 export const ErrorBoundary = RouteErrorBoundary;
 
@@ -17,25 +18,27 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <Stack
-              screenOptions={{
-                contentStyle: { backgroundColor: theme.colors.background },
-                headerBackButtonDisplayMode: "minimal",
-                headerStyle: { backgroundColor: theme.colors.surface },
-                headerTintColor: theme.colors.primary,
-                headerTitleStyle: { fontWeight: "800" },
-              }}
-            >
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(student)" options={{ headerShown: false }} />
-              <Stack.Screen name="(parent)" options={{ headerShown: false }} />
-              <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-              <Stack.Screen name="content-review" options={{ headerShown: false }} />
-              <Stack.Screen name="unauthorized" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" options={{ title: "Not found" }} />
-            </Stack>
-            <StatusBar style="dark" />
+            <InstallProvider>
+              <Stack
+                screenOptions={{
+                  contentStyle: { backgroundColor: theme.colors.background },
+                  headerBackButtonDisplayMode: "minimal",
+                  headerStyle: { backgroundColor: theme.colors.surface },
+                  headerTintColor: theme.colors.primary,
+                  headerTitleStyle: { fontWeight: "800" },
+                }}
+              >
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(student)" options={{ headerShown: false }} />
+                <Stack.Screen name="(parent)" options={{ headerShown: false }} />
+                <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+                <Stack.Screen name="content-review" options={{ headerShown: false }} />
+                <Stack.Screen name="unauthorized" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" options={{ title: "Not found" }} />
+              </Stack>
+              <StatusBar style="dark" />
+            </InstallProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

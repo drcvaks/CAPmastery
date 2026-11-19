@@ -5,8 +5,8 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../../lib/constants/theme";
 import { canAccessArea, type ProtectedArea } from "../access";
 import { useOptionalAuth } from "../AuthContext";
+import { InstallButton } from "../../install/InstallButton";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const capMasteryBanner = require("../../../assets/cap-mastery-banner.png");
 
 type Workspace = {
@@ -119,6 +119,11 @@ export function WorkspaceSwitcher({
           );
         })}
       </View>
+      {isStandaloneSidebar ? (
+        <View style={{ marginTop: "auto" }}>
+          <InstallButton dark />
+        </View>
+      ) : null}
     </View>
   );
 }

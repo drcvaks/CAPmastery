@@ -157,6 +157,38 @@ describe("leaving an unfinished study session", () => {
 });
 
 describe("practice test session", () => {
+  it("lets the cadet revise a saved active-test answer without moving away", async () => {
+    const saveAnswer = jest.fn().mockResolvedValue({});
+    const refetch = jest.fn().mockResolvedValue({
+      data: {
+        ...activeSession,
+        questions: [{ ...question, selected_choice_id: question.choices[1]!.id }],
+      },
+    });
+    jest.mocked(useStudySession).mockReturnValue({
+      data: activeSession,
+      isPending: false,
+      isError: false,
+      refetch,
+    } as never);
+    jest.mocked(useSubmitStudyAnswer).mockReturnValue({
+      isPending: false,
+      isError: false,
+      mutateAsync: saveAnswer,
+    } as never);
+    await render(<StudySessionView sessionId={activeSession.id} />);
+    const user = userEvent.setup();
+    await user.press(screen.getByText("Choice B"));
+    expect(saveAnswer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sessionQuestionId: question.session_question_id,
+        selectedChoiceId: question.choices[1]!.id,
+      }),
+    );
+    expect(screen.getByText(question.question_text)).toBeVisible();
+    expect(screen.getByText("You can change this answer until you finish the test.")).toBeVisible();
+    expect(screen.queryByText("Synthetic explanation")).toBeNull();
+  });
   it("shows a neutral saved state without correctness or explanation while active", async () => {
     await render(<StudySessionView sessionId={activeSession.id} />);
 
@@ -253,7 +285,7 @@ describe("practice test session", () => {
     expect(screen.getByRole("button", { name: "Finish test and review answers" })).toBeVisible();
   });
 
-  it("advances to the next unanswered practice question after submission", async () => {
+  it("saves a practice answer on selection and advances without a submit button", async () => {
     const unansweredQuestion = { ...question, attempt_id: null, selected_choice_id: null };
     const nextQuestion = {
       ...unansweredQuestion,
@@ -274,6 +306,7 @@ describe("practice test session", () => {
       questions: [{ ...unansweredQuestion, attempt_id: question.attempt_id }, nextQuestion],
     };
     const refetch = jest.fn().mockResolvedValue({ data: refreshedSession });
+    const saveAnswer = jest.fn().mockResolvedValue({});
     jest.mocked(useStudySession).mockReturnValue({
       data: initialSession,
       isPending: false,
@@ -283,15 +316,48 @@ describe("practice test session", () => {
     jest.mocked(useSubmitStudyAnswer).mockReturnValue({
       isPending: false,
       isError: false,
-      mutateAsync: jest.fn().mockResolvedValue({}),
+      mutateAsync: saveAnswer,
     } as never);
 
     await render(<StudySessionView sessionId={activeSession.id} />);
     const user = userEvent.setup();
     await user.press(screen.getByText("Choice A"));
-    await user.press(screen.getByRole("button", { name: "Submit answer" }));
+    expect(screen.queryByRole("button", { name: "Submit answer" })).toBeNull();
+    expect(saveAnswer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sessionQuestionId: unansweredQuestion.session_question_id,
+        selectedChoiceId: unansweredQuestion.choices[0]!.id,
+      }),
+    );
 
     expect(await screen.findByText("The next protected practice question?")).toBeVisible();
+  });
+
+  it("retains a failed auto-save selection and offers retry without advancing", async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(new Error("offline"));
+    jest.mocked(useStudySession).mockReturnValue({
+      data: {
+        ...activeSession,
+        questions: [{ ...question, attempt_id: null, selected_choice_id: null }],
+      },
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as never);
+    jest.mocked(useSubmitStudyAnswer).mockReturnValue({
+      isPending: false,
+      isError: true,
+      error: new Error("offline"),
+      mutateAsync,
+    } as never);
+    await render(<StudySessionView sessionId={activeSession.id} />);
+    const user = userEvent.setup();
+    await user.press(screen.getByText("Choice A"));
+    expect(screen.getByText("A protected practice question?")).toBeVisible();
+    const retry = screen.getByRole("button", { name: "Retry saving answer" });
+    expect(retry).toBeEnabled();
+    await user.press(retry);
+    expect(mutateAsync).toHaveBeenCalledTimes(2);
   });
 
   it("withholds challenge feedback until the student's set is complete", async () => {

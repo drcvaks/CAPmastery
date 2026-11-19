@@ -173,6 +173,17 @@ The client credential scan examines tracked application/configuration sources fo
 
 ## Checkpoint 7 practice-test enforcement
 
+- Grading rejects a NULL selected-choice ID before comparing it with an existing
+  saved answer, so SQL three-valued comparisons cannot silently bypass revision
+  validation. Revision fixtures use isolated synthetic IDs without expanding RLS.
+
+- Answer revisions lock the owned session row and recheck active state, timer,
+  pause status, Student role, active profile, and choice membership. Correctness
+  is regraded in PostgreSQL. Revisions update the original attempt and score
+  without increasing answer counts, mission effort, or normal mastery.
+  Study/challenge attempts remain immutable. Fully answered practice exams stay
+  active until explicit completion or expiry; no correctness is released early.
+
 - Blueprint configuration is authenticated-read-only; clients cannot insert or alter blueprint rules.
 - Every practice RPC verifies the authenticated student and session owner. Another student cannot read, pause, complete, or retrieve results for the session.
 - The server enforces blueprint balance, time expiry, and pause policy. Client countdowns and hidden controls are usability aids only.

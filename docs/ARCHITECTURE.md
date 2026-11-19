@@ -54,6 +54,12 @@ The root restores the session and routes to `/admin`, `/home`, or `/unauthorized
 
 ## UI foundation
 
+The web root includes an install context with platform-specific PWA support.
+The native provider is a no-op; the web provider captures the browser install
+event and supplies manual Home Screen instructions where needed. Public manifest
+metadata and a network-only service worker support installation without caching
+private learning or Auth data. See `docs/PWA_INSTALLATION.md`.
+
 Student Home now uses `StudentMissionDashboard`, a small motivation view with a daily ten-answer mission, next 5/10/20-answer checkpoint, weekly goal selector, and progress bars. It reads the owner-only `get_student_missions` projection and saves the 25/50/100 weekly target through `set_student_weekly_mission`. Counts come from persisted server-graded attempts, regardless of correctness, and include study, practice tests, and challenges. The caller's IANA timezone defines local calendar days and Monday–Sunday weeks. Mission queries are scoped by signed-in user ID and invalidated by the existing answer submission flow. Home polls once per minute for calendar rollover and cross-device updates.
 
 Home always shows its study-track selector and current track. The default follows the most recently active accessible study track, and the primary action resumes only the selected track's latest active study session or starts 5, 10, or 20 questions there. Switching tracks preserves unfinished sessions and answers. Creating a session immediately invalidates the mission projection so it can be resumed before any answer is submitted. Study-only milestone feedback uses the server's accepted answer count, so a retry cannot award another count. Detailed readiness, past achievements, and challenge tools remain on their existing routes; Home adds no readiness scoring, badges, streaks, or competition feature.
@@ -136,6 +142,16 @@ Readiness is a study estimate derived from coverage, recent accuracy, mastery, r
 ## Checkpoint 7 boundary
 
 Practice tests reuse the owned study-session infrastructure but have an explicit `practice_test` mode and immutable blueprint, timing, and pause snapshots. A thin launcher calls a typed service; the shared session component switches to neutral answer acknowledgements while the test is active and releases scoring, explanations, memory support, and topic analysis only after server-recorded completion.
+
+Selecting a choice in an active practice test immediately calls the same secure
+answer-submission service and advances after confirmation. Failed saves retain
+the selection and offer Retry; Study and challenge sessions retain explicit
+submission. Active practice answers can be revised by going back and selecting a
+different choice. Revisions stay on the current question; first submissions still
+advance. The server replaces the same attempt and adjusts the final score without
+adding mission effort or mastery events. Completing all answers no longer ends
+practice automatically: Finish or expiry closes it. No grading or correctness
+moves to the client.
 
 The initial Leadership Chapter 1 blueprint is an unofficial pilot configuration: ten questions, optional 15-minute timer, no pause, difficulty targets 4 easy/4 medium/2 hard, and cognitive targets 4 recall/3 understanding/1 application/2 scenario. It is configuration data, not a claim about the official CAP exam. An approved official blueprint can replace it without changing the session model.
 

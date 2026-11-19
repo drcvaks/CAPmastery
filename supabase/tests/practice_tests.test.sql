@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(56);
+select plan(77);
 
 select has_table('public', 'practice_test_blueprints', 'practice-test blueprints exist');
 select has_table('public', 'practice_test_blueprint_rules', 'practice-test blueprint rules exist');
@@ -207,7 +207,14 @@ select throws_ok(
   'P0002', 'Completed practice test not found', 'topic results are unavailable before completion'
 );
 
+create temporary table revision_target as
+select sq.id as sq_id, pq.correct_choice_id, pq.wrong_choice_id
+from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id
+where sq.session_id=(select id from practice_sessions where label='primary') order by sq.position limit 1;
+select ok((select wrong_choice_id is not null from revision_target),'revision fixture provides a replacement choice without bypassing RLS');
 select set_config('request.jwt.claim.sub', 'e2222222-2222-4222-8222-222222222222', true);
+select throws_ok($$select public.submit_answer((select sq_id from revision_target),(select wrong_choice_id from revision_target),1000,null)$$,
+  'P0002','Study session not found','another student cannot revise an answer');
 select throws_ok(
   $$select * from public.get_study_session_questions((select id from practice_sessions where label = 'primary'))$$,
   'P0002', 'Study session not found', 'another student cannot read the practice test'
@@ -218,10 +225,30 @@ select throws_ok(
 );
 
 select set_config('request.jwt.claim.sub', 'e1111111-1111-4111-8111-111111111111', true);
+select throws_ok($$select public.submit_answer((select sq_id from revision_target),null,1000,null)$$,
+ '22023','Selected choice is required','a null revision cannot silently keep the previous answer');
+select lives_ok($$select public.submit_answer((select sq_id from revision_target),(select wrong_choice_id from revision_target),1000,null)$$,'owner changes an answer before finishing');
+reset role;
+select is((select correct_count from public.study_sessions where id=(select id from practice_sessions where label='primary')),0,'changing correct to wrong subtracts from the final score');
+set local role authenticated;
+select is((select selected_choice_id from public.get_study_session_questions((select id from practice_sessions where label='primary')) where session_question_id=(select sq_id from revision_target)),
+  (select wrong_choice_id from revision_target),'changed choice is persisted');
+select is((select is_correct from public.submit_answer((select sq_id from revision_target),(select wrong_choice_id from revision_target),1000,null)),null,'revision retry still hides correctness');
+select is((select answered_count from public.submit_answer((select sq_id from revision_target),(select wrong_choice_id from revision_target),1000,null)),1,'revision does not increment answered count');
+select is((select count(*)::integer from public.question_attempts where session_question_id=(select sq_id from revision_target)),1,'revision preserves one attempt');
+select throws_ok($$select public.submit_answer((select sq_id from revision_target),
+ (select pq.correct_choice_id from practice_questions pq where pq.correct_choice_id<>(select correct_choice_id from revision_target) limit 1),1000,null)$$,
+ '22023','Selected choice does not belong to the question','revision rejects a different question choice');
+select lives_ok($$select public.submit_answer((select sq_id from revision_target),(select correct_choice_id from revision_target),1000,null)$$,'owner changes back to the correct choice');
+reset role;
+select is((select correct_count from public.study_sessions where id=(select id from practice_sessions where label='primary')),1,'changing back to correct restores the final score');
+set local role authenticated;
 select lives_ok(
   $$select public.complete_practice_test((select id from practice_sessions where label = 'primary'))$$,
   'owner completes the practice test'
 );
+select throws_ok($$select public.submit_answer((select sq_id from revision_target),(select wrong_choice_id from revision_target),1000,null)$$,
+  '22023','Practice test is not active','finished answer cannot change');
 select is((select is_correct from public.get_study_session_questions((select id from practice_sessions where label = 'primary')) where attempt_id is not null), true, 'completion releases attempted-answer correctness');
 select is((select explanation from public.get_study_session_questions((select id from practice_sessions where label = 'primary')) where attempt_id is not null), 'Synthetic practice explanation', 'completion releases attempted-answer explanation');
 select is((select count(*)::integer from public.get_practice_test_results((select id from practice_sessions where label = 'primary'))), 2, 'completed results cover both selected topics');
@@ -239,27 +266,50 @@ insert into practice_sessions values (
   'pausable', public.create_practice_test('e5000000-0000-4000-8000-000000000001', false)
 );
 select is((select allow_pause_snapshot from public.study_sessions where id = (select id from practice_sessions where label = 'pausable')), true, 'pause permission is snapshotted at creation');
+select lives_ok($$select public.submit_answer(
+ (select sq.id from public.study_session_questions sq where sq.session_id=(select id from practice_sessions where label='pausable') order by sq.position limit 1),
+ (select pq.correct_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id where sq.session_id=(select id from practice_sessions where label='pausable') order by sq.position limit 1),1000,null)$$,'save answer before pausing');
 select lives_ok($$select public.set_practice_test_paused((select id from practice_sessions where label = 'pausable'), true)$$, 'configured test can pause');
+select throws_ok($$select public.submit_answer(
+ (select sq.id from public.study_session_questions sq where sq.session_id=(select id from practice_sessions where label='pausable') order by sq.position limit 1),
+ (select pq.wrong_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id where sq.session_id=(select id from practice_sessions where label='pausable') order by sq.position limit 1),1000,null)$$,
+ '22023','Resume the practice test before answering','paused answer cannot be revised');
 select is((select is_paused from public.get_study_session_questions((select id from practice_sessions where label = 'pausable')) limit 1), true, 'paused state is visible');
+select ok((select pq.wrong_choice_id is not null from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id
+ where sq.session_id=(select id from practice_sessions where label='pausable') order by sq.position limit 1),'paused revision uses a non-null replacement');
 select throws_ok(
   $$select * from public.submit_answer(
-    (select sq.id from public.study_session_questions sq where sq.session_id = (select id from practice_sessions where label = 'pausable') order by sq.position limit 1),
-    (select pq.correct_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id = sq.question_id where sq.session_id = (select id from practice_sessions where label = 'pausable') order by sq.position limit 1),
+    (select sq.id from public.study_session_questions sq where sq.session_id = (select id from practice_sessions where label = 'pausable') order by sq.position offset 1 limit 1),
+    (select pq.correct_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id = sq.question_id where sq.session_id = (select id from practice_sessions where label = 'pausable') order by sq.position offset 1 limit 1),
     1000, null
   )$$,
   '22023', 'Resume the practice test before answering', 'paused test cannot accept answers'
 );
 select lives_ok($$select public.set_practice_test_paused((select id from practice_sessions where label = 'pausable'), false)$$, 'configured test resumes');
 select is((select is_paused from public.get_study_session_questions((select id from practice_sessions where label = 'pausable')) limit 1), false, 'resumed state is visible');
+select lives_ok($$do $fill$ declare item record; begin
+ for item in select sq.id,pq.correct_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id where sq.session_id=(select id from practice_sessions where label='pausable')
+ loop perform public.submit_answer(item.id,item.correct_choice_id,1000,null); end loop;
+end $fill$ $$,'all questions can be saved without finishing');
+select is((select status::text from public.study_sessions where id=(select id from practice_sessions where label='pausable')),'active','fully answered test stays open for revisions');
+select is((select answered_count from public.study_sessions where id=(select id from practice_sessions where label='pausable')),10,'fully answered test counts ten questions once');
+select lives_ok($$select public.complete_practice_test((select id from practice_sessions where label='pausable'))$$,'fully answered test can be explicitly finished');
 
 insert into practice_sessions values (
   'expired', public.create_practice_test('e5000000-0000-4000-8000-000000000001', true)
 );
+select * from public.submit_answer(
+ (select sq.id from public.study_session_questions sq where sq.session_id=(select id from practice_sessions where label='expired') order by sq.position offset 1 limit 1),
+ (select pq.correct_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id where sq.session_id=(select id from practice_sessions where label='expired') order by sq.position offset 1 limit 1),1000,null);
 reset role;
 update public.study_sessions set started_at = now() - interval '20 minutes'
 where id = (select id from practice_sessions where label = 'expired');
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'e1111111-1111-4111-8111-111111111111', true);
+select throws_ok($$select public.submit_answer(
+ (select sq.id from public.study_session_questions sq where sq.session_id=(select id from practice_sessions where label='expired') order by sq.position offset 1 limit 1),
+ (select pq.wrong_choice_id from public.study_session_questions sq join practice_questions pq on pq.question_id=sq.question_id where sq.session_id=(select id from practice_sessions where label='expired') order by sq.position offset 1 limit 1),1000,null)$$,
+ '22023','Practice test time has expired','expired answer cannot be revised');
 select throws_ok(
   $$select * from public.submit_answer(
     (select sq.id from public.study_session_questions sq where sq.session_id = (select id from practice_sessions where label = 'expired') order by sq.position limit 1),
